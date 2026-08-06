@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Terraria Online - Android Mobile Web</title>
+  <title>Terraria Mobile Online 2D</title>
   
-  <!-- Firebase Compat SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <!-- Firebase Compat Libraries -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
   <style>
     * {
@@ -21,74 +21,95 @@
     }
 
     html, body {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background-color: #0d0f18;
-      color: #fff;
-      touch-action: none;
-    }
-
-    #game-container {
-      position: relative;
       width: 100vw;
       height: 100vh;
       overflow: hidden;
-      display: flex;
-      justify-content: center;
+      background-color: #0b0e14;
+      color: #ffffff;
+      touch-action: none;
+    }
+
+    /* Orientation Warning Overlay */
+    #orientation-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      background: linear-gradient(135deg, #0f172a, #1e1b4b);
+      color: #fff;
+      flex-direction: column;
       align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
     }
 
-    canvas {
+    #orientation-overlay .icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+      animation: rotatePulse 2s infinite ease-in-out;
+    }
+
+    @keyframes rotatePulse {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      50% { transform: scale(1.15) rotate(90deg); }
+    }
+
+    /* Fullscreen Game Canvas */
+    #gameCanvas {
+      width: 100vw;
+      height: 100vh;
       display: block;
-      width: 100%;
-      height: 100%;
-      image-rendering: pixelated;
-      image-rendering: crisp-edges;
+      background: #000;
     }
 
-    /* GLASSMORPHISM UI PANELS */
+    /* Glassmorphism UI Base */
     .glass-panel {
-      background: rgba(18, 22, 36, 0.75);
+      background: rgba(15, 23, 42, 0.75);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
       border-radius: 16px;
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
     }
 
-    /* AUTH MODAL */
-    #auth-screen {
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      z-index: 1000;
+    /* Auth Overlay Modal */
+    #auth-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      background: rgba(5, 7, 15, 0.85);
+      backdrop-filter: blur(15px);
       display: flex;
-      justify-content: center;
       align-items: center;
-      background: linear-gradient(135deg, rgba(10,15,30,0.92), rgba(30,15,40,0.92));
+      justify-content: center;
+      padding: 15px;
     }
 
     .auth-card {
-      width: 90%;
-      max-width: 420px;
-      padding: 24px 28px;
+      width: 100%;
+      max-width: 380px;
+      padding: 24px;
       text-align: center;
-      animation: fadeIn 0.4s ease-out;
+      background: linear-gradient(145deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95));
+      border: 2px solid rgba(56, 189, 248, 0.4);
+      box-shadow: 0 0 35px rgba(56, 189, 248, 0.25);
     }
 
     .auth-title {
-      font-size: 26px;
+      font-size: 24px;
       font-weight: 800;
-      background: linear-gradient(45deg, #00f2fe, #4facfe, #00ff87);
+      background: linear-gradient(90deg, #38bdf8, #a855f7, #f43f5e);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       margin-bottom: 6px;
+      text-transform: uppercase;
       letter-spacing: 1px;
     }
 
     .auth-subtitle {
-      font-size: 13px;
-      color: #a0aec0;
+      font-size: 12px;
+      color: #94a3b8;
       margin-bottom: 20px;
     }
 
@@ -100,1330 +121,1255 @@
     .input-group label {
       display: block;
       font-size: 11px;
-      color: #cbd5e0;
+      color: #cbd5e1;
       margin-bottom: 4px;
-      text-transform: uppercase;
-      font-weight: 700;
+      font-weight: 600;
     }
 
-    .input-field {
+    .auth-input {
       width: 100%;
-      padding: 12px 16px;
+      padding: 12px 14px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.2);
-      background: rgba(0,0,0,0.4);
       color: #fff;
-      font-size: 15px;
+      font-size: 14px;
       outline: none;
       transition: all 0.2s ease;
     }
 
-    .input-field:focus {
-      border-color: #00f2fe;
-      box-shadow: 0 0 12px rgba(0,242,254,0.4);
+    .auth-input:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
     }
 
     .auth-btn {
       width: 100%;
-      padding: 14px;
+      padding: 13px;
+      margin-top: 10px;
       border: none;
       border-radius: 12px;
-      background: linear-gradient(45deg, #00f2fe, #4facfe);
-      color: #000;
-      font-weight: 800;
+      background: linear-gradient(90deg, #0284c7, #7c3aed);
+      color: white;
       font-size: 15px;
+      font-weight: 700;
       cursor: pointer;
-      box-shadow: 0 4px 15px rgba(0,242,254,0.4);
-      transition: transform 0.1s, box-shadow 0.2s;
-      margin-top: 8px;
+      box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+      transition: transform 0.1s, filter 0.2s;
     }
 
     .auth-btn:active {
       transform: scale(0.97);
     }
 
-    .auth-err {
-      color: #ff4d4d;
+    .auth-status {
+      margin-top: 12px;
       font-size: 12px;
-      margin-top: 10px;
-      min-height: 18px;
+      color: #f43f5e;
+      min-height: 16px;
     }
 
-    /* HUD OVERLAYS */
-    #hud {
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
+    /* Top Navigation HUD Bar */
+    #top-bar {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      height: 48px;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
       pointer-events: none;
-      z-index: 10;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 12px 16px;
-      padding-top: calc(12px + env(safe-area-inset-top));
-      padding-bottom: calc(12px + env(safe-area-inset-bottom));
-      padding-left: calc(16px + env(safe-area-inset-left));
-      padding-right: calc(16px + env(safe-area-inset-right));
     }
 
-    .hud-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      width: 100%;
-    }
-
-    .player-card {
+    #top-bar > * {
       pointer-events: auto;
+    }
+
+    .hud-chip {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 8px 14px;
-    }
-
-    .player-avatar {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #ff007f, #7928ca);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 900;
-      font-size: 18px;
-      box-shadow: 0 0 10px rgba(121, 40, 202, 0.6);
-    }
-
-    .player-info {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-
-    .player-name {
-      font-weight: 800;
-      font-size: 14px;
-      color: #00ff87;
-    }
-
-    .hp-bar-bg {
-      width: 110px;
-      height: 10px;
-      background: rgba(0,0,0,0.6);
-      border-radius: 6px;
-      overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.2);
-    }
-
-    .hp-bar-fill {
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, #ff416c, #ff4b2b);
-      transition: width 0.2s ease;
-    }
-
-    .top-controls {
-      pointer-events: auto;
-      display: flex;
       gap: 8px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
     }
 
-    .icon-btn {
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.2);
-      background: rgba(18, 22, 36, 0.7);
-      color: #fff;
-      font-size: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      backdrop-filter: blur(8px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      transition: transform 0.1s, background 0.2s;
-    }
-
-    .icon-btn:active {
-      transform: scale(0.9);
-      background: rgba(0,242,254,0.3);
-    }
-
-    /* HOTBAR */
-    .hotbar-container {
-      pointer-events: auto;
-      position: absolute;
-      bottom: calc(14px + env(safe-area-inset-bottom));
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 6px;
-      padding: 6px;
-      max-width: 90vw;
-      overflow-x: auto;
-      scrollbar-width: none;
-    }
-    .hotbar-container::-webkit-scrollbar { display: none; }
-
-    .hotbar-slot {
-      width: 44px;
-      height: 44px;
-      min-width: 44px;
-      border-radius: 10px;
-      background: rgba(0,0,0,0.5);
-      border: 2px solid rgba(255,255,255,0.2);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .hotbar-slot.active {
-      border-color: #00ff87;
-      box-shadow: 0 0 12px rgba(0,255,135,0.6);
-      transform: translateY(-4px);
-      background: rgba(0,255,135,0.15);
-    }
-
-    .slot-icon {
-      width: 26px;
-      height: 26px;
-      border-radius: 4px;
-    }
-
-    .slot-num {
-      position: absolute;
-      bottom: 2px;
-      right: 4px;
-      font-size: 10px;
-      font-weight: 800;
-      color: #fff;
-      text-shadow: 1px 1px 2px #000;
-    }
-
-    /* TOUCH CONTROLS (ANDRIOD HORIZONTAL) */
-    .touch-controls {
-      pointer-events: auto;
-      position: absolute;
-      bottom: calc(16px + env(safe-area-inset-bottom));
-      left: calc(16px + env(safe-area-inset-left));
-      display: flex;
-      gap: 10px;
-    }
-
-    .dpad-btn {
-      width: 58px;
-      height: 58px;
-      border-radius: 16px;
-      background: rgba(18, 22, 36, 0.7);
-      border: 2px solid rgba(255,255,255,0.2);
-      color: #fff;
-      font-size: 22px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      backdrop-filter: blur(8px);
-      box-shadow: 0 6px 18px rgba(0,0,0,0.4);
-      transition: background 0.1s, transform 0.1s;
-    }
-
-    .dpad-btn:active, .dpad-btn.pressed {
-      background: rgba(0, 242, 254, 0.4);
-      border-color: #00f2fe;
-      transform: scale(0.92);
-    }
-
-    .action-controls {
-      pointer-events: auto;
-      position: absolute;
-      bottom: calc(16px + env(safe-area-inset-bottom));
-      right: calc(16px + env(safe-area-inset-right));
-      display: flex;
-      gap: 10px;
-      align-items: flex-end;
-    }
-
-    .action-btn {
+    .hud-btn {
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
-      background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
-      border: 2px solid rgba(255,255,255,0.25);
-      color: #fff;
       display: flex;
       align-items: center;
       justify-content: center;
-      backdrop-filter: blur(8px);
-      box-shadow: 0 6px 18px rgba(0,0,0,0.4);
-      transition: transform 0.1s, background 0.1s;
+      font-size: 18px;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      transition: all 0.2s ease;
     }
 
-    .action-btn:active, .action-btn.pressed {
+    .hud-btn:active {
       transform: scale(0.9);
-      background: rgba(0, 255, 135, 0.4);
-      border-color: #00ff87;
+      background: rgba(56, 189, 248, 0.4);
     }
 
-    .btn-jump { width: 62px; height: 62px; font-size: 24px; background: rgba(0,242,254,0.2); }
-    .btn-mine { width: 54px; height: 54px; font-size: 20px; background: rgba(255,65,108,0.2); }
-    .btn-place { width: 54px; height: 54px; font-size: 20px; background: rgba(255,180,0,0.2); }
-
-    /* CHAT overlay */
-    #chat-box {
-      pointer-events: auto;
-      position: absolute;
-      top: calc(65px + env(safe-area-inset-top));
-      left: calc(16px + env(safe-area-inset-left));
+    /* Realtime Chat Overlay */
+    #chat-container {
+      position: fixed;
+      top: 65px;
+      left: 10px;
       width: 280px;
       max-height: 180px;
+      z-index: 1000;
       display: flex;
       flex-direction: column;
-      padding: 10px;
-      transition: opacity 0.3s ease, transform 0.3s ease;
-      z-index: 20;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    #chat-box.hidden {
+    #chat-container.minimized {
+      transform: translateX(-320px);
       opacity: 0;
       pointer-events: none;
-      transform: translateX(-30px);
     }
 
-    .chat-messages {
+    #chat-messages {
       flex: 1;
       overflow-y: auto;
+      padding: 8px;
       display: flex;
       flex-direction: column;
       gap: 4px;
       font-size: 11px;
-      margin-bottom: 8px;
-      scrollbar-width: none;
+      max-height: 130px;
+      scrollbar-width: thin;
     }
-    .chat-messages::-webkit-scrollbar { display: none; }
 
     .chat-msg {
-      background: rgba(0,0,0,0.4);
       padding: 4px 8px;
-      border-radius: 6px;
-      word-break: break-word;
-    }
-
-    .chat-user {
-      font-weight: 800;
-      color: #00f2fe;
-    }
-
-    .chat-input-row {
-      display: flex;
-      gap: 6px;
-    }
-
-    .chat-input {
-      flex: 1;
-      background: rgba(0,0,0,0.5);
-      border: 1px solid rgba(255,255,255,0.2);
       border-radius: 8px;
-      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+      word-break: break-word;
+      line-height: 1.3;
+    }
+
+    .chat-msg .author {
+      font-weight: 800;
+      color: #38bdf8;
+      margin-right: 4px;
+    }
+
+    #chat-input-box {
+      display: flex;
+      padding: 6px;
+      gap: 6px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    #chat-input {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
       padding: 6px 10px;
+      color: white;
       font-size: 12px;
       outline: none;
     }
 
-    .chat-send {
-      background: #00f2fe;
+    #chat-send {
+      padding: 6px 12px;
+      background: #0284c7;
       border: none;
       border-radius: 8px;
-      color: #000;
-      font-weight: 800;
-      padding: 0 12px;
+      color: white;
+      font-weight: bold;
       font-size: 12px;
     }
 
-    /* INVENTORY MODAL */
-    #inventory-modal {
-      pointer-events: auto;
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      width: 90%;
-      max-width: 480px;
-      padding: 20px;
-      z-index: 50;
+    /* Hotbar Inventory (20 Blocks) */
+    #hotbar-wrapper {
+      position: fixed;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      max-width: 92vw;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 20px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    #hotbar-wrapper::-webkit-scrollbar {
       display: none;
     }
 
-    #inventory-modal.active {
-      display: block;
-      animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-
-    .inv-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 14px;
-    }
-
-    .inv-title {
-      font-weight: 800;
-      font-size: 18px;
-      color: #00f2fe;
-    }
-
-    .inv-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 8px;
-      max-height: 240px;
-      overflow-y: auto;
-      padding-right: 4px;
-    }
-
-    .inv-item {
-      aspect-ratio: 1;
-      background: rgba(0,0,0,0.4);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 10px;
+    .hotbar-slot {
+      flex: 0 0 46px;
+      height: 46px;
+      border-radius: 12px;
+      background: rgba(30, 41, 59, 0.7);
+      border: 2px solid rgba(255, 255, 255, 0.15);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 4px;
-      cursor: pointer;
       position: relative;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    .inv-item:active {
-      border-color: #00ff87;
-      background: rgba(0,255,135,0.1);
+    .hotbar-slot.active {
+      border-color: #38bdf8;
+      background: rgba(56, 189, 248, 0.25);
+      transform: scale(1.12);
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.6);
     }
 
-    .inv-item-name {
-      font-size: 9px;
-      color: #cbd5e0;
-      text-align: center;
-      line-height: 1;
+    .hotbar-icon {
+      width: 26px;
+      height: 26px;
+      object-fit: contain;
     }
 
-    /* PORTRAIT WARNING OVERLAY */
-    #orientation-warning {
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: #0d0f18;
-      z-index: 2000;
-      display: none;
-      flex-direction: column;
-      justify-content: center;
+    .hotbar-label {
+      font-size: 8px;
+      color: #cbd5e1;
+      margin-top: 1px;
+      font-weight: 700;
+      white-space: nowrap;
+      max-width: 42px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* On-Screen Mobile Touch Controls */
+    .touch-controls {
+      position: fixed;
+      bottom: 70px;
+      z-index: 1000;
+      pointer-events: none;
+      display: flex;
+      user-select: none;
+    }
+
+    .touch-controls > * {
+      pointer-events: auto;
+    }
+
+    #left-dpad {
+      left: 15px;
+      gap: 10px;
       align-items: center;
-      text-align: center;
-      padding: 20px;
     }
 
-    .phone-rotate-icon {
-      font-size: 60px;
-      animation: rotateAnim 2s infinite ease-in-out;
-      margin-bottom: 16px;
+    #right-actions {
+      right: 15px;
+      gap: 12px;
+      align-items: center;
     }
 
-    @keyframes rotateAnim {
-      0%, 100% { transform: rotate(0deg); }
-      50% { transform: rotate(90deg); }
+    .ctrl-btn {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: rgba(15, 23, 42, 0.75);
+      border: 2px solid rgba(255, 255, 255, 0.25);
+      color: white;
+      font-size: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(8px);
+      transition: transform 0.1s;
     }
 
-    @media (orientation: portrait) {
-      #orientation-warning {
-        display: flex;
-      }
+    .ctrl-btn:active, .ctrl-btn.pressed {
+      transform: scale(0.88);
+      background: rgba(56, 189, 248, 0.4);
+      border-color: #38bdf8;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
+    .btn-mode {
+      background: linear-gradient(135deg, #e11d48, #9333ea);
+      font-size: 13px;
+      font-weight: 800;
+      width: 64px;
+      height: 64px;
+      border-radius: 18px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
     }
 
-    @keyframes popIn {
-      from { opacity: 0; transform: translate(-50%, -45%) scale(0.9); }
-      to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    /* Notification Banner */
+    #toast-msg {
+      position: fixed;
+      top: 65px;
+      right: 15px;
+      z-index: 10000;
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      transform: translateY(-50px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      pointer-events: none;
+    }
+
+    #toast-msg.show {
+      transform: translateY(0);
+      opacity: 1;
     }
   </style>
 </head>
 <body>
 
-<div id="game-container">
+  <!-- Screen Orientation Alert for Mobile Portrait -->
+  <div id="orientation-overlay">
+    <div class="icon">📱🔄</div>
+    <h2 style="font-size: 20px; margin-bottom: 8px;">Поверните устройство</h2>
+    <p style="font-size: 13px; color: #94a3b8;">Игра работает исключительно в горизонтальном режиме!</p>
+  </div>
+
+  <!-- Game Rendering Canvas -->
   <canvas id="gameCanvas"></canvas>
 
-  <!-- PORTRAIT ORIENTATION ALERT -->
-  <div id="orientation-warning">
-    <div class="phone-rotate-icon">📱🔄</div>
-    <h2 style="color: #00f2fe; margin-bottom: 8px;">Поверните устройство</h2>
-    <p style="color: #a0aec0; font-size: 14px;">Игра создана исключительно для горизонтального режима (Android Landscape)</p>
+  <!-- Notification Toast -->
+  <div id="toast-msg"></div>
+
+  <!-- HUD Top Bar -->
+  <div id="top-bar">
+    <div style="display: flex; gap: 8px;">
+      <div class="hud-chip glass-panel" style="border-color: rgba(56,189,248,0.4);">
+        <span id="player-tag" style="color:#38bdf8;">@игрок</span>
+        <span style="color:#22c55e;">❤️ <span id="player-hp">100</span></span>
+      </div>
+      <div class="hud-chip glass-panel">
+        <span>🌐 Онлайн:</span>
+        <span id="online-count" style="color:#f59e0b;">1</span>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 8px;">
+      <button class="hud-btn" id="btn-toggle-chat" title="Чат">💬</button>
+      <button class="hud-btn" id="btn-toggle-music" title="Музыка">🎵</button>
+      <button class="hud-btn" id="btn-fullscreen" title="Полный экран">⛶</button>
+    </div>
   </div>
 
-  <!-- AUTH SCREEN -->
-  <div id="auth-screen">
-    <div class="auth-card glass-panel">
-      <div class="auth-title">TERRARIA ONLINE</div>
-      <div class="auth-subtitle">Мультиплеерный 2D Мир на Android</div>
+  <!-- Realtime Chat Overlay Panel -->
+  <div id="chat-container" class="glass-panel">
+    <div id="chat-messages"></div>
+    <div id="chat-input-box">
+      <input type="text" id="chat-input" placeholder="Сообщение..." maxlength="100">
+      <button id="chat-send">▶</button>
+    </div>
+  </div>
+
+  <!-- On-Screen Touch Controls (Left D-Pad) -->
+  <div class="touch-controls" id="left-dpad">
+    <button class="ctrl-btn" id="btn-left">◀</button>
+    <button class="ctrl-btn" id="btn-right">▶</button>
+    <button class="ctrl-btn" id="btn-jump">▲</button>
+  </div>
+
+  <!-- On-Screen Touch Controls (Right Action Buttons) -->
+  <div class="touch-controls" id="right-actions">
+    <button class="ctrl-btn btn-mode" id="btn-mode">⛏️<br>КОПАТЬ</button>
+    <button class="ctrl-btn" id="btn-action">🎯</button>
+  </div>
+
+  <!-- Hotbar Inventory Palette (20 Beautiful Block Types) -->
+  <div id="hotbar-wrapper" class="glass-panel"></div>
+
+  <!-- User Login / Auth Modal Window -->
+  <div id="auth-modal">
+    <div class="glass-panel auth-card">
+      <div class="auth-title">TERRARIA 2D</div>
+      <div class="auth-subtitle">Онлайн браузерный мир Android</div>
+
       <div class="input-group">
-        <label>Никнейм (@юзер)</label>
-        <input type="text" id="username-input" class="input-field" placeholder="@steve" maxlength="15">
+        <label>Уникальный Никнейм (@юзер)</label>
+        <input type="text" id="auth-user" class="auth-input" placeholder="@alex_craft" maxlength="16" autocomplete="off">
       </div>
+
       <div class="input-group">
         <label>Пароль</label>
-        <input type="password" id="password-input" class="input-field" placeholder="••••••••">
-      </div>
-      <button class="auth-btn" id="login-btn">ВОЙТИ / ЗАРЕГИСТРИРОВАТЬСЯ</button>
-      <div id="auth-err" class="auth-err"></div>
-    </div>
-  </div>
-
-  <!-- HUD INTERFACE -->
-  <div id="hud">
-    <div class="hud-top">
-      <div class="player-card glass-panel">
-        <div class="player-avatar" id="avatar-letter">?</div>
-        <div class="player-info">
-          <div class="player-name" id="hud-username">@Player</div>
-          <div class="hp-bar-bg">
-            <div id="hp-bar" class="hp-bar-fill"></div>
-          </div>
-        </div>
+        <input type="password" id="auth-pass" class="auth-input" placeholder="••••••••" maxlength="20">
       </div>
 
-      <div class="top-controls">
-        <div class="icon-btn" id="btn-audio" title="Музыка Genshin">🎵</div>
-        <div class="icon-btn" id="btn-chat-toggle" title="Чат">💬</div>
-        <div class="icon-btn" id="btn-inventory" title="Инвентарь">🎒</div>
-        <div class="icon-btn" id="btn-fullscreen" title="Полный экран">⛶</div>
-      </div>
-    </div>
-
-    <!-- HOTBAR -->
-    <div class="hotbar-container glass-panel" id="hotbar"></div>
-
-    <!-- TOUCH DPAD CONTROLS -->
-    <div class="touch-controls">
-      <div class="dpad-btn" id="btn-left">◀</div>
-      <div class="dpad-btn" id="btn-right">▶</div>
-    </div>
-
-    <!-- ACTION BUTTONS -->
-    <div class="action-controls">
-      <div class="action-btn btn-mine" id="btn-mine">⛏️</div>
-      <div class="action-btn btn-place" id="btn-place">🧱</div>
-      <div class="action-btn btn-jump" id="btn-jump">🚀</div>
+      <button id="auth-btn" class="auth-btn">ВОЙТИ В МИР 🚀</button>
+      <div id="auth-status" class="auth-status"></div>
     </div>
   </div>
 
-  <!-- CHAT WINDOW -->
-  <div id="chat-box" class="glass-panel hidden">
-    <div class="chat-messages" id="chat-messages"></div>
-    <div class="chat-input-row">
-      <input type="text" id="chat-input" class="chat-input" placeholder="Сообщение..." maxlength="80">
-      <button class="chat-send" id="chat-send-btn">➔</button>
-    </div>
-  </div>
+  <script>
+    /* ==========================================================================
+       1. FIREBASE INITIALIZATION & REALTIME DB CONFIGURATION
+       ========================================================================== */
+    const firebaseConfig = {
+      apiKey: "AIzaSyBm0mIvHVznIeF2PoFk6dtdaiT5r877wyA",
+      authDomain: "meow-874ce.firebaseapp.com",
+      databaseURL: "https://meow-874ce-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "meow-874ce",
+      storageBucket: "meow-874ce.firebasestorage.app",
+      messagingSenderId: "471541334599",
+      appId: "1:471541334599:web:567af3e7dbe70a37572762"
+    };
 
-  <!-- INVENTORY MODAL -->
-  <div id="inventory-modal" class="glass-panel">
-    <div class="inv-header">
-      <div class="inv-title">🎒 Инвентарь Блоков (20 Видов)</div>
-      <div class="icon-btn" id="inv-close" style="width: 32px; height: 32px;">✕</div>
-    </div>
-    <div class="inv-grid" id="inv-grid"></div>
-  </div>
-</div>
-
-<script>
-  // -------------------------------------------------------------
-  // FIREBASE INITIALIZATION
-  // -------------------------------------------------------------
-  const firebaseConfig = {
-    apiKey: "AIzaSyBm0mIvHVznIeF2PoFk6dtdaiT5r877wyA",
-    authDomain: "meow-874ce.firebaseapp.com",
-    databaseURL: "https://meow-874ce-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "meow-874ce",
-    storageBucket: "meow-874ce.firebasestorage.app",
-    messagingSenderId: "471541334599",
-    appId: "1:471541334599:web:567af3e7dbe70a37572762"
-  };
-
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-
-  // -------------------------------------------------------------
-  // AUDIO SYNTHESIZER (GENSHIN IMPACT AMBIENT STYLE)
-  // -------------------------------------------------------------
-  class AmbientAudioEngine {
-    constructor() {
-      this.ctx = null;
-      this.isPlaying = false;
-      this.timer = null;
-      this.notes = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25]; // C D E G A pentatonic
+    // Initialize Firebase
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
     }
+    const db = firebase.database();
 
-    init() {
-      if (!this.ctx) {
-        this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    /* ==========================================================================
+       2. GAME CONSTANTS & WORLD ARCHITECTURE (20 BEAUTIFUL BLOCK TYPES)
+       ========================================================================== */
+    const TILE_SIZE = 32;
+    const WORLD_WIDTH = 160;  // Grid columns
+    const WORLD_HEIGHT = 70;  // Grid rows
+    const GRAVITY = 0.45;
+    const WALK_SPEED = 3.8;
+    const JUMP_FORCE = -9.2;
+
+    // Block ID definitions (20 distinct tiles)
+    const BLOCKS = {
+      0:  { name: 'Воздух', solid: false, color: 'transparent', light: 0 },
+      1:  { name: 'Трава', solid: true, color: '#4ade80', topColor: '#22c55e', sideColor: '#854d0e' },
+      2:  { name: 'Земля', solid: true, color: '#854d0e', pattern: 'dirt' },
+      3:  { name: 'Камень', solid: true, color: '#64748b', pattern: 'stone' },
+      4:  { name: 'Бедрок', solid: true, color: '#1e293b', unbreakable: true },
+      5:  { name: 'Дерево', solid: true, color: '#a16207', pattern: 'wood' },
+      6:  { name: 'Листва', solid: true, color: '#15803d', transparent: true },
+      7:  { name: 'Песок', solid: true, color: '#fde047' },
+      8:  { name: 'Лёд', solid: true, color: '#a5f3fc', friction: 0.98 },
+      9:  { name: 'Стекло', solid: true, color: 'rgba(186, 230, 253, 0.55)', transparent: true },
+      10: { name: 'Кирпич', solid: true, color: '#b91c1c', pattern: 'brick' },
+      11: { name: 'Золото', solid: true, color: '#eab308', glow: '#fef08a', light: 0.4 },
+      12: { name: 'Алмаз', solid: true, color: '#06b6d4', glow: '#67e8f9', light: 0.7 },
+      13: { name: 'Рубин', solid: true, color: '#e11d48', glow: '#fda4af', light: 0.6 },
+      14: { name: 'Изумруд', solid: true, color: '#10b981', glow: '#6ee7b7', light: 0.6 },
+      15: { name: 'Аметист', solid: true, color: '#a855f7', glow: '#d8b4fe', light: 0.8 },
+      16: { name: 'Лава', solid: false, color: '#f97316', glow: '#ffeb3b', light: 1.0, hazard: true },
+      17: { name: 'Обсидиан', solid: true, color: '#312e81', glow: '#6366f1' },
+      18: { name: 'Сундук', solid: true, color: '#d97706', icon: '📦' },
+      19: { name: 'Фонарь', solid: false, color: '#f59e0b', light: 1.0, icon: '💡' },
+      20: { name: 'Цветок', solid: false, color: '#ec4899', icon: '🌸' }
+    };
+
+    /* ==========================================================================
+       3. AUDIO ENGINE (GENSHIN IMPACT STYLE AMBIENT GENERATOR & SFX)
+       ========================================================================== */
+    class GenshinAudioEngine {
+      constructor() {
+        this.ctx = null;
+        this.isPlaying = false;
+        this.timer = null;
+        // Relaxing Genshin Impact inspired Pentatonic scales (Mondstadt / Liyue ambiance)
+        this.scale = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25, 783.99, 880.00];
       }
-    }
 
-    toggle() {
-      this.init();
-      if (this.ctx.state === 'suspended') {
-        this.ctx.resume();
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
       }
-      this.isPlaying = !this.isPlaying;
-      if (this.isPlaying) {
-        this.playMelody();
-      } else {
-        clearTimeout(this.timer);
+
+      toggle() {
+        this.init();
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+        this.isPlaying = !this.isPlaying;
+        if (this.isPlaying) {
+          this.startMusic();
+          showToast("🎵 Фоновая музыка Геншин включена");
+        } else {
+          clearTimeout(this.timer);
+          showToast("🔇 Музыка выключена");
+        }
+        return this.isPlaying;
       }
-      return this.isPlaying;
-    }
 
-    playMelody() {
-      if (!this.isPlaying) return;
+      startMusic() {
+        if (!this.isPlaying) return;
 
-      const note = this.notes[Math.floor(Math.random() * this.notes.length)];
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
+        // Play relaxing ambient piano note
+        const note = this.scale[Math.floor(Math.random() * this.scale.length)];
+        this.playPianoNote(note, 2.5);
 
-      osc.type = Math.random() > 0.5 ? 'sine' : 'triangle';
-      osc.frequency.setValueAtTime(note, this.ctx.currentTime);
+        // Schedule next soft melody note
+        const delay = 1200 + Math.random() * 2200;
+        this.timer = setTimeout(() => this.startMusic(), delay);
+      }
 
-      gain.gain.setValueAtTime(0, this.ctx.currentTime);
-      gain.gain.linearRampToValueAtTime(0.08, this.ctx.currentTime + 0.3);
-      gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 2.5);
-
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-
-      osc.start();
-      osc.stop(this.ctx.currentTime + 2.6);
-
-      const delay = 600 + Math.random() * 1400;
-      this.timer = setTimeout(() => this.playMelody(), delay);
-    }
-
-    playSFX(freq, duration, type = 'sine') {
-      if (!this.ctx) return;
-      try {
+      playPianoNote(freq, duration) {
+        if (!this.ctx) return;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
-        osc.type = type;
+
+        osc.type = 'triangle';
         osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-        gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+
+        gain.gain.setValueAtTime(0.001, this.ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.12, this.ctx.currentTime + 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+
         osc.connect(gain);
         gain.connect(this.ctx.destination);
+
         osc.start();
         osc.stop(this.ctx.currentTime + duration);
-      } catch (e) {}
-    }
-  }
+      }
 
-  const audioEng = new AmbientAudioEngine();
+      playSFX(type) {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
 
-  // -------------------------------------------------------------
-  // GAME DEFINITIONS & BLOCKS (20 TYPES)
-  // -------------------------------------------------------------
-  const TILE_SIZE = 24;
-  const WORLD_W = 140;
-  const WORLD_H = 60;
-
-  const BLOCKS = [
-    { id: 0, name: "Воздух", color: "transparent", solid: false },
-    { id: 1, name: "Трава", color: "#2e8b57", topColor: "#41e06d", solid: true },
-    { id: 2, name: "Земля", color: "#6e473b", solid: true },
-    { id: 3, name: "Камень", color: "#7a8288", solid: true },
-    { id: 4, name: "Древесина", color: "#8b5a2b", solid: true },
-    { id: 5, name: "Листва", color: "#2d6a4f", solid: true },
-    { id: 6, name: "Песок", color: "#e9c46a", solid: true },
-    { id: 7, name: "Снег", color: "#e0f1f7", solid: true },
-    { id: 8, name: "Медная руда", color: "#d97706", ore: "#f97316", solid: true },
-    { id: 9, name: "Железная руда", color: "#94a3b8", ore: "#e2e8f0", solid: true },
-    { id: 10, name: "Золотая руда", color: "#eab308", ore: "#fef08a", solid: true },
-    { id: 11, name: "Алмазная руда", color: "#06b6d4", ore: "#67e8f9", solid: true },
-    { id: 12, name: "Кристалл", color: "#a855f7", glow: true, solid: true },
-    { id: 13, name: "Кирпич", color: "#b91c1c", solid: true },
-    { id: 14, name: "Стекло", color: "rgba(224,242,254,0.4)", solid: true },
-    { id: 15, name: "Обсидиан", color: "#1e1b4b", solid: true },
-    { id: 16, name: "Лава", color: "#ef4444", liquid: true, solid: false },
-    { id: 17, name: "Вода", color: "rgba(59,130,246,0.6)", liquid: true, solid: false },
-    { id: 18, name: "Факел", color: "#f97316", light: true, solid: false },
-    { id: 19, name: "Цветок", color: "#ec4899", solid: false },
-    { id: 20, name: "Верстак", color: "#d97706", solid: true }
-  ];
-
-  // Map Array 2D
-  let map = new Array(WORLD_H).fill(0).map(() => new Array(WORLD_W).fill(0));
-
-  // Generate Handcrafted / Deterministic Baseline Terraria World
-  function generateBaseWorld() {
-    for (let x = 0; x < WORLD_W; x++) {
-      let groundY = Math.floor(20 + Math.sin(x * 0.1) * 3 + Math.cos(x * 0.04) * 4);
-      for (let y = 0; y < WORLD_H; y++) {
-        if (y < groundY) {
-          map[y][x] = 0; // Air
-        } else if (y === groundY) {
-          map[y][x] = 1; // Grass
-          // Trees & flowers
-          if (x % 7 === 0 && x > 5 && x < WORLD_W - 5) {
-            for (let t = 1; t <= 3; t++) map[y - t][x] = 4;
-            map[y - 4][x] = 5; map[y - 4][x - 1] = 5; map[y - 4][x + 1] = 5;
-            map[y - 5][x] = 5;
-          } else if (x % 3 === 0) {
-            map[y - 1][x] = 19; // Flower
-          }
-        } else if (y < groundY + 8) {
-          map[y][x] = 2; // Dirt
-        } else if (y < WORLD_H - 8) {
-          // Underground Stone & Ores
-          let r = Math.random();
-          if (r < 0.03) map[y][x] = 8; // Copper
-          else if (r < 0.05) map[y][x] = 9; // Iron
-          else if (r < 0.065) map[y][x] = 10; // Gold
-          else if (r < 0.075) map[y][x] = 11; // Diamond
-          else if (r < 0.09) map[y][x] = 12; // Crystal
-          else map[y][x] = 3; // Stone
-        } else {
-          // Deep Nether
-          let r = Math.random();
-          if (r < 0.2) map[y][x] = 16; // Lava
-          else map[y][x] = 15; // Obsidian
+        const now = this.ctx.currentTime;
+        if (type === 'break') {
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(160, now);
+          osc.frequency.exponentialRampToValueAtTime(40, now + 0.1);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.1);
+          osc.start(now);
+          osc.stop(now + 0.1);
+        } else if (type === 'place') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(300, now);
+          osc.frequency.exponentialRampToValueAtTime(150, now + 0.08);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.08);
+          osc.start(now);
+          osc.stop(now + 0.08);
+        } else if (type === 'jump') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(220, now);
+          osc.frequency.exponentialRampToValueAtTime(440, now + 0.15);
+          gain.gain.setValueAtTime(0.1, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
+          osc.start(now);
+          osc.stop(now + 0.15);
         }
       }
     }
-  }
-  generateBaseWorld();
 
-  // -------------------------------------------------------------
-  // GAME ENGINE & GAME STATE
-  // -------------------------------------------------------------
-  const canvas = document.getElementById('gameCanvas');
-  const ctx = canvas.getContext('2d');
+    const audioEngine = new GenshinAudioEngine();
 
-  function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  window.addEventListener('resize', resizeCanvas);
-  resizeCanvas();
+    /* ==========================================================================
+       4. GAME STATE & LOCAL DATA MANAGEMENT
+       ========================================================================== */
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
 
-  // Player State
-  let myUser = null;
-  let player = {
-    x: 40 * TILE_SIZE,
-    y: 10 * TILE_SIZE,
-    vx: 0,
-    vy: 0,
-    w: 18,
-    h: 32,
-    grounded: false,
-    facing: 'right',
-    hp: 100,
-    selectedBlock: 1,
-    skinColor: '#4facfe'
-  };
+    let currentUser = null;
+    let buildMode = true; // true = Dig/Mine, false = Place
+    let selectedBlockId = 1; // Default Grass
+    let cameraX = 0;
+    let cameraY = 0;
 
-  let remotePlayers = {};
-  let mobs = [];
-  let particles = [];
-  let dayTime = 0.2; // 0..1 Day/Night cycle
+    // World Grid Matrix
+    const world = Array(WORLD_HEIGHT).fill(null).map(() => Array(WORLD_WIDTH).fill(0));
 
-  // Controls State
-  let keys = { left: false, right: false, jump: false, mine: false, place: false };
-  let targetBlock = { x: -1, y: -1 };
+    // Particles Engine Array
+    let particles = [];
 
-  // Hotbar Slots
-  let hotbarItems = [1, 2, 3, 4, 5, 8, 10, 18];
+    // Player Object
+    const player = {
+      x: 20 * TILE_SIZE,
+      y: 10 * TILE_SIZE,
+      vx: 0,
+      vy: 0,
+      width: 24,
+      height: 48,
+      grounded: false,
+      facing: 'right',
+      color: '#38bdf8',
+      hp: 100,
+      animFrame: 0
+    };
 
-  // -------------------------------------------------------------
-  // MOBS INITIALIZATION WITH OVERHEAD NAME TAGS
-  // -------------------------------------------------------------
-  function initMobs() {
-    const mobTypes = [
-      { name: "🧟 Зомби", type: "zombie", color: "#4ade80", hp: 50, speed: 0.8, hostile: true },
-      { name: "💧 Слайм", type: "slime", color: "#38bdf8", hp: 30, speed: 0.6, hostile: true },
-      { name: "💀 Скелет", type: "skeleton", color: "#f1f5f9", hp: 40, speed: 0.7, hostile: true },
-      { name: "🐔 Курица", type: "chicken", color: "#fef08a", hp: 15, speed: 0.5, hostile: false },
-      { name: "🐷 Свинья", type: "pig", color: "#f472b6", hp: 25, speed: 0.4, hostile: false }
+    // Online Players Dictionary
+    const onlinePlayers = {};
+
+    // Mobs List (Terraria & Minecraft styled NPC)
+    const mobs = [
+      { id: 1, type: '🧟 Зомби', x: 25 * TILE_SIZE, y: 15 * TILE_SIZE, vx: 0.8, hp: 100, maxHp: 100, color: '#22c55e' },
+      { id: 2, type: '🐔 Курица', x: 35 * TILE_SIZE, y: 15 * TILE_SIZE, vx: -0.5, hp: 20, maxHp: 20, color: '#f8fafc' },
+      { id: 3, type: '🐸 Слайм', x: 50 * TILE_SIZE, y: 15 * TILE_SIZE, vx: 0.6, hp: 50, maxHp: 50, color: '#06b6d4' },
+      { id: 4, type: '🐷 Свинья', x: 65 * TILE_SIZE, y: 15 * TILE_SIZE, vx: -0.4, hp: 40, maxHp: 40, color: '#f472b6' },
+      { id: 5, type: '💀 Скелет', x: 80 * TILE_SIZE, y: 15 * TILE_SIZE, vx: 0.9, hp: 80, maxHp: 80, color: '#cbd5e1' }
     ];
 
-    mobs = [];
-    for (let i = 0; i < 8; i++) {
-      let template = mobTypes[i % mobTypes.length];
-      let spawnX = (15 + i * 15) * TILE_SIZE;
-      mobs.push({
-        id: 'mob_' + i,
-        name: template.name,
-        type: template.type,
-        color: template.color,
-        x: spawnX,
-        y: 15 * TILE_SIZE,
-        vx: 0.5,
-        vy: 0,
-        w: template.type === 'slime' ? 20 : 20,
-        h: template.type === 'slime' ? 16 : 28,
-        hp: template.hp,
-        maxHp: template.hp,
-        hostile: template.hostile,
-        grounded: false
-      });
-    }
-  }
-  initMobs();
+    /* ==========================================================================
+       5. DETERMINISTIC BASE WORLD GENERATION
+       ========================================================================== */
+    function generateBaseWorld() {
+      for (let x = 0; x < WORLD_WIDTH; x++) {
+        // Height map calculation
+        const surfaceY = Math.floor(22 + Math.sin(x * 0.08) * 5 + Math.cos(x * 0.03) * 3);
 
-  // -------------------------------------------------------------
-  // RENDERING ENGINE
-  // -------------------------------------------------------------
-  function render() {
-    // Sky Gradient based on Day/Night Cycle
-    dayTime += 0.0001;
-    if (dayTime > 1) dayTime = 0;
-    
-    let dayLight = Math.sin(dayTime * Math.PI);
-    let skyR = Math.floor(15 + dayLight * 110);
-    let skyG = Math.floor(20 + dayLight * 160);
-    let skyB = Math.floor(40 + dayLight * 215);
-    ctx.fillStyle = `rgb(${skyR}, ${skyG}, ${skyB})`;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Camera Center on Local Player
-    ctx.save();
-    let camX = -player.x + canvas.width / 2;
-    let camY = -player.y + canvas.height / 2;
-    ctx.translate(Math.floor(camX), Math.floor(camY));
-
-    // Render Blocks
-    let startX = Math.max(0, Math.floor((player.x - canvas.width / 2) / TILE_SIZE) - 2);
-    let endX = Math.min(WORLD_W, Math.ceil((player.x + canvas.width / 2) / TILE_SIZE) + 2);
-    let startY = Math.max(0, Math.floor((player.y - canvas.height / 2) / TILE_SIZE) - 2);
-    let endY = Math.min(WORLD_H, Math.ceil((player.y + canvas.height / 2) / TILE_SIZE) + 2);
-
-    for (let y = startY; y < endY; y++) {
-      for (let x = startX; x < endX; x++) {
-        let bId = map[y][x];
-        if (bId !== 0) {
-          drawBlock(x, y, bId);
-        }
-      }
-    }
-
-    // Target Cursor Highlight
-    if (targetBlock.x >= 0 && targetBlock.y >= 0) {
-      ctx.strokeStyle = '#00ff87';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(targetBlock.x * TILE_SIZE, targetBlock.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-    }
-
-    // Mobs Rendering
-    mobs.forEach(mob => drawMob(mob));
-
-    // Remote Players
-    Object.keys(remotePlayers).forEach(u => {
-      if (u !== myUser) drawRemotePlayer(remotePlayers[u]);
-    });
-
-    // Local Player
-    drawPlayer(player, myUser || "@me");
-
-    // Particles
-    drawParticles();
-
-    // Night Ambient Tint
-    ctx.restore();
-    if (dayLight < 0.5) {
-      let nightAlpha = (0.5 - dayLight) * 1.2;
-      ctx.fillStyle = `rgba(5, 8, 25, ${Math.min(0.65, nightAlpha)})`;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
-  }
-
-  function drawBlock(x, y, id) {
-    let px = x * TILE_SIZE;
-    let py = y * TILE_SIZE;
-    let block = BLOCKS[id] || BLOCKS[1];
-
-    ctx.fillStyle = block.color;
-    ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
-
-    // Detail overlays
-    if (id === 1) { // Grass top
-      ctx.fillStyle = block.topColor;
-      ctx.fillRect(px, py, TILE_SIZE, 5);
-    } else if (block.ore) { // Ores
-      ctx.fillStyle = block.ore;
-      ctx.fillRect(px + 4, py + 4, 6, 6);
-      ctx.fillRect(px + 12, py + 10, 5, 5);
-    } else if (id === 18) { // Torch
-      ctx.fillStyle = '#8b5a2b';
-      ctx.fillRect(px + 10, py + 8, 4, 16);
-      ctx.fillStyle = '#f97316';
-      ctx.fillRect(px + 8, py + 4, 8, 8);
-    } else if (id === 19) { // Flower
-      ctx.fillStyle = '#22c55e';
-      ctx.fillRect(px + 11, py + 12, 2, 12);
-      ctx.fillStyle = '#ec4899';
-      ctx.fillRect(px + 8, py + 6, 8, 8);
-    }
-  }
-
-  function drawPlayer(p, name) {
-    // Body
-    ctx.fillStyle = p.skinColor || '#00f2fe';
-    ctx.fillRect(p.x, p.y, p.w, p.h);
-
-    // Eyes / Direction
-    ctx.fillStyle = '#fff';
-    let eyeX = p.facing === 'right' ? p.x + 11 : p.x + 3;
-    ctx.fillRect(eyeX, p.y + 6, 4, 4);
-
-    // Name Tag
-    ctx.font = 'bold 11px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText(name, p.x + p.w / 2, p.y - 8);
-  }
-
-  function drawRemotePlayer(rp) {
-    ctx.fillStyle = '#f43f5e';
-    ctx.fillRect(rp.x, rp.y, 18, 32);
-
-    ctx.font = 'bold 11px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#ffed4a';
-    ctx.fillText(rp.username || 'Игрок', rp.x + 9, rp.y - 8);
-  }
-
-  function drawMob(mob) {
-    ctx.fillStyle = mob.color;
-    ctx.fillRect(mob.x, mob.y, mob.w, mob.h);
-
-    // OVERHEAD NAME TAG WITH HP BAR
-    let centerX = mob.x + mob.w / 2;
-    let tagY = mob.y - 12;
-
-    ctx.font = 'bold 11px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText(mob.name, centerX, tagY);
-
-    // Mob HP Bar
-    let barW = 28;
-    let barH = 4;
-    let barX = centerX - barW / 2;
-    let barY = tagY + 3;
-    let hpPercent = Math.max(0, mob.hp / mob.maxHp);
-
-    ctx.fillStyle = 'rgba(0,0,0,0.6)';
-    ctx.fillRect(barX, barY, barW, barH);
-    ctx.fillStyle = mob.hostile ? '#ef4444' : '#22c55e';
-    ctx.fillRect(barX, barY, barW * hpPercent, barH);
-  }
-
-  function createParticles(x, y, color) {
-    for (let i = 0; i < 6; i++) {
-      particles.push({
-        x: x, y: y,
-        vx: (Math.random() - 0.5) * 4,
-        vy: (Math.random() - 0.5) * 4,
-        life: 1,
-        color: color
-      });
-    }
-  }
-
-  function drawParticles() {
-    for (let i = particles.length - 1; i >= 0; i--) {
-      let pt = particles[i];
-      pt.x += pt.vx;
-      pt.y += pt.vy;
-      pt.life -= 0.05;
-
-      if (pt.life <= 0) {
-        particles.splice(i, 1);
-        continue;
-      }
-
-      ctx.fillStyle = pt.color;
-      ctx.globalAlpha = pt.life;
-      ctx.fillRect(pt.x, pt.y, 4, 4);
-      ctx.globalAlpha = 1.0;
-    }
-  }
-
-  // -------------------------------------------------------------
-  // PHYSICS & GAME LOOP
-  // -------------------------------------------------------------
-  function updatePhysics() {
-    // Left/Right Movement
-    if (keys.left) {
-      player.vx = -2.8;
-      player.facing = 'left';
-    } else if (keys.right) {
-      player.vx = 2.8;
-      player.facing = 'right';
-    } else {
-      player.vx *= 0.6;
-    }
-
-    // Jump
-    if (keys.jump && player.grounded) {
-      player.vy = -7.5;
-      player.grounded = false;
-      audioEng.playSFX(350, 0.1);
-    }
-
-    // Gravity
-    player.vy += 0.4;
-
-    // Move Horizontal
-    player.x += player.vx;
-    collideHorizontal(player);
-
-    // Move Vertical
-    player.y += player.vy;
-    collideVertical(player);
-
-    // Target block targeter (closest block near player)
-    let reachX = Math.floor((player.x + player.w / 2 + (player.facing === 'right' ? 24 : -24)) / TILE_SIZE);
-    let reachY = Math.floor((player.y + player.h / 2) / TILE_SIZE);
-    targetBlock.x = Math.max(0, Math.min(WORLD_W - 1, reachX));
-    targetBlock.y = Math.max(0, Math.min(WORLD_H - 1, reachY));
-
-    // Mine Action
-    if (keys.mine && targetBlock.x >= 0) {
-      let b = map[targetBlock.y][targetBlock.x];
-      if (b !== 0) {
-        let blockColor = BLOCKS[b].color;
-        map[targetBlock.y][targetBlock.x] = 0;
-        createParticles(targetBlock.x * TILE_SIZE + 12, targetBlock.y * TILE_SIZE + 12, blockColor);
-        audioEng.playSFX(180, 0.08, 'square');
-        syncBlockChange(targetBlock.x, targetBlock.y, 0);
-      }
-    }
-
-    // Place Action
-    if (keys.place && targetBlock.x >= 0) {
-      if (map[targetBlock.y][targetBlock.x] === 0) {
-        map[targetBlock.y][targetBlock.x] = player.selectedBlock;
-        audioEng.playSFX(440, 0.08);
-        syncBlockChange(targetBlock.x, targetBlock.y, player.selectedBlock);
-      }
-    }
-
-    // Update Mobs
-    mobs.forEach(mob => {
-      mob.vy += 0.3;
-      mob.x += mob.vx;
-      collideHorizontal(mob);
-      mob.y += mob.vy;
-      collideVertical(mob);
-
-      if (Math.random() < 0.01) mob.vx = -mob.vx;
-    });
-
-    // Sync Player Position
-    if (myUser && Math.random() < 0.2) {
-      syncPlayerState();
-    }
-  }
-
-  function collideHorizontal(ent) {
-    let tileX1 = Math.floor(ent.x / TILE_SIZE);
-    let tileX2 = Math.floor((ent.x + ent.w) / TILE_SIZE);
-    let tileY1 = Math.floor(ent.y / TILE_SIZE);
-    let tileY2 = Math.floor((ent.y + ent.h - 1) / TILE_SIZE);
-
-    for (let y = tileY1; y <= tileY2; y++) {
-      for (let x = tileX1; x <= tileX2; x++) {
-        if (isSolid(x, y)) {
-          if (ent.vx > 0) ent.x = x * TILE_SIZE - ent.w;
-          else if (ent.vx < 0) ent.x = (x + 1) * TILE_SIZE;
-          ent.vx = 0;
-        }
-      }
-    }
-  }
-
-  function collideVertical(ent) {
-    let tileX1 = Math.floor(ent.x / TILE_SIZE);
-    let tileX2 = Math.floor((ent.x + ent.w - 1) / TILE_SIZE);
-    let tileY1 = Math.floor(ent.y / TILE_SIZE);
-    let tileY2 = Math.floor((ent.y + ent.h) / TILE_SIZE);
-
-    ent.grounded = false;
-    for (let y = tileY1; y <= tileY2; y++) {
-      for (let x = tileX1; x <= tileX2; x++) {
-        if (isSolid(x, y)) {
-          if (ent.vy > 0) {
-            ent.y = y * TILE_SIZE - ent.h;
-            ent.grounded = true;
-          } else if (ent.vy < 0) {
-            ent.y = (y + 1) * TILE_SIZE;
+        for (let y = 0; y < WORLD_HEIGHT; y++) {
+          if (y === WORLD_HEIGHT - 1 || y === WORLD_HEIGHT - 2) {
+            world[y][x] = 4; // Bedrock bottom
+          } else if (y === surfaceY) {
+            world[y][x] = 1; // Surface Grass
+          } else if (y > surfaceY && y < surfaceY + 6) {
+            world[y][x] = 2; // Dirt layer
+          } else if (y >= surfaceY + 6) {
+            // Underground stone & rare ore vein generation
+            const rand = Math.random();
+            if (rand < 0.02) world[y][x] = 12; // Diamond
+            else if (rand < 0.04) world[y][x] = 11; // Gold
+            else if (rand < 0.06) world[y][x] = 13; // Ruby
+            else if (rand < 0.08) world[y][x] = 14; // Emerald
+            else if (rand < 0.10) world[y][x] = 15; // Amethyst
+            else if (y > WORLD_HEIGHT - 8 && rand < 0.2) world[y][x] = 16; // Lava pockets
+            else world[y][x] = 3; // Stone
+          } else {
+            world[y][x] = 0; // Air
           }
-          ent.vy = 0;
+        }
+
+        // Generate trees on surface
+        if (x % 7 === 0 && surfaceY > 10) {
+          const treeHeight = 4 + Math.floor(Math.random() * 2);
+          for (let i = 1; i <= treeHeight; i++) {
+            if (surfaceY - i > 0) world[surfaceY - i][x] = 5; // Trunk
+          }
+          // Tree leaves crown
+          for (let lx = -2; lx <= 2; lx++) {
+            for (let ly = -2; ly <= 0; ly++) {
+              const leafX = x + lx;
+              const leafY = surfaceY - treeHeight + ly;
+              if (leafX >= 0 && leafX < WORLD_WIDTH && leafY >= 0) {
+                if (world[leafY][leafX] === 0) world[leafY][leafX] = 6;
+              }
+            }
+          }
         }
       }
     }
-  }
 
-  function isSolid(x, y) {
-    if (x < 0 || x >= WORLD_W || y < 0 || y >= WORLD_H) return true;
-    let b = map[y][x];
-    return BLOCKS[b] ? BLOCKS[b].solid : false;
-  }
+    /* ==========================================================================
+       6. UI INITIALIZATION & EVENT LISTENERS
+       ========================================================================== */
+    function initHotbar() {
+      const wrapper = document.getElementById('hotbar-wrapper');
+      wrapper.innerHTML = '';
 
-  function gameLoop() {
-    updatePhysics();
-    render();
-    requestAnimationFrame(gameLoop);
-  }
+      for (let id = 1; id <= 20; id++) {
+        const block = BLOCKS[id];
+        const slot = document.createElement('div');
+        slot.className = `hotbar-slot ${id === selectedBlockId ? 'active' : ''}`;
+        slot.dataset.id = id;
 
-  // -------------------------------------------------------------
-  // REAL-TIME FIREBASE SYNC
-  // -------------------------------------------------------------
-  function syncBlockChange(x, y, blockId) {
-    db.ref('world/' + x + '_' + y).set(blockId);
-  }
+        // Custom preview element for block
+        const iconElem = document.createElement('div');
+        iconElem.style.width = '24px';
+        iconElem.style.height = '24px';
+        iconElem.style.borderRadius = '4px';
+        iconElem.style.backgroundColor = block.color;
+        if (block.glow) iconElem.style.boxShadow = `0 0 8px ${block.glow}`;
 
-  function syncPlayerState() {
-    if (!myUser) return;
-    db.ref('players/' + myUser).set({
-      username: '@' + myUser,
-      x: Math.round(player.x),
-      y: Math.round(player.y),
-      facing: player.facing,
-      hp: player.hp,
-      lastSeen: Date.now()
-    });
-  }
+        if (block.icon) {
+          iconElem.style.display = 'flex';
+          iconElem.style.alignItems = 'center';
+          iconElem.style.justifyContent = 'center';
+          iconElem.style.fontSize = '14px';
+          iconElem.innerText = block.icon;
+        }
 
-  function setupRealtimeListeners() {
-    // Listen for World Changes
-    db.ref('world').on('child_added', snapshot => {
-      let key = snapshot.key;
-      let blockId = snapshot.val();
-      let [x, y] = key.split('_').map(Number);
-      if (x >= 0 && x < WORLD_W && y >= 0 && y < WORLD_H) {
-        map[y][x] = blockId;
+        const label = document.createElement('div');
+        label.className = 'hotbar-label';
+        label.innerText = block.name;
+
+        slot.appendChild(iconElem);
+        slot.appendChild(label);
+
+        slot.addEventListener('click', () => {
+          selectedBlockId = id;
+          document.querySelectorAll('.hotbar-slot').forEach(s => s.classList.remove('active'));
+          slot.classList.add('active');
+        });
+
+        wrapper.appendChild(slot);
       }
-    });
-
-    db.ref('world').on('child_changed', snapshot => {
-      let key = snapshot.key;
-      let blockId = snapshot.val();
-      let [x, y] = key.split('_').map(Number);
-      if (x >= 0 && x < WORLD_W && y >= 0 && y < WORLD_H) {
-        map[y][x] = blockId;
-      }
-    });
-
-    // Listen for Online Players
-    db.ref('players').on('value', snapshot => {
-      remotePlayers = snapshot.val() || {};
-    });
-
-    // Chat Listeners
-    db.ref('chat').limitToLast(15).on('child_added', snapshot => {
-      let msg = snapshot.val();
-      appendChatMessage(msg.user, msg.text);
-    });
-  }
-
-  // -------------------------------------------------------------
-  // UI & TOUCH CONTROLS BINDING
-  // -------------------------------------------------------------
-  function setupUI() {
-    // Hotbar Setup
-    const hotbarEl = document.getElementById('hotbar');
-    hotbarEl.innerHTML = '';
-    hotbarItems.forEach((blockId, index) => {
-      let slot = document.createElement('div');
-      slot.className = 'hotbar-slot' + (index === 0 ? ' active' : '');
-      slot.onclick = () => {
-        document.querySelectorAll('.hotbar-slot').forEach(s => s.classList.remove('active'));
-        slot.classList.add('active');
-        player.selectedBlock = blockId;
-      };
-
-      let block = BLOCKS[blockId];
-      let icon = document.createElement('div');
-      icon.className = 'slot-icon';
-      icon.style.background = block.color;
-      if (block.topColor) icon.style.borderTop = '3px solid ' + block.topColor;
-
-      let num = document.createElement('span');
-      num.className = 'slot-num';
-      num.innerText = index + 1;
-
-      slot.appendChild(icon);
-      slot.appendChild(num);
-      hotbarEl.appendChild(slot);
-    });
-
-    // Inventory Setup
-    const invGrid = document.getElementById('inv-grid');
-    BLOCKS.forEach(b => {
-      if (b.id === 0) return;
-      let item = document.createElement('div');
-      item.className = 'inv-item';
-      item.onclick = () => {
-        player.selectedBlock = b.id;
-        document.getElementById('inventory-modal').classList.remove('active');
-      };
-
-      let icon = document.createElement('div');
-      icon.className = 'slot-icon';
-      icon.style.background = b.color;
-      if (b.topColor) icon.style.borderTop = '3px solid ' + b.topColor;
-
-      let name = document.createElement('div');
-      name.className = 'inv-item-name';
-      name.innerText = b.name;
-
-      item.appendChild(icon);
-      item.appendChild(name);
-      invGrid.appendChild(item);
-    });
-
-    // Touch D-Pad Buttons
-    bindTouch('btn-left', pressed => keys.left = pressed);
-    bindTouch('btn-right', pressed => keys.right = pressed);
-    bindTouch('btn-jump', pressed => keys.jump = pressed);
-    bindTouch('btn-mine', pressed => keys.mine = pressed);
-    bindTouch('btn-place', pressed => keys.place = pressed);
-
-    // Audio Button
-    document.getElementById('btn-audio').onclick = () => {
-      let playing = audioEng.toggle();
-      document.getElementById('btn-audio').style.background = playing ? 'rgba(0, 242, 254, 0.4)' : 'rgba(18, 22, 36, 0.7)';
-    };
-
-    // Chat Toggle
-    document.getElementById('btn-chat-toggle').onclick = () => {
-      document.getElementById('chat-box').classList.toggle('hidden');
-    };
-
-    // Inventory Modal Toggle
-    document.getElementById('btn-inventory').onclick = () => {
-      document.getElementById('inventory-modal').classList.add('active');
-    };
-    document.getElementById('inv-close').onclick = () => {
-      document.getElementById('inventory-modal').classList.remove('active');
-    };
-
-    // Fullscreen Toggle
-    document.getElementById('btn-fullscreen').onclick = () => {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(() => {});
-      } else {
-        document.exitFullscreen().catch(() => {});
-      }
-    };
-
-    // Chat Sending
-    document.getElementById('chat-send-btn').onclick = sendChatMessage;
-    document.getElementById('chat-input').addEventListener('keypress', e => {
-      if (e.key === 'Enter') sendChatMessage();
-    });
-
-    // Login/Register Logic
-    document.getElementById('login-btn').onclick = handleAuth;
-
-    // Auto-login from localStorage
-    let savedUser = localStorage.getItem('terraria_user');
-    if (savedUser) {
-      document.getElementById('username-input').value = savedUser;
     }
-  }
 
-  function bindTouch(id, callback) {
-    const btn = document.getElementById(id);
-    const start = (e) => { e.preventDefault(); btn.classList.add('pressed'); callback(true); };
-    const end = (e) => { e.preventDefault(); btn.classList.remove('pressed'); callback(false); };
+    function setupControls() {
+      const keys = { left: false, right: false, jump: false };
 
-    btn.addEventListener('touchstart', start);
-    btn.addEventListener('touchend', end);
-    btn.addEventListener('mousedown', start);
-    btn.addEventListener('mouseup', end);
-  }
+      // Touch Buttons Handling
+      const bindBtn = (id, keyName) => {
+        const btn = document.getElementById(id);
+        const start = (e) => { e.preventDefault(); keys[keyName] = true; btn.classList.add('pressed'); };
+        const end = (e) => { e.preventDefault(); keys[keyName] = false; btn.classList.remove('pressed'); };
+        btn.addEventListener('touchstart', start, { passive: false });
+        btn.addEventListener('touchend', end, { passive: false });
+        btn.addEventListener('mousedown', start);
+        btn.addEventListener('mouseup', end);
+      };
 
-  function sendChatMessage() {
-    let input = document.getElementById('chat-input');
-    let text = input.value.trim();
-    if (text && myUser) {
-      db.ref('chat').push({
-        user: '@' + myUser,
-        text: text,
-        time: Date.now()
+      bindBtn('btn-left', 'left');
+      bindBtn('btn-right', 'right');
+      bindBtn('btn-jump', 'jump');
+
+      // Mode switch (Mine / Build)
+      const btnMode = document.getElementById('btn-mode');
+      btnMode.addEventListener('click', () => {
+        buildMode = !buildMode;
+        btnMode.innerHTML = buildMode ? '⛏️<br>КОПАТЬ' : '🧱<br>СТРОИТЬ';
+        btnMode.style.background = buildMode 
+          ? 'linear-gradient(135deg, #e11d48, #9333ea)' 
+          : 'linear-gradient(135deg, #10b981, #0284c7)';
+        showToast(buildMode ? "Режим: Разрушение блоков ⛏️" : "Режим: Строительство 🧱");
       });
-      input.value = '';
-    }
-  }
 
-  function appendChatMessage(user, text) {
-    let box = document.getElementById('chat-messages');
-    let msg = document.createElement('div');
-    msg.className = 'chat-msg';
-    msg.innerHTML = `<span class="chat-user">${user}:</span> ${text}`;
-    box.appendChild(msg);
-    box.scrollTop = box.scrollHeight;
-  }
+      // Action Button
+      document.getElementById('btn-action').addEventListener('click', () => {
+        performFrontAction();
+      });
 
-  function handleAuth() {
-    let userVal = document.getElementById('username-input').value.trim().replace(/^@/, '');
-    let passVal = document.getElementById('password-input').value.trim();
-    let errEl = document.getElementById('auth-err');
+      // Canvas Touch/Click for Direct Block Digging & Building
+      canvas.addEventListener('touchstart', handleCanvasTouch, { passive: false });
+      canvas.addEventListener('mousedown', handleCanvasTouch);
 
-    if (!userVal || !passVal) {
-      errEl.innerText = "Заполните ник и пароль!";
-      return;
-    }
+      // HUD buttons
+      document.getElementById('btn-toggle-chat').addEventListener('click', () => {
+        const chat = document.getElementById('chat-container');
+        chat.classList.toggle('minimized');
+      });
 
-    db.ref('users/' + userVal).once('value', snapshot => {
-      let userData = snapshot.val();
-      if (userData) {
-        // Check password
-        if (userData.password === passVal) {
-          loginSuccess(userVal);
+      document.getElementById('btn-toggle-music').addEventListener('click', () => {
+        audioEngine.toggle();
+      });
+
+      document.getElementById('btn-fullscreen').addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
         } else {
-          errEl.innerText = "Неверный пароль!";
+          document.exitFullscreen().catch(() => {});
         }
-      } else {
-        // Register new user
-        db.ref('users/' + userVal).set({
-          password: passVal,
-          created: Date.now()
-        }).then(() => {
-          loginSuccess(userVal);
+      });
+
+      // Global Chat Send
+      const sendChat = () => {
+        const input = document.getElementById('chat-input');
+        const text = input.value.trim();
+        if (text && currentUser) {
+          db.ref('chat').push({
+            user: currentUser,
+            text: text,
+            time: Date.now()
+          });
+          input.value = '';
+        }
+      };
+
+      document.getElementById('chat-send').addEventListener('click', sendChat);
+      document.getElementById('chat-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') sendChat();
+      });
+
+      return keys;
+    }
+
+    const inputKeys = setupControls();
+
+    /* ==========================================================================
+       7. CANVAS TOUCH & WORLD INTERACTION
+       ========================================================================== */
+    function handleCanvasTouch(e) {
+      if (!currentUser) return;
+      const rect = canvas.getBoundingClientRect();
+      const touch = e.touches ? e.touches[0] : e;
+      const clickX = touch.clientX - rect.left + cameraX;
+      const clickY = touch.clientY - rect.top + cameraY;
+
+      const gridX = Math.floor(clickX / TILE_SIZE);
+      const gridY = Math.floor(clickY / TILE_SIZE);
+
+      if (gridX >= 0 && gridX < WORLD_WIDTH && gridY >= 0 && gridY < WORLD_HEIGHT) {
+        // Distance check (Player reach radius = 6 tiles)
+        const playerGridX = Math.floor((player.x + player.width / 2) / TILE_SIZE);
+        const playerGridY = Math.floor((player.y + player.height / 2) / TILE_SIZE);
+        const dist = Math.hypot(gridX - playerGridX, gridY - playerGridY);
+
+        if (dist <= 6.5) {
+          if (buildMode) {
+            // Mine block
+            if (world[gridY][gridX] !== 0 && !BLOCKS[world[gridY][gridX]].unbreakable) {
+              spawnParticles(gridX * TILE_SIZE + 16, gridY * TILE_SIZE + 16, BLOCKS[world[gridY][gridX]].color);
+              world[gridY][gridX] = 0;
+              db.ref(`world/${gridX}_${gridY}`).set(0);
+              audioEngine.playSFX('break');
+            }
+          } else {
+            // Place block
+            if (world[gridY][gridX] === 0) {
+              world[gridY][gridX] = selectedBlockId;
+              db.ref(`world/${gridX}_${gridY}`).set(selectedBlockId);
+              spawnParticles(gridX * TILE_SIZE + 16, gridY * TILE_SIZE + 16, BLOCKS[selectedBlockId].color);
+              audioEngine.playSFX('place');
+            }
+          }
+        }
+      }
+    }
+
+    function performFrontAction() {
+      const pX = Math.floor((player.x + (player.facing === 'right' ? 35 : -15)) / TILE_SIZE);
+      const pY = Math.floor((player.y + player.height / 2) / TILE_SIZE);
+
+      if (pX >= 0 && pX < WORLD_WIDTH && pY >= 0 && pY < WORLD_HEIGHT) {
+        if (buildMode) {
+          if (world[pY][pX] !== 0 && !BLOCKS[world[pY][pX]].unbreakable) {
+            spawnParticles(pX * TILE_SIZE + 16, pY * TILE_SIZE + 16, BLOCKS[world[pY][pX]].color);
+            world[pY][pX] = 0;
+            db.ref(`world/${pX}_${pY}`).set(0);
+            audioEngine.playSFX('break');
+          }
+        } else {
+          if (world[pY][pX] === 0) {
+            world[pY][pX] = selectedBlockId;
+            db.ref(`world/${pX}_${pY}`).set(selectedBlockId);
+            spawnParticles(pX * TILE_SIZE + 16, pY * TILE_SIZE + 16, BLOCKS[selectedBlockId].color);
+            audioEngine.playSFX('place');
+          }
+        }
+      }
+    }
+
+    function spawnParticles(x, y, color) {
+      for (let i = 0; i < 8; i++) {
+        particles.push({
+          x: x,
+          y: y,
+          vx: (Math.random() - 0.5) * 5,
+          vy: (Math.random() - 0.5) * 5,
+          life: 1.0,
+          color: color
         });
       }
+    }
+
+    /* ==========================================================================
+       8. AUTHENTICATION & FIREBASE SYNC ENGINE
+       ========================================================================== */
+    const authModal = document.getElementById('auth-modal');
+    const authBtn = document.getElementById('auth-btn');
+    const authStatus = document.getElementById('auth-status');
+
+    function initAuth() {
+      const savedUser = localStorage.getItem('terraria_user');
+      if (savedUser) {
+        loginUser(savedUser);
+      }
+
+      authBtn.addEventListener('click', () => {
+        let userInput = document.getElementById('auth-user').value.trim();
+        const passInput = document.getElementById('auth-pass').value.trim();
+
+        if (!userInput.startsWith('@')) userInput = '@' + userInput;
+
+        if (userInput.length < 3) {
+          authStatus.innerText = "Имя должно содержать минимум 3 символа!";
+          return;
+        }
+        if (passInput.length < 4) {
+          authStatus.innerText = "Пароль слишком короткий!";
+          return;
+        }
+
+        const cleanKey = userInput.replace(/[^a-zA-Z0-9_]/g, '');
+        const userRef = db.ref(`users/${cleanKey}`);
+
+        userRef.once('value').then((snapshot) => {
+          if (snapshot.exists()) {
+            const data = snapshot.val();
+            if (data.pass === passInput) {
+              loginUser(userInput);
+            } else {
+              authStatus.innerText = "Неверный пароль!";
+            }
+          } else {
+            // Register new player account
+            userRef.set({ pass: passInput, created: Date.now() }).then(() => {
+              loginUser(userInput);
+            });
+          }
+        });
+      });
+    }
+
+    function loginUser(username) {
+      currentUser = username;
+      localStorage.setItem('terraria_user', username);
+      authModal.style.display = 'none';
+      document.getElementById('player-tag').innerText = currentUser;
+      showToast(`Добро пожаловать в мир, ${currentUser}! 🎉`);
+
+      // Sync player position & online heartbeat
+      const cleanKey = currentUser.replace(/[^a-zA-Z0-9_]/g, '');
+      const playerRef = db.ref(`players/${cleanKey}`);
+      
+      playerRef.onDisconnect().remove();
+
+      setInterval(() => {
+        if (currentUser) {
+          playerRef.set({
+            name: currentUser,
+            x: player.x,
+            y: player.y,
+            facing: player.facing,
+            selectedBlock: selectedBlockId,
+            lastSeen: Date.now()
+          });
+        }
+      }, 80);
+
+      // Listen for other players
+      db.ref('players').on('value', (snapshot) => {
+        const data = snapshot.val() || {};
+        const now = Date.now();
+        let count = 0;
+
+        for (let key in data) {
+          if (now - data[key].lastSeen < 8000) {
+            count++;
+            if (data[key].name !== currentUser) {
+              onlinePlayers[key] = data[key];
+            }
+          } else {
+            delete onlinePlayers[key];
+          }
+        }
+        document.getElementById('online-count').innerText = count;
+      });
+
+      // Realtime World Updates Listener
+      db.ref('world').on('child_changed', (snapshot) => {
+        const key = snapshot.key;
+        const val = snapshot.val();
+        const [x, y] = key.split('_').map(Number);
+        if (x >= 0 && x < WORLD_WIDTH && y >= 0 && y < WORLD_HEIGHT) {
+          world[y][x] = val;
+        }
+      });
+
+      db.ref('world').on('child_added', (snapshot) => {
+        const key = snapshot.key;
+        const val = snapshot.val();
+        const [x, y] = key.split('_').map(Number);
+        if (x >= 0 && x < WORLD_WIDTH && y >= 0 && y < WORLD_HEIGHT) {
+          world[y][x] = val;
+        }
+      });
+
+      // Realtime Chat Listener
+      db.ref('chat').limitToLast(15).on('value', (snapshot) => {
+        const messages = snapshot.val() || {};
+        const chatContainer = document.getElementById('chat-messages');
+        chatContainer.innerHTML = '';
+
+        for (let id in messages) {
+          const m = messages[id];
+          const div = document.createElement('div');
+          div.className = 'chat-msg';
+          div.innerHTML = `<span class="author">${m.user}:</span>${escapeHtml(m.text)}`;
+          chatContainer.appendChild(div);
+        }
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      });
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast-msg');
+      toast.innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2800);
+    }
+
+    /* ==========================================================================
+       9. PHYSICS ENGINE & COLLISION DETECTION
+       ========================================================================== */
+    function updatePhysics() {
+      // Horizontal Movement
+      if (inputKeys.left) {
+        player.vx = -WALK_SPEED;
+        player.facing = 'left';
+      } else if (inputKeys.right) {
+        player.vx = WALK_SPEED;
+        player.facing = 'right';
+      } else {
+        player.vx *= 0.6;
+      }
+
+      // Jump
+      if (inputKeys.jump && player.grounded) {
+        player.vy = JUMP_FORCE;
+        player.grounded = false;
+        audioEngine.playSFX('jump');
+      }
+
+      // Apply Gravity
+      player.vy += GRAVITY;
+
+      // X-Axis Collision
+      player.x += player.vx;
+      if (checkTileCollision(player.x, player.y) || checkTileCollision(player.x + player.width, player.y) ||
+          checkTileCollision(player.x, player.y + player.height - 1) || checkTileCollision(player.x + player.width, player.y + player.height - 1)) {
+        player.x -= player.vx;
+        player.vx = 0;
+      }
+
+      // Y-Axis Collision
+      player.y += player.vy;
+      player.grounded = false;
+      if (checkTileCollision(player.x, player.y) || checkTileCollision(player.x + player.width, player.y) ||
+          checkTileCollision(player.x, player.y + player.height) || checkTileCollision(player.x + player.width, player.y + player.height)) {
+        if (player.vy > 0) {
+          player.grounded = true;
+        }
+        player.y -= player.vy;
+        player.vy = 0;
+      }
+
+      // Camera Smooth Follow Focus
+      cameraX += (player.x - canvas.width / 2 - cameraX) * 0.1;
+      cameraY += (player.y - canvas.height / 2 - cameraY) * 0.1;
+
+      // Restrict Camera Bounds
+      cameraX = Math.max(0, Math.min(WORLD_WIDTH * TILE_SIZE - canvas.width, cameraX));
+      cameraY = Math.max(0, Math.min(WORLD_HEIGHT * TILE_SIZE - canvas.height, cameraY));
+
+      // Mobs physics update
+      mobs.forEach(mob => {
+        mob.x += mob.vx;
+        const tileX = Math.floor((mob.x + (mob.vx > 0 ? 28 : 0)) / TILE_SIZE);
+        const tileY = Math.floor(mob.y / TILE_SIZE);
+        if (tileX >= 0 && tileX < WORLD_WIDTH && world[tileY] && BLOCKS[world[tileY][tileX]].solid) {
+          mob.vx *= -1; // Reverse direction on wall hit
+        }
+      });
+
+      // Update Particles
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= 0.04;
+        if (p.life <= 0) particles.splice(i, 1);
+      }
+    }
+
+    function checkTileCollision(px, py) {
+      const gx = Math.floor(px / TILE_SIZE);
+      const gy = Math.floor(py / TILE_SIZE);
+      if (gx < 0 || gx >= WORLD_WIDTH || gy < 0 || gy >= WORLD_HEIGHT) return true;
+      return BLOCKS[world[gy][gx]].solid;
+    }
+
+    /* ==========================================================================
+       10. GRAPHICS RENDERER (PARALLAX SKY, WORLD TILES, PLAYERS & MOBS)
+       ========================================================================== */
+    function render() {
+      // Clear Screen
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Sky & Dynamic Atmosphere Gradient
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      skyGrad.addColorStop(0, '#0284c7');
+      skyGrad.addColorStop(0.6, '#38bdf8');
+      skyGrad.addColorStop(1, '#bae6fd');
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Render World Grid
+      const startCol = Math.max(0, Math.floor(cameraX / TILE_SIZE));
+      const endCol = Math.min(WORLD_WIDTH - 1, Math.ceil((cameraX + canvas.width) / TILE_SIZE));
+      const startRow = Math.max(0, Math.floor(cameraY / TILE_SIZE));
+      const endRow = Math.min(WORLD_HEIGHT - 1, Math.ceil((cameraY + canvas.height) / TILE_SIZE));
+
+      for (let y = startRow; y <= endRow; y++) {
+        for (let x = startCol; x <= endCol; x++) {
+          const id = world[y][x];
+          if (id === 0) continue;
+
+          const drawX = Math.floor(x * TILE_SIZE - cameraX);
+          const drawY = Math.floor(y * TILE_SIZE - cameraY);
+          const block = BLOCKS[id];
+
+          // Base Tile Fill
+          ctx.fillStyle = block.color;
+          ctx.fillRect(drawX, drawY, TILE_SIZE, TILE_SIZE);
+
+          // Detailed Visual Styles
+          if (id === 1) { // Grass top
+            ctx.fillStyle = block.topColor;
+            ctx.fillRect(drawX, drawY, TILE_SIZE, 6);
+          } else if (id === 3) { // Stone texture detail
+            ctx.fillStyle = 'rgba(0,0,0,0.15)';
+            ctx.fillRect(drawX + 4, drawY + 4, 8, 8);
+            ctx.fillRect(drawX + 18, drawY + 16, 10, 10);
+          } else if (block.glow) { // Glowing Ore FX
+            ctx.fillStyle = block.glow;
+            ctx.shadowColor = block.glow;
+            ctx.shadowBlur = 10;
+            ctx.fillRect(drawX + 8, drawY + 8, 16, 16);
+            ctx.shadowBlur = 0;
+          }
+
+          if (block.icon) {
+            ctx.font = '18px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(block.icon, drawX + 16, drawY + 24);
+          }
+
+          // Tile Bevel Shadow
+          ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)';
+          ctx.strokeRect(drawX, drawY, TILE_SIZE, TILE_SIZE);
+        }
+      }
+
+      // Render Particles
+      particles.forEach(p => {
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.life;
+        ctx.fillRect(p.x - cameraX, p.y - cameraY, 4, 4);
+      });
+      ctx.globalAlpha = 1.0;
+
+      // Render Mobs (With Overhead Name Tags & HP Bars)
+      mobs.forEach(mob => {
+        const mx = mob.x - cameraX;
+        const my = mob.y - cameraY;
+
+        // Mob Body
+        ctx.fillStyle = mob.color;
+        ctx.beginPath();
+        ctx.roundRect(mx, my, 28, 28, 6);
+        ctx.fill();
+
+        // Mob Name Tag & Health Overhead
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
+        ctx.fillRect(mx - 15, my - 22, 58, 16);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 9px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(mob.type, mx + 14, my - 10);
+      });
+
+      // Render Remote Online Players
+      for (let key in onlinePlayers) {
+        const op = onlinePlayers[key];
+        const px = op.x - cameraX;
+        const py = op.y - cameraY;
+
+        // Player Body
+        ctx.fillStyle = '#a855f7';
+        ctx.fillRect(px, py, player.width, player.height);
+
+        // Name Tag
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+        ctx.fillRect(px - 10, py - 20, player.width + 20, 16);
+        ctx.fillStyle = '#38bdf8';
+        ctx.font = 'bold 10px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(op.name, px + player.width / 2, my - 8);
+      }
+
+      // Render Local Player
+      const px = player.x - cameraX;
+      const py = player.y - cameraY;
+
+      // Shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.2)';
+      ctx.beginPath();
+      ctx.ellipse(px + player.width / 2, py + player.height, 12, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Body (Cute Animated Character)
+      ctx.fillStyle = player.color;
+      ctx.beginPath();
+      ctx.roundRect(px, py, player.width, player.height, 8);
+      ctx.fill();
+
+      // Character Eyes
+      ctx.fillStyle = '#ffffff';
+      const eyeOffset = player.facing === 'right' ? 14 : 4;
+      ctx.fillRect(px + eyeOffset, py + 8, 5, 5);
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(px + eyeOffset + (player.facing === 'right' ? 2 : 0), py + 10, 3, 3);
+
+      // Local Player Name Tag Overhead
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+      ctx.fillRect(px - 15, py - 22, player.width + 30, 16);
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = 'bold 10px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(currentUser || '@игрок', px + player.width / 2, py - 10);
+    }
+
+    /* ==========================================================================
+       11. MAIN ENGINE LOOP & SCREEN RESIZE HANDLING
+       ========================================================================== */
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      // Orientation Check overlay trigger
+      const overlay = document.getElementById('orientation-overlay');
+      if (window.innerHeight > window.innerWidth) {
+        overlay.style.display = 'flex';
+      } else {
+        overlay.style.display = 'none';
+      }
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+
+    function gameLoop() {
+      updatePhysics();
+      render();
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Startup Execution
+    window.addEventListener('load', () => {
+      resizeCanvas();
+      generateBaseWorld();
+      initHotbar();
+      initAuth();
+      requestAnimationFrame(gameLoop);
     });
-  }
 
-  function loginSuccess(username) {
-    myUser = username;
-    localStorage.setItem('terraria_user', username);
-    document.getElementById('auth-screen').style.display = 'none';
-    document.getElementById('hud-username').innerText = '@' + username;
-    document.getElementById('avatar-letter').innerText = username.charAt(0).toUpperCase();
-
-    // Start background audio
-    audioEng.toggle();
-
-    // Init Realtime Firebase Sync
-    setupRealtimeListeners();
-
-    // Start Engine Loop
-    gameLoop();
-  }
-
-  // Initialize UI on load
-  setupUI();
-</script>
+  </script>
 </body>
 </html>
