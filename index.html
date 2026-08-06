@@ -3,17 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Meow P2P Messenger Ultra</title>
-  <!-- Firebase App & Realtime Database SDK -->
+  <title>Meow Cloud Messenger</title>
+  <!-- Firebase App & Realtime Database SDK (Compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  <!-- PeerJS for WebRTC Abstraction -->
-  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-  <!-- JSZip for Exporting Archive Backups -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
   <style>
-    /* PURE BLACK MODERN THEME - NO GRADIENTS */
+    /* PURE BLACK MODERN THEME - STRICTLY NO GRADIENTS */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -26,8 +22,8 @@
     :root {
       --bg-black: #000000;
       --bg-surface: #0a0a0a;
-      --bg-card: #141414;
-      --bg-input: #1f1f1f;
+      --bg-card: #121212;
+      --bg-input: #1a1a1a;
       --bg-bubble-self: #1e293b;
       --bg-bubble-peer: #171717;
       --border-color: #262626;
@@ -121,10 +117,11 @@
     }
 
     .auth-subtitle {
-      font-size: 14px;
+      font-size: 13px;
       color: var(--text-muted);
-      margin-bottom: 32px;
+      margin-bottom: 28px;
       text-align: center;
+      line-height: 1.4;
     }
 
     .form-group {
@@ -197,7 +194,7 @@
       border-bottom: 1px solid var(--border-color);
       display: flex;
       align-items: center;
-      justify-content: space-between;\
+      justify-content: space-between;
       padding: 0 16px;
       z-index: 20;
     }
@@ -259,21 +256,10 @@
       background-color: var(--success);
     }
 
-    .online-indicator.connecting {
-      background-color: var(--warning);
-      animation: pulse 1.2s infinite;
-    }
-
-    @keyframes pulse {
-      0% { opacity: 0.3; }
-      50% { opacity: 1; }
-      100% { opacity: 0.3; }
-    }
-
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 8px;
     }
 
     .icon-btn {
@@ -366,7 +352,7 @@
     }
 
     .message-bubble {
-      max-width: 80%;
+      max-width: 82%;
       padding: 10px 14px;
       border-radius: 18px;
       font-size: 14px;
@@ -573,6 +559,124 @@
       gap: 20px;
     }
 
+    /* CALL OVERLAY MODAL */
+    .call-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #000000;
+      z-index: 300;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 40px 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+
+    .call-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .call-video-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      background-color: #050505;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .remote-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .local-video {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 110px;
+      height: 160px;
+      border-radius: var(--radius-md);
+      object-fit: cover;
+      border: 2px solid var(--border-color);
+      z-index: 2;
+      background-color: #111;
+    }
+
+    .call-info {
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin-top: 40px;
+    }
+
+    .call-avatar {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background-color: var(--bg-card);
+      border: 2px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      font-weight: 700;
+      overflow: hidden;
+    }
+
+    .call-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .call-controls {
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 30px;
+    }
+
+    .call-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: white;
+    }
+
+    .call-btn-accept {
+      background-color: var(--success);
+    }
+
+    .call-btn-decline {
+      background-color: var(--danger);
+    }
+
+    .call-btn-mute {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+    }
+
     /* SVG ICONS */
     .svg-icon {
       width: 22px;
@@ -599,8 +703,8 @@
             <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
           </svg>
         </div>
-        <div class="auth-title" id="auth-title-text">Вход в Meow P2P</div>
-        <div class="auth-subtitle">Сквозное шифрование &amp; Авто-восстановление P2P</div>
+        <div class="auth-title" id="auth-title-text">Вход в Meow Cloud</div>
+        <div class="auth-subtitle">Облачное шифрование (Telegram-style)<br>История сохраняется навсегда при входе с любого устройства!</div>
 
         <div class="form-group">
           <input type="text" id="auth-username" class="input-field" placeholder="Юзернейм (@username)" autocomplete="off">
@@ -625,7 +729,7 @@
           <div>
             <div class="user-info-title" id="header-my-name">@user</div>
             <div class="user-info-subtitle">
-              <span class="online-indicator active"></span> Онлайн (P2P)
+              <span class="online-indicator active"></span> Онлайн (Cloud Sync)
             </div>
           </div>
         </div>
@@ -657,9 +761,18 @@
             <div class="user-info-title" id="chat-peer-name">@peer</div>
             <div class="user-info-subtitle" id="chat-peer-status">
               <span class="online-indicator" id="peer-status-dot"></span>
-              <span id="peer-status-text">Соединение...</span>
+              <span id="peer-status-text">Загрузка...</span>
             </div>
           </div>
+        </div>
+
+        <div class="header-actions">
+          <button class="icon-btn" id="btn-call-audio" title="Аудиозвонок P2P">
+            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+          </button>
+          <button class="icon-btn" id="btn-call-video" title="Видеозвонок P2P">
+            <svg class="svg-icon" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+          </button>
         </div>
       </div>
 
@@ -722,20 +835,6 @@
       <button class="btn" id="btn-save-profile">Сохранить профиль</button>
 
       <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 4px 0;">
-
-      <!-- EXPORT / IMPORT BACKUP SECTION -->
-      <div style="display: flex; flex-direction: column; gap: 8px;">
-        <button class="btn btn-secondary" id="btn-export-backup">
-          📦 Экспортировать ZIP бекап (Ключи + Переписка)
-        </button>
-        
-        <button class="btn btn-secondary" id="btn-import-backup">
-          📥 Импортировать ZIP бекап
-        </button>
-        <input type="file" id="file-input-import" accept=".zip" class="hidden">
-      </div>
-
-      <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 4px 0;">
       
       <button class="btn btn-danger" id="btn-clear-cache">
         Очистить кэш и сообщения
@@ -755,6 +854,34 @@
     <div class="recorder-controls">
       <button class="btn btn-danger" id="btn-cancel-circle" style="width: 100px;">Отмена</button>
       <button class="btn" id="btn-stop-send-circle" style="width: 140px;">Отправить</button>
+    </div>
+  </div>
+
+  <!-- AUDIO / VIDEO CALL MODAL -->
+  <div class="call-overlay" id="modal-call">
+    <div class="call-video-container">
+      <video id="call-remote-video" class="remote-video" autoplay playsinline></video>
+      <video id="call-local-video" class="local-video" autoplay playsinline muted></video>
+    </div>
+
+    <div class="call-info">
+      <div class="call-avatar" id="call-avatar-container">?</div>
+      <div style="font-size: 20px; font-weight: 700;" id="call-peer-name">@username</div>
+      <div style="font-size: 14px; color: var(--text-muted);" id="call-status-text">Звонок...</div>
+    </div>
+
+    <div class="call-controls">
+      <button class="call-btn call-btn-mute" id="btn-call-toggle-mic" title="Микрофон">
+        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path></svg>
+      </button>
+
+      <button class="call-btn call-btn-accept hidden" id="btn-call-accept" title="Принять">
+        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+      </button>
+
+      <button class="call-btn call-btn-decline" id="btn-call-decline" title="Завершить">
+        <svg class="svg-icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
     </div>
   </div>
 
@@ -778,11 +905,10 @@
     const db = firebase.database();
 
     /* -------------------------------------------------------------------
-       STATE & ENCRYPTION CRYPTO MODULE (Web Crypto API ECDH + AES-GCM)
+       CLOUD ENCRYPTION VAULT (TELEGRAM-STYLE ACCESSIBLE FROM ANY DEVICE)
        ------------------------------------------------------------------- */
-    let currentUser = null; // { username, bio, avatar, keyPair, exportedPrivateKeyJwk, peerId }
+    let currentUser = null; // { username, bio, avatar, masterKey, rawPass }
     let activePeer = null; // cleanUserKey
-    let peerConnections = {}; // cleanUserKey -> { conn: DataConnection, sharedKey: CryptoKey, reconnectTimer, pingInterval, isP2POpen }
     let localDB = null;
     let voiceRecorder = null;
     let voiceChunks = [];
@@ -790,78 +916,64 @@
     let circleChunks = [];
     let circleTimerInterval = null;
     let typingTimeout = null;
-    let peer = null; // PeerJS instance
+
+    // WebRTC P2P Call State
+    let peerConnection = null;
+    let localCallStream = null;
+    let activeCallTarget = null;
+    let isCallVideo = false;
 
     function cleanUserKey(username) {
       return username.toLowerCase().replace(/[^a-z0-9_]/g, '');
     }
 
-    async function hashPassword(password) {
-      const msgUint8 = new TextEncoder().encode(password);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    function getChatId(user1, user2) {
+      const u1 = cleanUserKey(user1);
+      const u2 = cleanUserKey(user2);
+      return u1 < u2 ? `${u1}_${u2}` : `${u2}_${u1}`;
     }
 
-    // Generate ECDH Key Pair
-    async function generateECDHKeyPair() {
-      return await window.crypto.subtle.generateKey(
-        { name: "ECDH", namedCurve: "P-256" },
-        true,
-        ["deriveKey", "deriveBits"]
+    // Derive PBKDF2 Master Encryption Key from Password & Username
+    async function deriveMasterKey(password, username) {
+      const enc = new TextEncoder();
+      const passBuffer = enc.encode(password);
+      const saltBuffer = enc.encode('meow_salt_' + cleanUserKey(username));
+
+      const importedPassKey = await crypto.subtle.importKey(
+        'raw', passBuffer, { name: 'PBKDF2' }, false, ['deriveKey']
       );
-    }
 
-    async function exportPublicKey(key) {
-      return await window.crypto.subtle.exportKey("jwk", key);
-    }
-
-    async function exportPrivateKey(key) {
-      return await window.crypto.subtle.exportKey("jwk", key);
-    }
-
-    async function importPrivateKey(jwk) {
-      return await window.crypto.subtle.importKey(
-        "jwk",
-        jwk,
-        { name: "ECDH", namedCurve: "P-256" },
-        true,
-        ["deriveKey", "deriveBits"]
-      );
-    }
-
-    async function deriveSharedAESKey(privateKey, peerJwk) {
-      const peerPublicKey = await window.crypto.subtle.importKey(
-        "jwk",
-        peerJwk,
-        { name: "ECDH", namedCurve: "P-256" },
-        true,
-        []
-      );
-      return await window.crypto.subtle.deriveKey(
-        { name: "ECDH", public: peerPublicKey },
-        privateKey,
-        { name: "AES-GCM", length: 256 },
+      return await crypto.subtle.deriveKey(
+        {
+          name: 'PBKDF2',
+          salt: saltBuffer,
+          iterations: 100000,
+          hash: 'SHA-256'
+        },
+        importedPassKey,
+        { name: 'AES-GCM', length: 256 },
         false,
-        ["encrypt", "decrypt"]
+        ['encrypt', 'decrypt']
       );
     }
 
+    // Encrypt Payload using AES-GCM
     async function encryptPayload(key, payloadObj) {
       const text = JSON.stringify(payloadObj);
       const iv = window.crypto.getRandomValues(new Uint8Array(12));
       const encodedText = new TextEncoder().encode(text);
-      const encryptedContent = await window.crypto.subtle.encrypt(
+      const encryptedBuffer = await window.crypto.subtle.encrypt(
         { name: "AES-GCM", iv: iv },
         key,
         encodedText
       );
       return {
         iv: Array.from(iv),
-        cipher: Array.from(new Uint8Array(encryptedContent))
+        cipher: Array.from(new Uint8Array(encryptedBuffer))
       };
     }
 
+    // Decrypt Payload using AES-GCM
     async function decryptPayload(key, encryptedObj) {
       const iv = new Uint8Array(encryptedObj.iv);
       const cipher = new Uint8Array(encryptedObj.cipher);
@@ -874,12 +986,19 @@
       return JSON.parse(decodedText);
     }
 
+    async function hashPassword(password) {
+      const msgUint8 = new TextEncoder().encode(password);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
     /* -------------------------------------------------------------------
-       INDEXEDDB LOCAL STORAGE (MOBILE LOCAL CACHE)
+       INDEXEDDB LOCAL STORAGE
        ------------------------------------------------------------------- */
     function initIndexedDB() {
       return new Promise((resolve, reject) => {
-        const request = indexedDB.open("MeowP2P_Cache_DB_v2", 1);
+        const request = indexedDB.open("MeowCloud_Cache_DB_v3", 1);
         request.onupgradeneeded = (e) => {
           const dbInstance = e.target.result;
           if (!dbInstance.objectStoreNames.contains("messages")) {
@@ -930,353 +1049,7 @@
     }
 
     /* -------------------------------------------------------------------
-       PEERJS P2P ENGINE WITH AUTO-RECONNECT & PING-PONG
-       ------------------------------------------------------------------- */
-    
-    function listenForIncomingSignals() {
-      if (!currentUser) return;
-      const myKey = cleanUserKey(currentUser.username);
-
-      // Listen for incoming PeerJS DataConnections
-      if (!peer) { // Ensure PeerJS is initialized
-        console.error("PeerJS not initialized yet!");
-        return;
-      }
-
-      peer.on('connection', async (conn) => {
-        // Incoming connection from another peer
-        const peerId = conn.peer;
-        const targetUserKey = cleanUserKey(peerId);
-        console.log(`Incoming PeerJS connection from: ${peerId}`);
-
-        peerConnections[targetUserKey] = peerConnections[targetUserKey] || {};
-
-        // Derive shared AES key (public key should be in Firebase)
-        const peerSnap = await db.ref(`users/${targetUserKey}`).once('value');
-        const peerData = peerSnap.val();
-        if (peerData && peerData.publicKey && currentUser.keyPair?.privateKey) {
-            peerConnections[targetUserKey].sharedKey = await deriveSharedAESKey(currentUser.keyPair.privateKey, peerData.publicKey);
-        } else {
-            console.error(`Public key not found for ${targetUserKey}. Cannot establish E2EE for incoming connection.`);
-            conn.close(); // Close connection if E2EE not possible
-            return;
-        }
-
-        setupPeerJSConnectionEvents(targetUserKey, conn);
-      });
-
-      peer.on('error', (err) => {
-        console.error('PeerJS global error:', err);
-        // This often catches errors like network issues for the PeerJS server itself.
-        // It doesn't necessarily mean a specific data connection failed.
-        // If the peer instance itself fails, consider reloading or re-initializing.
-      });
-
-      // Listen for fallback messages (if P2P fails)
-      const fallbackMsgsRef = db.ref(`fallback_msgs/${myKey}`);
-      fallbackMsgsRef.on('child_added', async (senderSnapshot) => {
-        const senderKey = senderSnapshot.key;
-        senderSnapshot.forEach(async (msgSnapshot) => {
-            const encryptedObj = msgSnapshot.val();
-            const msgId = msgSnapshot.key;
-            db.ref(`fallback_msgs/${myKey}/${senderKey}/${msgId}`).remove(); // Consume message
-
-            let sharedKey = peerConnections[senderKey]?.sharedKey;
-            if (!sharedKey) {
-                const senderSnap = await db.ref(`users/${senderKey}`).once('value');
-                const senderData = senderSnap.val();
-                if (senderData && senderData.publicKey && currentUser.keyPair?.privateKey) {
-                     sharedKey = await deriveSharedAESKey(currentUser.keyPair.privateKey, senderData.publicKey);
-                     peerConnections[senderKey] = peerConnections[senderKey] || {};
-                     peerConnections[senderKey].sharedKey = sharedKey;
-                } else {
-                    console.error(`Cannot derive shared key for fallback message from ${senderKey}. Missing public key or private key.`);
-                    return;
-                }
-            }
-
-            try {
-              const decryptedMsg = await decryptPayload(sharedKey, encryptedObj);
-              if (decryptedMsg.type === 'reaction_update') {
-                // Update local message reaction
-                const localMsgs = await getLocalMessagesForChat(senderKey);
-                const target = localMsgs.find(m => m.id === decryptedMsg.msgId);
-                if (target) {
-                  target.reaction = decryptedMsg.reaction;
-                  await saveMessageToLocalDB(target);
-                  if (activePeer === senderKey) {
-                    const elem = document.querySelector(`[data-msg-id="${target.id}"]`);
-                    if (elem) {
-                      let badge = elem.querySelector('.reaction-badge');
-                      if (!badge) {
-                        badge = document.createElement('div');
-                        badge.className = 'reaction-badge';
-                        elem.appendChild(badge);
-                      }
-                      badge.innerText = decryptedMsg.reaction;
-                    }
-                  }
-                }
-              } else {
-                await saveMessageToLocalDB(decryptedMsg);
-                if (activePeer === senderKey) {
-                  renderSingleMessage(decryptedMsg);
-                }
-                refreshChatsListUI();
-              }
-            } catch (e) {
-              console.error("Failed to decrypt fallback message:", e);
-            }
-        });
-      });
-
-      // Listen for typing events via Firebase signaling
-      db.ref(`typing/${myKey}`).on('value', (snap) => {
-        const val = snap.val();
-        if (activePeer && val && val.from === activePeer) {
-          if (val.isTyping) {
-            updatePeerStatusText("печатает...", true);
-          } else {
-            updatePeerStatusText(peerConnections[activePeer]?.isP2POpen ? "Онлайн (P2P)" : "Онлайн", false);
-          }
-        }
-      });
-    }
-
-    async function initP2PConnection(targetUserKey) {
-      targetUserKey = cleanUserKey(targetUserKey);
-      const myUserKey = cleanUserKey(currentUser.username);
-
-      // If connection exists and open, return it
-      if (peerConnections[targetUserKey] && peerConnections[targetUserKey].conn && peerConnections[targetUserKey].conn.open) {
-        return peerConnections[targetUserKey];
-      }
-
-      cleanupPeerConnection(targetUserKey); // Clear any old state
-
-      // Fetch PeerJS ID and Public Key of target user from Firebase
-      const peerSnap = await db.ref(`users/${targetUserKey}`).once('value');
-      const peerData = peerSnap.val();
-      const peerPeerId = peerData?.peerId;
-
-      if (!peerPeerId) {
-        console.warn(`PeerJS ID not found for ${targetUserKey}. Cannot establish P2P.`);
-        return null;
-      }
-
-      // Initialize peerConnections object for this target
-      peerConnections[targetUserKey] = peerConnections[targetUserKey] || {};
-
-      // Derive shared AES key (this part is independent of PeerJS)
-      if (peerData && peerData.publicKey) {
-        peerConnections[targetUserKey].sharedKey = await deriveSharedAESKey(currentUser.keyPair.privateKey, peerData.publicKey);
-      } else {
-         console.warn(`Public key not found for ${targetUserKey}. Cannot establish E2EE.`);
-         return null;
-      }
-
-      // Create a PeerJS DataConnection
-      console.log(`Attempting PeerJS connection to ${peerPeerId}`);
-      const conn = peer.connect(peerPeerId, { reliable: true }); // reliable: true for ordered, guaranteed delivery
-
-      setupPeerJSConnectionEvents(targetUserKey, conn);
-
-      return peerConnections[targetUserKey];
-    }
-
-    function setupPeerJSConnectionEvents(peerKey, conn) {
-      peerConnections[peerKey].conn = conn; // Store the PeerJS DataConnection
-
-      conn.on('open', () => {
-        peerConnections[peerKey].isP2POpen = true;
-        console.log(`PeerJS DataConnection opened with ${peerKey}`);
-        if (activePeer === peerKey) {
-          updatePeerStatusUI("Онлайн (P2P подключен)", "active");
-        }
-        startHeartbeat(peerKey);
-      });
-
-      conn.on('close', () => {
-        peerConnections[peerKey].isP2POpen = false;
-        console.log(`PeerJS DataConnection closed with ${peerKey}`);
-        stopHeartbeat(peerKey);
-        scheduleReconnection(peerKey);
-      });
-
-      conn.on('error', (err) => {
-        console.error(`PeerJS DataConnection error with ${peerKey}:`, err);
-        peerConnections[peerKey].isP2POpen = false;
-        stopHeartbeat(peerKey);
-        scheduleReconnection(peerKey);
-      });
-
-      conn.on('data', async (data) => {
-        try {
-          const raw = JSON.parse(data);
-          
-          if (raw.type === 'ping') {
-            conn.send(JSON.stringify({ type: 'pong' }));
-            return;
-          }
-          if (raw.type === 'pong') {
-            return;
-          }
-
-          const decryptedMsg = await decryptPayload(peerConnections[peerKey].sharedKey, raw);
-          
-          if (decryptedMsg.type === 'reaction_update') {
-            // Update local message reaction
-            const localMsgs = await getLocalMessagesForChat(peerKey);
-            const target = localMsgs.find(m => m.id === decryptedMsg.msgId);
-            if (target) {
-              target.reaction = decryptedMsg.reaction;
-              await saveMessageToLocalDB(target);
-              if (activePeer === peerKey) {
-                const elem = document.querySelector(`[data-msg-id="${target.id}"]`);
-                if (elem) {
-                  let badge = elem.querySelector('.reaction-badge');
-                  if (!badge) {
-                    badge = document.createElement('div');
-                    badge.className = 'reaction-badge';
-                    elem.appendChild(badge);
-                  }
-                  badge.innerText = decryptedMsg.reaction;
-                }
-              }
-            }
-            return;
-          }
-
-          await saveMessageToLocalDB(decryptedMsg);
-
-          if (activePeer === peerKey) {
-            renderSingleMessage(decryptedMsg);
-          }
-          refreshChatsListUI();
-        } catch (e) {
-          console.error("Payload error (PeerJS DataChannel):", e);
-        }
-      });
-    }
-
-    function startHeartbeat(peerKey) {
-      stopHeartbeat(peerKey);
-      peerConnections[peerKey].pingInterval = setInterval(() => {
-        const conn = peerConnections[peerKey]?.conn;
-        if (conn && conn.open) {
-          conn.send(JSON.stringify({ type: 'ping' }));
-        } else {
-          // If connection is not open, schedule reconnection
-          scheduleReconnection(peerKey);
-        }
-      }, 5000); // Send ping every 5 seconds
-    }
-
-    function stopHeartbeat(peerKey) {
-      if (peerConnections[peerKey]?.pingInterval) {
-        clearInterval(peerConnections[peerKey].pingInterval);
-        peerConnections[peerKey].pingInterval = null;
-      }
-    }
-
-    function scheduleReconnection(peerKey) {
-      if (peerConnections[peerKey]?.reconnectTimer) {
-        // console.log(`Reconnection already scheduled for ${peerKey}`);
-        return;
-      }
-      if (activePeer === peerKey) {
-        updatePeerStatusUI("Переподключение P2P...", "connecting");
-      }
-      console.log(`Scheduling reconnection for ${peerKey}`);
-      peerConnections[peerKey].reconnectTimer = setTimeout(() => {
-        peerConnections[peerKey].reconnectTimer = null;
-        initP2PConnection(peerKey); // Attempt to re-initialize connection
-      }, 5000); // Try to reconnect after 5 seconds
-    }
-
-    function cleanupPeerConnection(peerKey) {
-      stopHeartbeat(peerKey);
-      if (peerConnections[peerKey]) {
-        if (peerConnections[peerKey].reconnectTimer) {
-          clearTimeout(peerConnections[peerKey].reconnectTimer);
-          peerConnections[peerKey].reconnectTimer = null;
-        }
-        if (peerConnections[peerKey].conn) {
-          try {
-            peerConnections[peerKey].conn.close();
-            console.log(`PeerJS connection to ${peerKey} closed during cleanup.`);
-          } catch(e) { console.error('Error closing PeerJS conn during cleanup:', e); }
-        }
-        // No direct RTC object to close if using PeerJS abstraction.
-        // PeerJS manages the underlying WebRTC PeerConnection.
-      }
-    }
-
-    // Send payload over P2P DataChannel (with instant reconnect retry and Firebase fallback)
-    async function sendP2PPayload(targetUserKey, payloadObj) {
-      targetUserKey = cleanUserKey(targetUserKey);
-      let peerConn = peerConnections[targetUserKey];
-
-      // Ensure PeerJS connection is attempted/established
-      if (!peerConn || !peerConn.conn || !peerConn.conn.open) {
-        peerConn = await initP2PConnection(targetUserKey);
-        if (!peerConn || !peerConn.sharedKey) {
-          console.warn(`Could not establish PeerJS or shared key for ${targetUserKey}. Falling back to Firebase.`);
-          const encrypted = await encryptPayload(peerConnections[targetUserKey]?.sharedKey || currentUser.keyPair.privateKey, payloadObj); // Use current user's private key as a fallback for shared key derivation if needed
-          db.ref(`fallback_msgs/${targetUserKey}/${cleanUserKey(currentUser.username)}`).push(encrypted);
-          return true;
-        }
-      }
-
-      let attempts = 0;
-      // Wait for PeerJS connection to open
-      while ((!peerConn.conn || !peerConn.conn.open) && attempts < 15) { // Max 3 seconds wait
-        await new Promise(r => setTimeout(r, 200));
-        attempts++;
-      }
-
-      if (peerConn.conn && peerConn.conn.open) {
-        const encrypted = await encryptPayload(peerConn.sharedKey, payloadObj);
-        peerConn.conn.send(JSON.stringify(encrypted));
-        return true;
-      } else {
-        // Fallback: push through signal mailbox fallback if P2P fails after retries
-        console.warn('PeerJS DataConnection failed to open after retries. Using Firebase fallback.');
-        const encrypted = await encryptPayload(peerConn.sharedKey, payloadObj);
-        db.ref(`fallback_msgs/${targetUserKey}/${cleanUserKey(currentUser.username)}`).push(encrypted);
-        return true;
-      }
-    }
-
-    // Auto-reconnect when Android browser wakes up or comes back online
-    window.addEventListener('online', () => {
-      console.log('Browser back online. Attempting P2P reconnect.');
-      if (activePeer) initP2PConnection(activePeer);
-    });
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        console.log('Browser tab visible. Attempting P2P reconnect.');
-        if (activePeer) initP2PConnection(activePeer);
-      }
-    });
-
-    /* -------------------------------------------------------------------
-       UI CONTROLLER & NAVIGATION
-       ------------------------------------------------------------------- */
-    const screens = {
-      auth: document.getElementById('screen-auth'),
-      chats: document.getElementById('screen-chats'),
-      chat: document.getElementById('screen-chat')
-    };
-
-    function showScreen(screenId) {
-      Object.keys(screens).forEach(key => {
-        screens[key].classList.toggle('active', key === screenId);
-      });
-    }
-
-    /* -------------------------------------------------------------------
-       AUTH SYSTEM
+       AUTH SYSTEM (REGISTER & LOGIN WITH CLOUD ENCRYPTION)
        ------------------------------------------------------------------- */
     let isRegisterMode = false;
     const btnAuthSubmit = document.getElementById('btn-auth-submit');
@@ -1285,7 +1058,7 @@
 
     btnAuthToggle.addEventListener('click', () => {
       isRegisterMode = !isRegisterMode;
-      authTitleText.innerText = isRegisterMode ? "Регистрация Meow P2P" : "Вход в Meow P2P";
+      authTitleText.innerText = isRegisterMode ? "Регистрация Meow Cloud" : "Вход в Meow Cloud";
       btnAuthSubmit.querySelector('span').innerText = isRegisterMode ? "Зарегистрироваться" : "Войти";
       btnAuthToggle.innerText = isRegisterMode ? "Уже есть аккаунт? Войти" : "Нет аккаунта? Зарегистрироваться";
     });
@@ -1313,23 +1086,19 @@
           return;
         }
 
-        const keyPair = await generateECDHKeyPair();
-        const publicJwk = await exportPublicKey(keyPair.publicKey);
-        const privateJwk = await exportPrivateKey(keyPair.privateKey);
+        const masterKey = await deriveMasterKey(passwordInput, formattedUser);
 
         const newUser = {
           username: formattedUser,
           passHash: passHash,
-          bio: "Пользователь Meow P2P",
+          bio: "Пользователь Meow Cloud",
           avatar: "",
-          publicKey: publicJwk,
-          peerId: userKey, // Using clean username as PeerJS ID
           status: "online",
           lastSeen: Date.now()
         };
 
         await userRef.set(newUser);
-        currentUser = { ...newUser, keyPair, exportedPrivateKeyJwk: privateJwk };
+        currentUser = { ...newUser, masterKey, rawPass: passwordInput };
         setupOnlinePresence(userKey);
         finishLogin();
       } else {
@@ -1342,14 +1111,11 @@
           return;
         }
 
-        // On login, we regenerate keys to ensure fresh session security and update Firebase
-        const keyPair = await generateECDHKeyPair();
-        const publicJwk = await exportPublicKey(keyPair.publicKey);
-        const privateJwk = await exportPrivateKey(keyPair.privateKey);
+        const masterKey = await deriveMasterKey(passwordInput, formattedUser);
 
-        await userRef.update({ publicKey: publicJwk, peerId: userKey, status: "online", lastSeen: Date.now() });
+        await userRef.update({ status: "online", lastSeen: Date.now() });
 
-        currentUser = { ...existingData, keyPair, exportedPrivateKeyJwk: privateJwk, peerId: userKey };
+        currentUser = { ...existingData, masterKey, rawPass: passwordInput };
         setupOnlinePresence(userKey);
         finishLogin();
       }
@@ -1372,33 +1138,14 @@
     async function finishLogin() {
       const userKey = cleanUserKey(currentUser.username);
       localStorage.setItem('meow_user', currentUser.username);
+      localStorage.setItem('meow_pass', currentUser.rawPass);
+
       document.getElementById('header-my-name').innerText = currentUser.username;
       updateAvatarElement(document.getElementById('header-my-avatar'), currentUser.avatar, currentUser.username);
 
-      // Initialize PeerJS
-      peer = new Peer(userKey, {
-        host: 'peerjs.com',
-        port: 443,
-        path: '/meow-p2p', // A custom path to avoid conflicts with other PeerJS apps
-        secure: true,
-        // debug: 3 // Uncomment for PeerJS debugging
-      });
-
-      peer.on('open', (id) => {
-        console.log('My PeerJS ID is:', id);
-        currentUser.peerId = id;
-        db.ref(`users/${userKey}/peerId`).set(id); // Ensure PeerJS ID is in Firebase
-      });
-
-      peer.on('error', (err) => {
-        console.error('PeerJS instance error:', err);
-        // If PeerJS connection fails to PeerJS server (e.g., network issue),
-        // we might need to handle a reconnection of the PeerJS instance itself.
-        // For now, it logs.
-      });
-
       await initIndexedDB();
-      listenForIncomingSignals(); // This now also includes PeerJS incoming connections
+      listenForIncomingCalls();
+      listenForGlobalSync();
       refreshChatsListUI();
       showScreen('chats');
     }
@@ -1412,117 +1159,276 @@
     }
 
     /* -------------------------------------------------------------------
-       ZIP EXPORT & IMPORT BACKUP SYSTEM (Keys + Messages + Media)
+       REALTIME CLOUD SYNC FOR MESSAGES (RTDB STORAGE)
        ------------------------------------------------------------------- */
-    document.getElementById('btn-export-backup').addEventListener('click', async () => {
-      try {
-        const zip = new JSZip();
-        const allMessages = await getAllMessagesFromLocalDB();
+    function listenForGlobalSync() {
+      const myKey = cleanUserKey(currentUser.username);
 
-        // Convert Blob URLs in mediaUrl to base64 if needed for full backup
-        // NOTE: For simplicity, current mediaUrl are data URLs, so they are embedded directly.
-        // If external URLs were used, this would require fetching and embedding them.
+      // Listen to active user chats registry
+      db.ref(`user_chats/${myKey}`).on('child_added', (snap) => {
+        const peerKey = snap.key;
+        subscribeToChatCloud(peerKey);
+      });
+    }
 
-        const backupData = {
-          exportDate: new Date().toISOString(),
-          user: {
-            username: currentUser.username,
-            bio: currentUser.bio,
-            avatar: currentUser.avatar,
-            publicKey: currentUser.publicKey,
-            privateKeyJwk: currentUser.exportedPrivateKeyJwk,
-            peerId: currentUser.peerId
-          },
-          messages: allMessages
-        };
+    function subscribeToChatCloud(peerKey) {
+      const chatId = getChatId(currentUser.username, peerKey);
+      
+      db.ref(`chats/${chatId}`).on('child_added', async (snapshot) => {
+        const msgEncrypted = snapshot.val();
+        if (!msgEncrypted || !msgEncrypted.cipher) return;
 
-        zip.file("backup_data.json", JSON.stringify(backupData, null, 2));
+        try {
+          const decryptedMsg = await decryptPayload(currentUser.masterKey, msgEncrypted);
+          await saveMessageToLocalDB(decryptedMsg);
 
-        const content = await zip.generateAsync({ type: "blob" });
-        const downloadUrl = URL.createObjectURL(content);
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        a.download = `meow_p2p_backup_${cleanUserKey(currentUser.username)}_${Date.now()}.zip`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(downloadUrl);
-
-        alert("Бекап успешно скачан!");
-      } catch (err) {
-        alert("Ошибка создания бекапа: " + err.message);
-        console.error("Backup export error:", err);
-      }
-    });
-
-    document.getElementById('btn-import-backup').addEventListener('click', () => {
-      document.getElementById('file-input-import').click();
-    });
-
-    document.getElementById('file-input-import').addEventListener('change', async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      try {
-        const zip = await JSZip.loadAsync(file);
-        const jsonFile = zip.file("backup_data.json");
-        if (!jsonFile) {
-          alert("Неверный формат бекап-файла! Отсутствует backup_data.json.");
-          return;
+          if (activePeer === peerKey) {
+            const existingElem = document.querySelector(`[data-msg-id="${decryptedMsg.id}"]`);
+            if (!existingElem) {
+              renderSingleMessage(decryptedMsg);
+            }
+          }
+          refreshChatsListUI();
+        } catch (e) {
+          console.error("Failed to decrypt cloud message:", e);
         }
+      });
 
-        const jsonText = await jsonFile.async("text");
-        const backupObj = JSON.parse(jsonText);
+      // Listen for message updates (Reactions)
+      db.ref(`chats/${chatId}`).on('child_changed', async (snapshot) => {
+        const msgEncrypted = snapshot.val();
+        try {
+          const decryptedMsg = await decryptPayload(currentUser.masterKey, msgEncrypted);
+          await saveMessageToLocalDB(decryptedMsg);
 
-        const confirmImport = confirm("ПРЕДУПРЕЖДЕНИЕ: Импорт бекапа заменит вашу текущую переписку и ключи шифрования. Продолжить?");
-        if (!confirmImport) return;
+          if (activePeer === peerKey) {
+            const elem = document.querySelector(`[data-msg-id="${decryptedMsg.id}"]`);
+            if (elem && decryptedMsg.reaction) {
+              let badge = elem.querySelector('.reaction-badge');
+              if (!badge) {
+                badge = document.createElement('div');
+                badge.className = 'reaction-badge';
+                elem.appendChild(badge);
+              }
+              badge.innerText = decryptedMsg.reaction;
+            }
+          }
+        } catch (e) {}
+      });
 
-        // Clear current data before import
-        await clearAllLocalCache(); 
-
-        // Import private key and user data
-        if (backupObj.user && backupObj.user.privateKeyJwk && backupObj.user.publicKey) {
-          currentUser.keyPair = {
-            privateKey: await importPrivateKey(backupObj.user.privateKeyJwk),
-            publicKey: await crypto.subtle.importKey("jwk", backupObj.user.publicKey, { name: "ECDH", namedCurve: "P-256" }, true, [])
-          };
-          currentUser.exportedPrivateKeyJwk = backupObj.user.privateKeyJwk;
-          currentUser.username = backupObj.user.username;
-          currentUser.bio = backupObj.user.bio;
-          currentUser.avatar = backupObj.user.avatar;
-          currentUser.publicKey = backupObj.user.publicKey;
-          currentUser.peerId = backupObj.user.peerId;
-
-          // Update Firebase with restored public key and info
-          const userRef = db.ref(`users/${cleanUserKey(currentUser.username)}`);
-          await userRef.update({
-            publicKey: currentUser.publicKey,
-            bio: currentUser.bio,
-            avatar: currentUser.avatar,
-            peerId: currentUser.peerId,
-            status: "online",
-            lastSeen: firebase.database.ServerValue.TIMESTAMP
-          });
-          localStorage.setItem('meow_user', currentUser.username); // Re-set current user
-
-        } else {
-            alert("В бекап-файле отсутствуют ключи шифрования или данные пользователя. Импорт невозможен.");
-            return;
-        }
-
-        // Import messages
-        if (backupObj.messages && Array.isArray(backupObj.messages)) {
-          for (const msg of backupObj.messages) {
-            await saveMessageToLocalDB(msg);
+      // Typing indicators
+      db.ref(`typing/${chatId}/${peerKey}`).on('value', (snap) => {
+        const isTyping = snap.val();
+        if (activePeer === peerKey) {
+          if (isTyping) {
+            updatePeerStatusText("печатает...", true);
+          } else {
+            updatePeerStatusText("Онлайн", false);
           }
         }
+      });
+    }
 
-        alert("Переписка и ключи шифрования успешно восстановлены! Приложение будет перезагружено.");
-        window.location.reload();
-      } catch (err) {
-        alert("Ошибка импорта бекапа: " + err.message);
-        console.error("Backup import error:", err);
+    async function sendCloudMessage(peerKey, payloadObj) {
+      const chatId = getChatId(currentUser.username, peerKey);
+      const myKey = cleanUserKey(currentUser.username);
+
+      // Register chat for both participants
+      db.ref(`user_chats/${myKey}/${peerKey}`).set(true);
+      db.ref(`user_chats/${peerKey}/${myKey}`).set(true);
+
+      // Encrypt with sender's master key for local cloud store
+      const encryptedForSelf = await encryptPayload(currentUser.masterKey, payloadObj);
+
+      // Get peer master key derive context or store dual ciphertext for 100% cloud backup
+      const peerSnap = await db.ref(`users/${peerKey}`).once('value');
+      const peerData = peerSnap.val();
+      
+      let peerMasterKey = currentUser.masterKey; // Fallback
+      if (peerData) {
+        // Derive peer's master key directly using salt
+        peerMasterKey = await deriveMasterKey(currentUser.rawPass, peerData.username);
       }
+
+      // Store in RTDB under chat
+      const msgRef = db.ref(`chats/${chatId}`).push();
+      payloadObj.cloudKey = msgRef.key;
+
+      await msgRef.set(encryptedForSelf);
+
+      // Also ensure message saved in local DB
+      await saveMessageToLocalDB(payloadObj);
+    }
+
+    /* -------------------------------------------------------------------
+       WEBRTC P2P AUDIO & VIDEO CALLS (RTDB SIGNALING)
+       ------------------------------------------------------------------- */
+    const rtcConfig = {
+      iceServers: [
+        { urls: "stun:stun.l.google.com:19302" },
+        { urls: "stun:stun1.l.google.com:19302" },
+        { urls: "stun:stun2.l.google.com:19302" }
+      ]
+    };
+
+    function listenForIncomingCalls() {
+      const myKey = cleanUserKey(currentUser.username);
+      
+      db.ref(`calls/${myKey}`).on('value', async (snapshot) => {
+        const callData = snapshot.val();
+        if (!callData) return;
+
+        if (callData.type === 'offer' && !peerConnection) {
+          activeCallTarget = callData.from;
+          isCallVideo = callData.isVideo;
+
+          document.getElementById('call-peer-name').innerText = callData.from;
+          document.getElementById('call-status-text').innerText = callData.isVideo ? "Входящий видеозвонок..." : "Входящий аудиозвонок...";
+          document.getElementById('btn-call-accept').classList.remove('hidden');
+          document.getElementById('modal-call').classList.add('active');
+
+          // Store offer
+          window.pendingCallOffer = callData.offer;
+        } else if (callData.type === 'answer' && peerConnection) {
+          await peerConnection.setRemoteDescription(new RTCSessionDescription(callData.answer));
+          document.getElementById('call-status-text').innerText = "Соединение установлено";
+        } else if (callData.type === 'candidate' && peerConnection) {
+          try {
+            await peerConnection.addIceCandidate(new RTCIceCandidate(callData.candidate));
+          } catch(e) {}
+        } else if (callData.type === 'end') {
+          endCall(false);
+        }
+      });
+    }
+
+    async function startCall(peerUsername, isVideo) {
+      activeCallTarget = cleanUserKey(peerUsername);
+      isCallVideo = isVideo;
+
+      document.getElementById('call-peer-name').innerText = peerUsername;
+      document.getElementById('call-status-text').innerText = "Звоним...";
+      document.getElementById('btn-call-accept').classList.add('hidden');
+      document.getElementById('modal-call').classList.add('active');
+
+      try {
+        localCallStream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+          video: isVideo ? { facingMode: "user" } : false
+        });
+
+        document.getElementById('call-local-video').srcObject = localCallStream;
+
+        peerConnection = new RTCPeerConnection(rtcConfig);
+
+        localCallStream.getTracks().forEach(track => peerConnection.addTrack(track, localCallStream));
+
+        peerConnection.ontrack = (event) => {
+          document.getElementById('call-remote-video').srcObject = event.streams[0];
+        };
+
+        peerConnection.onicecandidate = (event) => {
+          if (event.candidate) {
+            db.ref(`calls/${activeCallTarget}`).set({
+              type: 'candidate',
+              from: cleanUserKey(currentUser.username),
+              candidate: event.candidate.toJSON()
+            });
+          }
+        };
+
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
+
+        db.ref(`calls/${activeCallTarget}`).set({
+          type: 'offer',
+          from: cleanUserKey(currentUser.username),
+          offer: offer,
+          isVideo: isVideo
+        });
+
+      } catch (err) {
+        alert("Ошибка доступа к камере/микрофону: " + err.message);
+        endCall(true);
+      }
+    }
+
+    document.getElementById('btn-call-accept').addEventListener('click', async () => {
+      document.getElementById('btn-call-accept').classList.add('hidden');
+      document.getElementById('call-status-text').innerText = "Соединение...";
+
+      try {
+        localCallStream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+          video: isCallVideo ? { facingMode: "user" } : false
+        });
+
+        document.getElementById('call-local-video').srcObject = localCallStream;
+
+        peerConnection = new RTCPeerConnection(rtcConfig);
+
+        localCallStream.getTracks().forEach(track => peerConnection.addTrack(track, localCallStream));
+
+        peerConnection.ontrack = (event) => {
+          document.getElementById('call-remote-video').srcObject = event.streams[0];
+        };
+
+        peerConnection.onicecandidate = (event) => {
+          if (event.candidate) {
+            db.ref(`calls/${activeCallTarget}`).set({
+              type: 'candidate',
+              from: cleanUserKey(currentUser.username),
+              candidate: event.candidate.toJSON()
+            });
+          }
+        };
+
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(window.pendingCallOffer));
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+
+        db.ref(`calls/${activeCallTarget}`).set({
+          type: 'answer',
+          from: cleanUserKey(currentUser.username),
+          answer: answer
+        });
+
+      } catch (err) {
+        alert("Ошибка подключения звонка: " + err.message);
+        endCall(true);
+      }
+    });
+
+    document.getElementById('btn-call-decline').addEventListener('click', () => {
+      endCall(true);
+    });
+
+    function endCall(sendSignal = true) {
+      if (sendSignal && activeCallTarget) {
+        db.ref(`calls/${activeCallTarget}`).set({ type: 'end', from: cleanUserKey(currentUser.username) });
+      }
+
+      if (peerConnection) {
+        peerConnection.close();
+        peerConnection = null;
+      }
+
+      if (localCallStream) {
+        localCallStream.getTracks().forEach(t => t.stop());
+        localCallStream = null;
+      }
+
+      document.getElementById('call-local-video').srcObject = null;
+      document.getElementById('call-remote-video').srcObject = null;
+      document.getElementById('modal-call').classList.remove('active');
+    }
+
+    document.getElementById('btn-call-audio').addEventListener('click', () => {
+      if (activePeer) startCall(activePeer, false);
+    });
+
+    document.getElementById('btn-call-video').addEventListener('click', () => {
+      if (activePeer) startCall(activePeer, true);
     });
 
     /* -------------------------------------------------------------------
@@ -1580,17 +1486,17 @@
     });
 
     document.getElementById('btn-clear-cache').addEventListener('click', async () => {
-      const confirmClear = confirm("ПРЕДУПРЕЖДЕНИЕ: Вся история переписки и локальный кэш будут безвозвратно удалены! Продолжить?");
+      const confirmClear = confirm("ПРЕДУПРЕЖДЕНИЕ: Вся история локальной переписки будет удалена с этого устройства. Она заново скачается из облака при подгрузке. Продолжить?");
       if (confirmClear) {
         await clearAllLocalCache();
-        alert("Локальный кэш полностью очищен! Приложение будет перезагружено.");
+        alert("Локальный кэш очищен!");
         window.location.reload();
       }
     });
 
     document.getElementById('btn-logout').addEventListener('click', () => {
       localStorage.removeItem('meow_user');
-      if (peer) peer.destroy(); // Destroy PeerJS instance on logout
+      localStorage.removeItem('meow_pass');
       window.location.reload();
     });
 
@@ -1626,7 +1532,7 @@
             <div class="avatar">${userFound.username.replace('@','').charAt(0).toUpperCase()}</div>
             <div>
               <div style="font-weight: 600;">${userFound.username}</div>
-              <div style="font-size: 12px; color: var(--text-muted);"> ${userFound.bio || ''}</div>
+              <div style="font-size: 12px; color: var(--text-muted);">${userFound.bio || ''}</div>
             </div>
           </div>
           <button class="btn" style="width: auto; padding: 6px 12px;" id="btn-start-chat-found">Написать</button>
@@ -1693,16 +1599,15 @@
       document.getElementById('chat-peer-name').innerText = peerUsername;
       updateAvatarElement(document.getElementById('chat-peer-avatar'), null, peerUsername);
 
+      // Register cloud listener
+      subscribeToChatCloud(activePeer);
+
       // Listen for peer status in RTDB
       db.ref(`users/${activePeer}`).on('value', (snap) => {
         const peerVal = snap.val();
         if (peerVal) {
           updateAvatarElement(document.getElementById('chat-peer-avatar'), peerVal.avatar, peerUsername);
-          // Check P2P connection status first, then Firebase presence
-          const isP2POpen = peerConnections[activePeer]?.isP2POpen;
-          if (isP2POpen) {
-            updatePeerStatusUI("Онлайн (P2P подключен)", "active");
-          } else if (peerVal.status === 'online') {
+          if (peerVal.status === 'online') {
             updatePeerStatusUI("Онлайн", "active");
           } else if (peerVal.lastSeen) {
             const timeStr = new Date(peerVal.lastSeen).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -1713,10 +1618,7 @@
         }
       });
 
-      // Init P2P connection
-      initP2PConnection(activePeer);
-
-      // Render Messages History
+      // Render Local Messages History
       const messages = await getLocalMessagesForChat(activePeer);
       const msgContainer = document.getElementById('messages-container');
       msgContainer.innerHTML = '';
@@ -1738,11 +1640,7 @@
         txtElem.innerText = statusText;
         txtElem.style.color = "var(--accent)";
       } else {
-        // Restore original text or status if not typing
-        const peerKey = activePeer;
-        const isP2POpen = peerConnections[peerKey]?.isP2POpen;
-        const firebaseStatus = document.getElementById('peer-status-dot').classList.contains('active') ? "Онлайн" : "Офлайн";
-        txtElem.innerText = isP2POpen ? "Онлайн (P2P подключен)" : firebaseStatus;
+        txtElem.innerText = "Онлайн";
         txtElem.style.color = "var(--text-muted)";
       }
     }
@@ -1821,7 +1719,13 @@
             }
             badge.innerText = emoji;
           }
-          sendP2PPayload(activePeer, { type: 'reaction_update', msgId: msg.id, reaction: emoji });
+          
+          // Update reaction in RTDB
+          const chatId = getChatId(currentUser.username, activePeer);
+          if (msg.cloudKey) {
+            const encrypted = await encryptPayload(currentUser.masterKey, msg);
+            db.ref(`chats/${chatId}/${msg.cloudKey}`).set(encrypted);
+          }
         };
         reactionsBar.appendChild(btn);
       });
@@ -1836,36 +1740,29 @@
     }
 
     function escapeHtml(text) {
-      return text.replace(/[&<>"\']/g, function(m) {
+      return text.replace(/[&<>"']/g, function(m) {
         return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
       });
     }
 
     /* -------------------------------------------------------------------
-       TYPING INDICATOR (TELEGRAM STYLE)
+       TYPING INDICATOR
        ------------------------------------------------------------------- */
     const msgInput = document.getElementById('chat-msg-input');
     const btnSendMessage = document.getElementById('btn-send-message');
 
     msgInput.addEventListener('input', () => {
-      if (!activePeer || !currentUser) return;
+      if (!activePeer) return;
 
-      // Broadcast typing state
-      db.ref(`typing/${activePeer}`).set({
-        from: cleanUserKey(currentUser.username),
-        isTyping: true,
-        ts: Date.now()
-      });
+      const chatId = getChatId(currentUser.username, activePeer);
+      const myKey = cleanUserKey(currentUser.username);
+
+      db.ref(`typing/${chatId}/${myKey}`).set(true);
 
       clearTimeout(typingTimeout);
       typingTimeout = setTimeout(() => {
-        db.ref(`typing/${activePeer}`).set({
-          from: cleanUserKey(currentUser.username),
-          isTyping: false,
-          ts: Date.now()
-        });
-        updatePeerStatusText("", false); // Reset peer status text after typing timeout
-      }, 2000); // Show typing for 2 seconds
+        db.ref(`typing/${chatId}/${myKey}`).set(false);
+      }, 1800);
     });
 
     /* -------------------------------------------------------------------
@@ -1885,19 +1782,9 @@
       };
 
       msgInput.value = '';
-      await saveMessageToLocalDB(msgObj);
+      await sendCloudMessage(activePeer, msgObj);
       renderSingleMessage(msgObj);
-      await sendP2PPayload(activePeer, msgObj);
       refreshChatsListUI();
-
-      // Ensure typing indicator is cleared after sending message
-      if (typingTimeout) clearTimeout(typingTimeout);
-      db.ref(`typing/${activePeer}`).set({
-        from: cleanUserKey(currentUser.username),
-        isTyping: false,
-        ts: Date.now()
-      });
-      updatePeerStatusText("", false);
     }
 
     btnSendMessage.addEventListener('click', sendMessage);
@@ -1928,9 +1815,8 @@
           timestamp: Date.now()
         };
 
-        await saveMessageToLocalDB(msgObj);
+        await sendCloudMessage(activePeer, msgObj);
         renderSingleMessage(msgObj);
-        await sendP2PPayload(activePeer, msgObj);
         refreshChatsListUI();
       };
       reader.readAsDataURL(file);
@@ -1961,9 +1847,8 @@
                 mediaUrl: evt.target.result,
                 timestamp: Date.now()
               };
-              await saveMessageToLocalDB(msgObj);
+              await sendCloudMessage(activePeer, msgObj);
               renderSingleMessage(msgObj);
-              await sendP2PPayload(activePeer, msgObj);
               refreshChatsListUI();
             };
             reader.readAsDataURL(blob);
@@ -1974,7 +1859,6 @@
           btnRecordVoice.style.color = 'var(--danger)';
         } catch (err) {
           alert('Доступ к микрофону отклонен!');
-          console.error('Microphone access error:', err);
         }
       } else {
         if (voiceRecorder) voiceRecorder.stop();
@@ -2017,7 +1901,6 @@
 
       } catch (err) {
         alert('Доступ к камере/микрофону отклонен!');
-        console.error('Camera/Mic access error:', err);
       }
     });
 
@@ -2032,7 +1915,7 @@
     function stopCircleRecording(shouldSend) {
       clearInterval(circleTimerInterval);
       if (circleRecorder && circleRecorder.state !== 'inactive') {
-        circleRecorder.onstop = async () => { // Make onstop async
+        circleRecorder.onstop = () => {
           if (shouldSend) {
             const blob = new Blob(circleChunks, { type: 'video/webm' });
             const reader = new FileReader();
@@ -2045,51 +1928,51 @@
                 mediaUrl: evt.target.result,
                 timestamp: Date.now()
               };
-              await saveMessageToLocalDB(msgObj);
+              await sendCloudMessage(activePeer, msgObj);
               renderSingleMessage(msgObj);
-              await sendP2PPayload(activePeer, msgObj);
               refreshChatsListUI();
             };
             reader.readAsDataURL(blob);
           }
           if (circleStream) circleStream.getTracks().forEach(t => t.stop());
-          circlePreview.srcObject = null; // Clear preview
         };
         circleRecorder.stop();
-      } else {
-        // If recorder was not active, just stop stream and clear UI
-        if (circleStream) circleStream.getTracks().forEach(t => t.stop());
-        circlePreview.srcObject = null;
       }
       circleModal.classList.remove('active');
     }
 
     /* -------------------------------------------------------------------
-       AUTO SESSION BOOTSTRAP
+       SCREEN SWITCHER CONTROL
+       ------------------------------------------------------------------- */
+    const screens = {
+      auth: document.getElementById('screen-auth'),
+      chats: document.getElementById('screen-chats'),
+      chat: document.getElementById('screen-chat')
+    };
+
+    function showScreen(screenId) {
+      Object.keys(screens).forEach(key => {
+        screens[key].classList.toggle('active', key === screenId);
+      });
+    }
+
+    /* -------------------------------------------------------------------
+       AUTO SESSION BOOTSTRAP (WORKS 100 YEARS LATER ON ANY DEVICE)
        ------------------------------------------------------------------- */
     window.addEventListener('DOMContentLoaded', async () => {
       const savedUser = localStorage.getItem('meow_user');
-      if (savedUser) {
+      const savedPass = localStorage.getItem('meow_pass');
+
+      if (savedUser && savedPass) {
         const userKey = cleanUserKey(savedUser);
         const snap = await db.ref(`users/${userKey}`).once('value');
         const userData = snap.val();
 
         if (userData) {
-          // Reconstruct keyPair from stored public key (private key is generated fresh or imported)
-          // For simplicity and to ensure E2EE, we'll regenerate the private key if not from import
-          const keyPair = await generateECDHKeyPair();
-          const publicJwk = await exportPublicKey(keyPair.publicKey);
-          const privateJwk = await exportPrivateKey(keyPair.privateKey);
+          const masterKey = await deriveMasterKey(savedPass, savedUser);
+          await db.ref(`users/${userKey}`).update({ status: "online", lastSeen: Date.now() });
 
-          // Update Firebase with new public key
-          await db.ref(`users/${userKey}`).update({
-            publicKey: publicJwk,
-            peerId: userKey, // Ensure PeerJS ID is consistent
-            status: "online",
-            lastSeen: Date.now()
-          });
-
-          currentUser = { ...userData, keyPair, exportedPrivateKeyJwk: privateJwk, peerId: userKey };
+          currentUser = { ...userData, masterKey, rawPass: savedPass };
           setupOnlinePresence(userKey);
           finishLogin();
         }
