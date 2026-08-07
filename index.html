@@ -1,1366 +1,2324 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>SakuraMail 🌸</title>
-  
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
-  <style>
-    :root {
-      --bg-dark: #0e0b16;
-      --card-bg: #171324;
-      --card-inner: #211b33;
-      --accent-purple: #9d72ff;
-      --accent-pink: #f285c4;
-      --accent-soft: #c3a6ff;
-      --text-main: #f0eaff;
-      --text-sub: #a195c0;
-      --border-color: #2e2645;
-      --badge-bg: #ff65a3;
-      --nav-bg: #120e1e;
-      --danger: #ff4f70;
-      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
-
-    [data-theme="My Melody Day"] {
-      --bg-dark: #1b1219;
-      --card-bg: #2b1a26;
-      --card-inner: #3a2333;
-      --accent-purple: #ff85c0;
-      --accent-pink: #ffb3d9;
-      --accent-soft: #ffd1e8;
-      --text-main: #fff0f6;
-      --text-sub: #c99bb3;
-      --border-color: #4a2c41;
-    }
-
-    [data-theme="Cinnamoroll Sky"] {
-      --bg-dark: #0b131e;
-      --card-bg: #121f30;
-      --card-inner: #1a2a42;
-      --accent-purple: #70b3ff;
-      --accent-pink: #b8dcff;
-      --accent-soft: #d6ebff;
-      --text-main: #f0f7ff;
-      --text-sub: #8da9c4;
-      --border-color: #243b5e;
-    }
-
-    [data-theme="Pompompurin Cafe"] {
-      --bg-dark: #1a160e;
-      --card-bg: #292215;
-      --card-inner: #382e1c;
-      --accent-purple: #ffc857;
-      --accent-pink: #ffe08a;
-      --accent-soft: #fff0b8;
-      --text-main: #fffdf5;
-      --text-sub: #c2b28a;
-      --border-color: #4d3e24;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-      font-family: var(--custom-font, var(--font-family));
-    }
-
-    body, html {
-      width: 100%;
-      height: 100%;
-      height: 100dvh;
-      background-color: var(--bg-dark);
-      color: var(--text-main);
-      overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    #app-container {
-      width: 100%;
-      max-width: 480px;
-      height: 100%;
-      height: 100dvh;
-      background: var(--bg-dark);
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      box-shadow: 0 0 40px rgba(0,0,0,0.8);
-      overflow: hidden;
-    }
-
-    /* Header */
-    .app-header {
-      height: 56px;
-      padding: 0 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: var(--nav-bg);
-      border-bottom: 1px solid var(--border-color);
-      z-index: 10;
-      flex-shrink: 0;
-    }
-
-    .header-title-box {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .header-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .header-sub {
-      font-size: 11px;
-      color: var(--accent-pink);
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .icon-btn {
-      background: none;
-      border: none;
-      color: var(--text-main);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      transition: background 0.2s;
-    }
-
-    .icon-btn:active {
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    /* Content Area */
-    .app-body {
-      flex: 1;
-      position: relative;
-      overflow-y: auto;
-      overflow-x: hidden;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .screen {
-      display: none;
-      flex-direction: column;
-      width: 100%;
-      min-height: 100%;
-      padding: 16px;
-      box-sizing: border-box;
-    }
-
-    .screen.active {
-      display: flex;
-    }
-
-    /* Navigation Bar */
-    .bottom-nav {
-      height: 60px;
-      background: var(--nav-bg);
-      border-top: 1px solid var(--border-color);
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      flex-shrink: 0;
-      z-index: 10;
-      padding-bottom: env(safe-area-inset-bottom);
-    }
-
-    .nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-sub);
-      font-size: 10px;
-      cursor: pointer;
-      flex: 1;
-      height: 100%;
-      gap: 4px;
-    }
-
-    .nav-item.active {
-      color: var(--accent-purple);
-    }
-
-    .nav-item svg {
-      width: 22px;
-      height: 22px;
-      fill: currentColor;
-    }
-
-    /* Form Components */
-    .input-group {
-      margin-bottom: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .input-label {
-      font-size: 12px;
-      color: var(--text-sub);
-    }
-
-    .custom-input {
-      width: 100%;
-      height: 48px;
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 14px;
-      padding: 0 16px;
-      color: var(--text-main);
-      font-size: 14px;
-      outline: none;
-    }
-
-    .custom-input:focus {
-      border-color: var(--accent-purple);
-    }
-
-    .btn-primary {
-      width: 100%;
-      height: 48px;
-      background: var(--accent-purple);
-      border: none;
-      border-radius: 14px;
-      color: #ffffff;
-      font-weight: 600;
-      font-size: 15px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: opacity 0.2s;
-    }
-
-    .btn-primary:active {
-      opacity: 0.85;
-    }
-
-    /* Screen Specific Styles */
-
-    /* Auth Screen */
-    #screen-auth {
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-    }
-
-    .logo-box {
-      margin-bottom: 24px;
-    }
-
-    .logo-avatar {
-      width: 110px;
-      height: 110px;
-      border-radius: 50%;
-      background: var(--card-bg);
-      border: 3px solid var(--accent-purple);
-      margin: 0 auto 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-
-    .logo-avatar img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    /* Profile Screen */
-    .profile-header-card {
-      background: var(--card-bg);
-      border-radius: 20px;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      border: 1px solid var(--border-color);
-      margin-bottom: 16px;
-      position: relative;
-    }
-
-    .avatar-wrapper {
-      position: relative;
-      width: 90px;
-      height: 90px;
-      margin-bottom: 12px;
-    }
-
-    .avatar-img {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid var(--accent-pink);
-    }
-
-    .avatar-edit-badge {
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      background: var(--accent-purple);
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-
-    .user-tag {
-      color: var(--text-sub);
-      font-size: 13px;
-      margin-top: 2px;
-    }
-
-    .level-box {
-      width: 100%;
-      margin-top: 16px;
-      background: var(--card-inner);
-      padding: 12px;
-      border-radius: 14px;
-    }
-
-    .level-title {
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      margin-bottom: 6px;
-    }
-
-    .progress-bar {
-      width: 100%;
-      height: 8px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 4px;
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: var(--accent-purple);
-      width: 60%;
-    }
-
-    .menu-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .menu-item {
-      background: var(--card-bg);
-      border-radius: 14px;
-      padding: 14px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border: 1px solid var(--border-color);
-      cursor: pointer;
-    }
-
-    .menu-item-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 14px;
-    }
-
-    /* Jam Jars Archive Grid */
-    .jars-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-top: 12px;
-    }
-
-    .jar-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 12px 8px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      cursor: pointer;
-    }
-
-    .jar-icon {
-      width: 50px;
-      height: 60px;
-      margin-bottom: 8px;
-      position: relative;
-    }
-
-    .jar-label {
-      font-size: 12px;
-      font-weight: 600;
-      margin-top: 4px;
-    }
-
-    .jar-date {
-      font-size: 10px;
-      color: var(--text-sub);
-    }
-
-    /* Mailbox & Bottles */
-    .mailbox-banner {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 20px;
-      padding: 24px;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .mailbox-icon-large {
-      width: 100px;
-      height: 100px;
-      margin-bottom: 16px;
-    }
-
-    /* Chat View */
-    .chat-container {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-    }
-
-    .chat-messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .msg-bubble {
-      max-width: 80%;
-      padding: 12px 14px;
-      border-radius: 18px;
-      font-size: 14px;
-      line-height: 1.4;
-      position: relative;
-      word-break: break-word;
-    }
-
-    .msg-incoming {
-      align-self: flex-start;
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-bottom-left-radius: 4px;
-    }
-
-    .msg-outgoing {
-      align-self: flex-end;
-      background: var(--accent-purple);
-      color: #fff;
-      border-bottom-right-radius: 4px;
-    }
-
-    .msg-ghost {
-      opacity: 0.7;
-      border: 1px dashed var(--accent-pink);
-    }
-
-    .msg-meta {
-      font-size: 9px;
-      opacity: 0.7;
-      margin-top: 4px;
-      text-align: right;
-    }
-
-    .chat-input-bar {
-      padding: 10px 12px;
-      background: var(--nav-bg);
-      border-top: 1px solid var(--border-color);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-shrink: 0;
-    }
-
-    .chat-input {
-      flex: 1;
-      height: 40px;
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 20px;
-      padding: 0 16px;
-      color: var(--text-main);
-      outline: none;
-    }
-
-    /* Canvas Drawing Area */
-    .drawing-modal {
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: var(--bg-dark);
-      z-index: 100;
-      display: none;
-      flex-direction: column;
-    }
-
-    .drawing-modal.active {
-      display: flex;
-    }
-
-    #drawing-canvas {
-      flex: 1;
-      background: #ffffff;
-      touch-action: none;
-      border-radius: 16px;
-      margin: 12px;
-    }
-
-    .drawing-tools {
-      height: 60px;
-      background: var(--card-bg);
-      display: flex;
-      align-items: center;
-      justify-content: space-around;
-      padding: 0 12px;
-    }
-
-    .color-dot {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      border: 2px solid #fff;
-      cursor: pointer;
-    }
-
-    /* Toggle Switch */
-    .toggle-switch {
-      position: relative;
-      width: 44px;
-      height: 24px;
-    }
-
-    .toggle-switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background-color: var(--card-inner);
-      transition: .3s;
-      border-radius: 24px;
-    }
-
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 18px;
-      width: 18px;
-      left: 3px;
-      bottom: 3px;
-      background-color: white;
-      transition: .3s;
-      border-radius: 50%;
-    }
-
-    input:checked + .slider {
-      background-color: var(--accent-purple);
-    }
-
-    input:checked + .slider:before {
-      transform: translateX(20px);
-    }
-
-    /* Audio Player Widget */
-    .bg-music-toggle {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      z-index: 20;
-    }
-
-    /* Media Attachments */
-    .msg-media {
-      max-width: 100%;
-      border-radius: 12px;
-      margin-top: 6px;
-      display: block;
-    }
-
-    /* Modal Sheet */
-    .modal-overlay {
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.7);
-      z-index: 90;
-      display: none;
-      justify-content: center;
-      align-items: flex-end;
-    }
-
-    .modal-overlay.active {
-      display: flex;
-    }
-
-    .modal-card {
-      width: 100%;
-      background: var(--card-bg);
-      border-top-left-radius: 24px;
-      border-top-right-radius: 24px;
-      padding: 20px;
-      border-top: 1px solid var(--border-color);
-      max-height: 80vh;
-      overflow-y: auto;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>SakuraMail 🌸</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --bg-deep: #0d0b1a;
+  --bg-card: #1a1528;
+  --bg-card2: #221c35;
+  --bg-input: #2a2340;
+  --pink: #e8a4c8;
+  --pink2: #d484b0;
+  --pink3: #f0c4dc;
+  --text: #f5e6f0;
+  --text2: #c4a8c0;
+  --text3: #8a7090;
+  --online: #7ee8a0;
+  --accent: #f0c4dc;
+}
+body {
+  font-family:'Nunito',sans-serif;
+  background:var(--bg-deep);
+  color:var(--text);
+  overflow:hidden;
+  height:100dvh;
+  width:100vw;
+  position:fixed;
+  top:0; left:0;
+}
+#app {
+  width:100%; height:100dvh;
+  overflow:hidden;
+  position:relative;
+}
+.screen {
+  position:absolute;
+  top:0; left:0;
+  width:100%; height:100dvh;
+  overflow-y:auto;
+  overflow-x:hidden;
+  display:none;
+  flex-direction:column;
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  scrollbar-width:none;
+}
+.screen::-webkit-scrollbar { display:none; }
+.screen.active { display:flex; }
+
+/* ===== WELCOME SCREEN ===== */
+#welcomeScreen {
+  background: linear-gradient(180deg, #0d0b1a 0%, #1a0f2e 50%, #0d0b1a 100%);
+  align-items:center; justify-content:center;
+  position:relative;
+}
+.sakura-bg {
+  position:absolute; top:0; left:0; width:100%; height:100%;
+  pointer-events:none; overflow:hidden; z-index:0;
+}
+.sakura-petal {
+  position:absolute; width:12px; height:12px;
+  background:var(--pink3); border-radius:50% 0 50% 0;
+  opacity:0.6; animation:fall linear infinite;
+}
+@keyframes fall {
+  0% { transform:translateY(-20px) rotate(0deg) translateX(0); opacity:0.8; }
+  100% { transform:translateY(100vh) rotate(720deg) translateX(50px); opacity:0; }
+}
+.welcome-content { z-index:1; text-align:center; padding:20px; width:100%; max-width:400px; }
+.sakura-logo {
+  width:120px; height:120px; margin:0 auto 24px;
+  position:relative;
+}
+.sakura-logo svg { width:100%; height:100%; }
+.welcome-title { font-size:36px; font-weight:800; color:var(--pink3); margin-bottom:8px; letter-spacing:2px; }
+.welcome-sub { font-size:14px; color:var(--text2); margin-bottom:40px; line-height:1.5; }
+.btn-pink {
+  width:100%; padding:16px; border:none; border-radius:28px;
+  background:var(--pink); color:var(--bg-deep); font-size:16px; font-weight:700;
+  font-family:inherit; cursor:pointer; margin-bottom:12px; transition:all 0.2s;
+}
+.btn-pink:active { transform:scale(0.97); background:var(--pink2); }
+.btn-outline {
+  width:100%; padding:16px; border:1.5px solid var(--pink); border-radius:28px;
+  background:transparent; color:var(--pink); font-size:16px; font-weight:700;
+  font-family:inherit; cursor:pointer; transition:all 0.2s;
+}
+.btn-outline:active { background:rgba(232,164,200,0.1); }
+
+/* ===== LOGIN / REGISTER ===== */
+.auth-screen { padding:20px; padding-top:max(20px, env(safe-area-inset-top)); }
+.auth-header { display:flex; align-items:center; margin-bottom:32px; }
+.back-btn { width:40px; height:40px; display:flex; align-items:center; justify-content:center; background:var(--bg-card); border-radius:12px; border:none; cursor:pointer; }
+.back-btn svg { width:20px; height:20px; fill:var(--text); }
+.auth-title { flex:1; text-align:center; font-size:20px; font-weight:700; margin-right:40px; }
+.avatar-upload {
+  width:100px; height:100px; margin:0 auto 24px;
+  border-radius:50%; border:2px dashed var(--pink);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; overflow:hidden; position:relative;
+  background:var(--bg-card);
+}
+.avatar-upload img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+.avatar-upload svg { width:36px; height:36px; fill:var(--pink); }
+.avatar-upload input { display:none; }
+.input-group { margin-bottom:16px; }
+.input-group label { display:block; font-size:12px; color:var(--text3); margin-bottom:6px; font-weight:600; }
+.input-field {
+  width:100%; padding:14px 16px; border-radius:16px;
+  border:1.5px solid var(--bg-input); background:var(--bg-card);
+  color:var(--text); font-size:15px; font-family:inherit;
+  outline:none; transition:border-color 0.2s;
+}
+.input-field:focus { border-color:var(--pink); }
+.input-field::placeholder { color:var(--text3); }
+.password-wrap { position:relative; }
+.eye-btn {
+  position:absolute; right:14px; top:50%; transform:translateY(-50%);
+  background:none; border:none; cursor:pointer; padding:4px;
+}
+.eye-btn svg { width:20px; height:20px; fill:var(--text3); }
+
+/* ===== MAIN APP ===== */
+.app-header {
+  padding:12px 16px;
+  padding-top:max(12px, env(safe-area-inset-top));
+  display:flex; align-items:center; gap:12px;
+  background:var(--bg-deep); position:sticky; top:0; z-index:10;
+  border-bottom:1px solid rgba(232,164,200,0.08);
+}
+.header-avatar { width:40px; height:40px; border-radius:50%; overflow:hidden; border:2px solid var(--pink); cursor:pointer; flex-shrink:0; }
+.header-avatar img { width:100%; height:100%; object-fit:cover; }
+.header-info { flex:1; }
+.header-name { font-size:16px; font-weight:700; }
+.header-status { font-size:12px; color:var(--online); display:flex; align-items:center; gap:4px; }
+.header-status.offline { color:var(--text3); }
+.header-status.typing { color:var(--pink); }
+.status-dot { width:8px; height:8px; border-radius:50%; background:var(--online); }
+.status-dot.offline { background:var(--text3); }
+.header-actions { display:flex; gap:8px; }
+.icon-btn {
+  width:40px; height:40px; border-radius:12px; background:var(--bg-card);
+  border:none; display:flex; align-items:center; justify-content:center;
+  cursor:pointer; transition:background 0.2s;
+}
+.icon-btn:active { background:var(--bg-card2); }
+.icon-btn svg { width:20px; height:20px; fill:var(--text); }
+
+/* ===== CHAT LIST ===== */
+.chat-list { flex:1; overflow-y:auto; padding:8px 12px; }
+.chat-item {
+  display:flex; align-items:center; gap:12px;
+  padding:12px; border-radius:16px;
+  background:var(--bg-card); margin-bottom:8px;
+  cursor:pointer; transition:background 0.2s;
+  position:relative;
+}
+.chat-item:active { background:var(--bg-card2); }
+.chat-item-avatar { width:52px; height:52px; border-radius:50%; overflow:hidden; flex-shrink:0; position:relative; }
+.chat-item-avatar img { width:100%; height:100%; object-fit:cover; }
+.online-ring {
+  position:absolute; bottom:2px; right:2px; width:14px; height:14px;
+  border-radius:50%; background:var(--online); border:2px solid var(--bg-card);
+}
+.chat-item-info { flex:1; min-width:0; }
+.chat-item-name { font-size:15px; font-weight:700; display:flex; align-items:center; gap:6px; }
+.chat-item-name .typing-text { font-size:11px; color:var(--pink); font-weight:600; }
+.chat-item-preview { font-size:13px; color:var(--text3); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.chat-item-meta { text-align:right; flex-shrink:0; }
+.chat-item-time { font-size:11px; color:var(--text3); }
+.unread-badge {
+  display:inline-block; min-width:20px; height:20px; padding:0 6px;
+  border-radius:10px; background:var(--pink); color:var(--bg-deep);
+  font-size:11px; font-weight:700; line-height:20px; text-align:center;
+  margin-top:4px;
+}
+.ghost-badge {
+  display:inline-block; padding:2px 8px; border-radius:8px;
+  background:rgba(138,112,144,0.3); color:var(--text2);
+  font-size:10px; margin-top:4px;
+}
+
+/* ===== CHAT SCREEN ===== */
+.chat-header {
+  padding:10px 12px;
+  padding-top:max(10px, env(safe-area-inset-top));
+  display:flex; align-items:center; gap:12px;
+  background:var(--bg-deep); position:sticky; top:0; z-index:10;
+  border-bottom:1px solid rgba(232,164,200,0.08);
+}
+.chat-messages {
+  flex:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:8px;
+}
+.msg-bubble {
+  max-width:78%; padding:10px 14px; border-radius:18px;
+  font-size:14px; line-height:1.5; word-break:break-word;
+  position:relative; animation:msgIn 0.2s ease;
+}
+@keyframes msgIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+.msg-bubble.sent { align-self:flex-end; background:var(--pink); color:var(--bg-deep); border-bottom-right-radius:4px; }
+.msg-bubble.received { align-self:flex-start; background:var(--bg-card2); color:var(--text); border-bottom-left-radius:4px; }
+.msg-bubble.ghost { opacity:0.5; }
+.msg-bubble img, .msg-bubble video { max-width:100%; border-radius:12px; margin-top:4px; display:block; }
+.msg-bubble audio { width:100%; margin-top:4px; }
+.msg-time { font-size:10px; opacity:0.6; margin-top:4px; text-align:right; }
+.msg-sender { font-size:11px; color:var(--pink); margin-bottom:2px; font-weight:600; }
+.msg-status { display:inline-flex; gap:2px; margin-left:4px; }
+.msg-status svg { width:12px; height:12px; fill:var(--bg-deep); }
+
+.chat-input-area {
+  padding:8px 12px 12px;
+  padding-bottom:max(12px, env(safe-area-inset-bottom));
+  background:var(--bg-deep); border-top:1px solid rgba(232,164,200,0.08);
+  display:flex; align-items:flex-end; gap:8px;
+}
+.chat-input-wrap {
+  flex:1; background:var(--bg-card); border-radius:24px;
+  display:flex; align-items:center; padding:4px 4px 4px 12px;
+  border:1.5px solid var(--bg-input);
+}
+.chat-input {
+  flex:1; background:transparent; border:none; color:var(--text);
+  font-size:15px; font-family:inherit; outline:none; padding:8px 4px;
+  max-height:100px; resize:none;
+}
+.chat-input::placeholder { color:var(--text3); }
+.input-actions { display:flex; gap:4px; }
+.input-actions button {
+  width:36px; height:36px; border-radius:50%; border:none;
+  background:transparent; display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
+}
+.input-actions button svg { width:20px; height:20px; fill:var(--text3); }
+.input-actions button:active svg { fill:var(--pink); }
+.send-btn {
+  width:44px; height:44px; border-radius:50%; border:none;
+  background:var(--pink); display:flex; align-items:center; justify-content:center;
+  cursor:pointer; flex-shrink:0; transition:transform 0.1s;
+}
+.send-btn:active { transform:scale(0.92); }
+.send-btn svg { width:20px; height:20px; fill:var(--bg-deep); }
+
+/* ===== BOTTOM NAV ===== */
+.bottom-nav {
+  display:flex; justify-content:space-around; align-items:center;
+  padding:8px 0 max(8px, env(safe-area-inset-bottom));
+  background:var(--bg-deep); border-top:1px solid rgba(232,164,200,0.08);
+  position:sticky; bottom:0; z-index:10;
+}
+.nav-item {
+  display:flex; flex-direction:column; align-items:center; gap:2px;
+  padding:4px 12px; border:none; background:transparent;
+  color:var(--text3); cursor:pointer; font-family:inherit;
+  font-size:10px; transition:color 0.2s;
+}
+.nav-item.active { color:var(--pink); }
+.nav-item svg { width:24px; height:24px; fill:currentColor; }
+
+/* ===== PROFILE ===== */
+.profile-header {
+  text-align:center; padding:24px 16px;
+  background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-deep) 100%);
+}
+.profile-avatar {
+  width:100px; height:100px; border-radius:50%; overflow:hidden;
+  margin:0 auto 12px; border:3px solid var(--pink); position:relative;
+}
+.profile-avatar img { width:100%; height:100%; object-fit:cover; }
+.profile-avatar .edit-overlay {
+  position:absolute; bottom:0; left:0; right:0; height:36px;
+  background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center;
+  font-size:11px; color:var(--text);
+}
+.profile-name { font-size:22px; font-weight:800; }
+.profile-username { font-size:14px; color:var(--pink); margin-top:4px; }
+.profile-status-text { font-size:13px; color:var(--text2); margin-top:8px; padding:0 20px; }
+.profile-menu { padding:8px 16px; }
+.profile-menu-item {
+  display:flex; align-items:center; gap:14px;
+  padding:14px 0; border-bottom:1px solid rgba(232,164,200,0.06);
+  cursor:pointer;
+}
+.profile-menu-item svg { width:22px; height:22px; fill:var(--pink); flex-shrink:0; }
+.profile-menu-item span { flex:1; font-size:15px; }
+.profile-menu-item .arrow { fill:var(--text3); width:16px; height:16px; }
+
+/* ===== MAILBOX ===== */
+.mailbox-header { text-align:center; padding:24px 16px; }
+.mailbox-icon { width:100px; height:100px; margin:0 auto 16px; }
+.mailbox-icon svg { width:100%; height:100%; }
+.mailbox-count { font-size:16px; color:var(--pink); margin-bottom:20px; }
+.mailbox-list { padding:0 12px; }
+.mail-item {
+  background:var(--bg-card); border-radius:16px; padding:14px; margin-bottom:10px;
+  cursor:pointer; transition:background 0.2s;
+}
+.mail-item:active { background:var(--bg-card2); }
+.mail-sender { font-size:13px; color:var(--pink); margin-bottom:4px; }
+.mail-preview { font-size:14px; color:var(--text); line-height:1.4; }
+.mail-time { font-size:11px; color:var(--text3); margin-top:6px; }
+
+/* ===== SWEET ARCHIVE (JARS) ===== */
+.archive-grid {
+  display:grid; grid-template-columns:repeat(3, 1fr); gap:12px;
+  padding:12px; flex:1; overflow-y:auto;
+}
+.jar-item {
+  display:flex; flex-direction:column; align-items:center; gap:8px;
+  cursor:pointer; transition:transform 0.2s;
+}
+.jar-item:active { transform:scale(0.95); }
+.jar-svg { width:80px; height:100px; }
+.jar-label { font-size:12px; color:var(--text2); text-align:center; }
+
+/* ===== BOTTLE MESSAGE ===== */
+.bottle-screen { align-items:center; justify-content:center; text-align:center; padding:24px; }
+.bottle-anim { width:200px; height:200px; margin-bottom:24px; position:relative; }
+.bottle-anim svg { width:100%; height:100%; animation:float 3s ease-in-out infinite; }
+@keyframes float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-15px); } }
+
+/* ===== DRAWING CANVAS ===== */
+.canvas-wrap { flex:1; display:flex; flex-direction:column; }
+.canvas-toolbar {
+  display:flex; align-items:center; gap:8px; padding:8px 12px;
+  background:var(--bg-card); overflow-x:auto; scrollbar-width:none;
+}
+.canvas-toolbar::-webkit-scrollbar { display:none; }
+.color-btn { width:28px; height:28px; border-radius:50%; border:2px solid transparent; cursor:pointer; flex-shrink:0; }
+.color-btn.active { border-color:var(--text); }
+.brush-btn { padding:6px 12px; border-radius:12px; border:none; background:var(--bg-input); color:var(--text); font-size:12px; cursor:pointer; flex-shrink:0; }
+.brush-btn.active { background:var(--pink); color:var(--bg-deep); }
+#drawCanvas { flex:1; background:var(--bg-card2); cursor:crosshair; touch-action:none; }
+
+/* ===== STICKERS ===== */
+.sticker-panel {
+  position:absolute; bottom:0; left:0; right:0;
+  background:var(--bg-card); border-radius:20px 20px 0 0;
+  padding:16px; max-height:50vh; overflow-y:auto;
+  transform:translateY(100%); transition:transform 0.3s ease;
+  z-index:20;
+}
+.sticker-panel.open { transform:translateY(0); }
+.sticker-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; }
+.sticker-item {
+  aspect-ratio:1; background:var(--bg-card2); border-radius:12px;
+  display:flex; align-items:center; justify-content:center; font-size:28px;
+  cursor:pointer; transition:transform 0.1s;
+}
+.sticker-item:active { transform:scale(0.9); }
+
+/* ===== MODALS ===== */
+.modal-overlay {
+  position:fixed; top:0; left:0; right:0; bottom:0;
+  background:rgba(0,0,0,0.7); z-index:100;
+  display:none; align-items:center; justify-content:center; padding:20px;
+}
+.modal-overlay.active { display:flex; }
+.modal-content {
+  background:var(--bg-card); border-radius:24px; padding:24px;
+  width:100%; max-width:360px; max-height:80vh; overflow-y:auto;
+}
+.modal-title { font-size:18px; font-weight:700; margin-bottom:16px; text-align:center; }
+.modal-close {
+  position:absolute; top:16px; right:16px; width:32px; height:32px;
+  border-radius:50%; background:var(--bg-input); border:none;
+  display:flex; align-items:center; justify-content:center; cursor:pointer;
+}
+.modal-close svg { width:16px; height:16px; fill:var(--text); }
+
+/* ===== RIDDLE MESSAGE ===== */
+.riddle-box {
+  background:var(--bg-card2); border-radius:16px; padding:16px;
+  border:1.5px dashed var(--pink); text-align:center;
+}
+.riddle-hint { font-size:14px; color:var(--text2); margin-bottom:12px; }
+.riddle-input {
+  width:100%; padding:12px; border-radius:12px; border:1.5px solid var(--bg-input);
+  background:var(--bg-card); color:var(--text); font-size:15px; font-family:inherit;
+  text-align:center; outline:none;
+}
+.riddle-input:focus { border-color:var(--pink); }
+
+/* ===== TOAST ===== */
+.toast {
+  position:fixed; bottom:80px; left:50%; transform:translateX(-50%) translateY(100px);
+  background:var(--bg-card2); color:var(--text); padding:12px 20px;
+  border-radius:16px; font-size:14px; z-index:200; opacity:0;
+  transition:all 0.3s ease; pointer-events:none; white-space:nowrap;
+  border:1px solid rgba(232,164,200,0.2);
+}
+.toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+
+/* ===== SEARCH USERS ===== */
+.search-bar { padding:12px 16px; }
+.search-input {
+  width:100%; padding:12px 16px; border-radius:20px;
+  border:1.5px solid var(--bg-input); background:var(--bg-card);
+  color:var(--text); font-size:15px; font-family:inherit; outline:none;
+}
+.search-input:focus { border-color:var(--pink); }
+.search-results { padding:0 12px; }
+
+/* ===== AUTO-REPLY SETTINGS ===== */
+.auto-reply-item {
+  display:flex; align-items:center; gap:10px;
+  padding:12px; background:var(--bg-card); border-radius:14px; margin-bottom:8px;
+}
+.auto-reply-item input { flex:1; background:transparent; border:none; color:var(--text); font-size:14px; outline:none; }
+.auto-reply-item button { background:none; border:none; color:var(--pink); cursor:pointer; font-size:12px; }
+
+/* ===== MUSIC PLAYER ===== */
+.music-bar {
+  position:fixed; bottom:60px; left:0; right:0;
+  background:var(--bg-card); padding:8px 16px;
+  display:flex; align-items:center; gap:10px;
+  border-top:1px solid rgba(232,164,200,0.1);
+  z-index:15; display:none;
+}
+.music-bar.active { display:flex; }
+.music-bar svg { width:20px; height:20px; fill:var(--pink); cursor:pointer; }
+.music-title { flex:1; font-size:12px; color:var(--text2); }
+
+/* ===== GHOST TOGGLE ===== */
+.ghost-toggle {
+  display:flex; align-items:center; gap:8px; padding:4px 10px;
+  border-radius:16px; background:var(--bg-card); cursor:pointer;
+  font-size:12px; color:var(--text3);
+}
+.ghost-toggle.active { color:var(--pink); background:rgba(232,164,200,0.15); }
+.ghost-toggle svg { width:16px; height:16px; fill:currentColor; }
+
+/* ===== SECTION TITLE ===== */
+.section-title { font-size:18px; font-weight:700; padding:16px 16px 8px; }
+.section-sub { font-size:13px; color:var(--text3); padding:0 16px 12px; }
+
+/* ===== LETTER TO FUTURE ===== */
+.letter-future-box {
+  background:var(--bg-card); border-radius:20px; padding:20px; margin:12px;
+  border:1.5px solid rgba(232,164,200,0.2);
+}
+.letter-future-box textarea {
+  width:100%; min-height:120px; background:transparent; border:none;
+  color:var(--text); font-size:15px; font-family:inherit; resize:none; outline:none;
+}
+.letter-future-box textarea::placeholder { color:var(--text3); }
+
+/* ===== WELCOME GIFT ===== */
+.welcome-gift {
+  text-align:center; padding:32px 20px;
+}
+.welcome-gift .gift-icon { font-size:64px; margin-bottom:16px; }
+.welcome-gift h3 { font-size:20px; color:var(--pink3); margin-bottom:8px; }
+.welcome-gift p { font-size:14px; color:var(--text2); line-height:1.6; }
+
+/* ===== HIDDEN ===== */
+.hidden { display:none !important; }
+
+/* ===== ANIMATIONS ===== */
+.pulse { animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
+
+/* ===== SCROLLBAR HIDE ===== */
+* { scrollbar-width:none; }
+*::-webkit-scrollbar { display:none; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width:380px) {
+  .welcome-title { font-size:28px; }
+  .jar-svg { width:60px; height:80px; }
+  .archive-grid { gap:8px; }
+}
+</style>
 </head>
 <body>
+<div id="app">
 
-<div id="app-container">
-
-  <!-- App Header -->
-  <header class="app-header" id="app-header">
-    <div class="header-title-box">
-      <div class="header-title" id="header-title">SakuraMail 🌸</div>
+<!-- ===== WELCOME SCREEN ===== -->
+<div id="welcomeScreen" class="screen active">
+  <div class="sakura-bg" id="sakuraBg"></div>
+  <div class="welcome-content">
+    <div class="sakura-logo">
+      <svg viewBox="0 0 120 120" fill="none">
+        <circle cx="60" cy="60" r="50" fill="rgba(232,164,200,0.15)" stroke="var(--pink)" stroke-width="2"/>
+        <path d="M60 25 C60 25 50 45 35 50 C20 55 25 70 35 75 C45 80 55 70 60 60 C65 70 75 80 85 75 C95 70 100 55 85 50 C70 45 60 25 60 25Z" fill="var(--pink)" opacity="0.8"/>
+        <circle cx="60" cy="55" r="8" fill="var(--pink3)"/>
+        <path d="M60 63 L60 75" stroke="var(--pink3)" stroke-width="2" stroke-linecap="round"/>
+        <path d="M55 70 Q60 78 65 70" stroke="var(--pink3)" stroke-width="2" fill="none"/>
+        <ellipse cx="45" cy="38" rx="6" ry="10" fill="var(--pink)" opacity="0.6" transform="rotate(-30 45 38)"/>
+        <ellipse cx="75" cy="38" rx="6" ry="10" fill="var(--pink)" opacity="0.6" transform="rotate(30 75 38)"/>
+        <ellipse cx="35" cy="55" rx="5" ry="9" fill="var(--pink)" opacity="0.5" transform="rotate(-60 35 55)"/>
+        <ellipse cx="85" cy="55" rx="5" ry="9" fill="var(--pink)" opacity="0.5" transform="rotate(60 85 55)"/>
+      </svg>
     </div>
-    <div class="header-actions">
-      <button class="icon-btn" id="music-btn" title="Фоновая музыка">
-        <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+    <div class="welcome-title">SakuraMail</div>
+    <div class="welcome-sub">Место, где сообщения<br>становятся теплом 🌸</div>
+    <button class="btn-pink" onclick="showScreen('loginScreen')">Войти</button>
+    <button class="btn-outline" onclick="showScreen('registerScreen')">Зарегистрироваться</button>
+  </div>
+</div>
+
+<!-- ===== LOGIN SCREEN ===== -->
+<div id="loginScreen" class="screen auth-screen">
+  <div class="auth-header">
+    <button class="back-btn" onclick="showScreen('welcomeScreen')">
+      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="auth-title">Вход</div>
+  </div>
+  <div class="input-group">
+    <label>Почта</label>
+    <input type="email" class="input-field" id="loginEmail" placeholder="sakura@mail.com">
+  </div>
+  <div class="input-group">
+    <label>Пароль</label>
+    <div class="password-wrap">
+      <input type="password" class="input-field" id="loginPassword" placeholder="••••••••">
+      <button class="eye-btn" onclick="togglePassword('loginPassword',this)">
+        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/></svg>
       </button>
-      <button class="icon-btn" id="logout-btn" title="Выход" style="display:none;">
-        <svg viewBox="0 0 24 24"><path fill="currentColor" d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
-      </button>
-    </div>
-  </header>
-
-  <!-- Body Content -->
-  <main class="app-body">
-
-    <!-- 1. AUTH SCREEN -->
-    <section class="screen active" id="screen-auth">
-      <div class="logo-box">
-        <div class="logo-avatar">
-          <!-- Kuromi SVG -->
-          <svg viewBox="0 0 100 100" width="80" height="80">
-            <circle cx="50" cy="55" r="35" fill="#1c182a"/>
-            <path d="M 25 35 Q 15 10 35 25 Q 50 35 25 35 Z" fill="#1c182a"/>
-            <path d="M 75 35 Q 85 10 65 25 Q 50 35 75 35 Z" fill="#1c182a"/>
-            <circle cx="38" cy="55" r="4" fill="#ffffff"/>
-            <circle cx="62" cy="55" r="4" fill="#ffffff"/>
-            <path d="M 45 65 Q 50 70 55 65" stroke="#f285c4" stroke-width="2" fill="none"/>
-            <polygon points="50,42 45,48 55,48" fill="#f285c4"/>
-          </svg>
-        </div>
-        <h2 style="font-size: 22px; font-weight:700;">SakuraMail 🌸</h2>
-        <p style="font-size: 12px; color: var(--text-sub); margin-top: 4px;">Твое уютное пространство для душевного общения</p>
-      </div>
-
-      <div style="width: 100%; max-width: 320px;">
-        <div class="input-group">
-          <input type="email" id="auth-email" class="custom-input" placeholder="Email или никнейм">
-        </div>
-        <div class="input-group">
-          <input type="password" id="auth-password" class="custom-input" placeholder="Пароль">
-        </div>
-        <div class="input-group" id="auth-username-group" style="display:none;">
-          <input type="text" id="auth-username" class="custom-input" placeholder="Уникальный юзернейм (@tag)">
-        </div>
-
-        <button class="btn-primary" id="auth-submit-btn">Войти</button>
-
-        <p style="font-size: 12px; color: var(--text-sub); margin-top: 16px; cursor: pointer;" id="auth-toggle-btn">
-          Нет аккаунта? <span style="color: var(--accent-purple);">Создать &gt;</span>
-        </p>
-      </div>
-    </section>
-
-    <!-- 2. WELCOME SCREEN -->
-    <section class="screen" id="screen-welcome">
-      <div style="background: var(--card-bg); border-radius:20px; padding:20px; border:1px solid var(--border-color); text-align:center;">
-        <p style="font-size: 12px; color: var(--accent-pink);">От: SakuraMail 🌸</p>
-        <h3 style="margin: 8px 0;">Привет, новенький! 💌</h3>
-        <p style="font-size: 13px; color: var(--text-sub); line-height:1.5;">
-          Мы так рады, что ты здесь!<br>
-          SakuraMail — это не просто мессенджер. Это твой маленький мирок тепла, уюта и искренних разговоров.
-        </p>
-        
-        <div style="margin: 24px 0; background: var(--card-inner); padding:20px; border-radius:16px;">
-          <p style="font-size: 12px; margin-bottom:12px;">Вот твой первый подарок 🎁</p>
-          <svg viewBox="0 0 100 100" width="80" height="80">
-            <circle cx="50" cy="50" r="30" fill="#9d72ff"/>
-            <circle cx="35" cy="30" r="10" fill="#9d72ff"/>
-            <circle cx="65" cy="30" r="10" fill="#9d72ff"/>
-            <circle cx="43" cy="48" r="3" fill="#fff"/>
-            <circle cx="57" cy="48" r="3" fill="#fff"/>
-            <ellipse cx="50" cy="55" rx="5" ry="3" fill="#f285c4"/>
-          </svg>
-        </div>
-
-        <button class="btn-primary" onclick="switchTab('dialogs')">Открыть подарок</button>
-      </div>
-    </section>
-
-    <!-- 3. DIALOGS LIST SCREEN -->
-    <section class="screen" id="screen-dialogs">
-      <div class="input-group">
-        <input type="text" id="dialog-search" class="custom-input" placeholder="Поиск собеседника по @tag...">
-      </div>
-
-      <div id="dialogs-list" style="display:flex; flex-direction:column; gap:10px;">
-        <!-- Dynamic Dialog Items -->
-      </div>
-    </section>
-
-    <!-- 4. CHAT WINDOW SCREEN -->
-    <section class="screen" id="screen-chat" style="padding:0; height:100%;">
-      <div class="chat-container">
-        <div class="app-header" style="border-bottom:1px solid var(--border-color);">
-          <button class="icon-btn" onclick="switchTab('dialogs')">
-            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-          </button>
-          <div style="text-align:center;">
-            <div id="chat-user-name" style="font-size:14px; font-weight:600;">...</div>
-            <div id="chat-user-status" style="font-size:10px; color:var(--accent-pink);">офлайн</div>
-          </div>
-          <button class="icon-btn" id="ghost-toggle-btn" title="Призрачное сообщение">
-            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2A9 9 0 0 0 3 11c0 2.97 1.45 5.6 3.7 7.2L6 22l3.5-1.5c.8.3 1.6.5 2.5.5 4.97 0 9-4.03 9-9s-4.03-9-9-9zm-3 8a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm6 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>
-          </button>
-        </div>
-
-        <div class="chat-messages" id="chat-messages-box">
-          <!-- Messages inserted dynamically -->
-        </div>
-
-        <div class="chat-input-bar">
-          <button class="icon-btn" id="attach-btn">
-            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V5c0-2.21-1.79-4-4-4s-4 1.79-4 4v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z"/></svg>
-          </button>
-          <button class="icon-btn" id="draw-btn">
-            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-          </button>
-          <input type="text" id="chat-msg-input" class="chat-input" placeholder="Напиши что-нибудь...">
-          <button class="icon-btn" id="chat-send-btn" style="color:var(--accent-purple);">
-            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <!-- 5. PROFILE SCREEN -->
-    <section class="screen" id="screen-profile">
-      <div class="profile-header-card">
-        <div class="avatar-wrapper">
-          <img id="profile-avatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%239d72ff'/></svg>" class="avatar-img">
-          <label for="avatar-file-input" class="avatar-edit-badge">
-            <svg viewBox="0 0 24 24" width="16" height="16"><path fill="#fff" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z"/></svg>
-          </label>
-          <input type="file" id="avatar-file-input" accept="image/*" style="display:none;">
-        </div>
-        <h3 id="profile-display-name">...</h3>
-        <p class="user-tag" id="profile-tag">@...</p>
-
-        <div class="level-box">
-          <div class="level-title">
-            <span>Сладкий уровень</span>
-            <span id="level-text">Уровень 12</span>
-          </div>
-          <div class="progress-bar">
-            <div class="progress-fill" id="level-fill" style="width: 65%;"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="menu-list">
-        <div class="menu-item" onclick="openScreen('mailbox')">
-          <div class="menu-item-left">
-            <span>📫 Почтовый ящик</span>
-          </div>
-          <span>&gt;</span>
-        </div>
-        <div class="menu-item" onclick="openScreen('archive')">
-          <div class="menu-item-left">
-            <span>🍯 Сладкий архив</span>
-          </div>
-          <span>&gt;</span>
-        </div>
-        <div class="menu-item" onclick="openScreen('past-letter')">
-          <div class="menu-item-left">
-            <span>⏳ Письма из прошлого</span>
-          </div>
-          <span>&gt;</span>
-        </div>
-        <div class="menu-item" onclick="openScreen('autoresponder')">
-          <div class="menu-item-left">
-            <span>🤖 Настройки автоответчика</span>
-          </div>
-          <span>&gt;</span>
-        </div>
-        <div class="menu-item" onclick="openScreen('themes')">
-          <div class="menu-item-left">
-            <span>🎨 Темы оформления</span>
-          </div>
-          <span>&gt;</span>
-        </div>
-        <div class="menu-item" onclick="openScreen('haptics')">
-          <div class="menu-item-left">
-            <span>🔔 Звуки и тактильный вайб</span>
-          </div>
-          <span>&gt;</span>
-        </div>
-        <div class="menu-item" onclick="openScreen('privacy')">
-          <div class="menu-item-left">
-            <span>🔒 Настройки приватности</span>
-          </div>
-          <span>&gt;</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- 6. MAILBOX SCREEN -->
-    <section class="screen" id="screen-mailbox">
-      <div class="mailbox-banner">
-        <div class="mailbox-icon-large">
-          <svg viewBox="0 0 100 100">
-            <path d="M 20 40 L 80 40 L 80 80 L 20 80 Z" fill="#211b33" stroke="#9d72ff" stroke-width="3"/>
-            <path d="M 20 40 L 50 60 L 80 40" fill="none" stroke="#f285c4" stroke-width="3"/>
-          </svg>
-        </div>
-        <h4>У тебя 3 новых письма 💌</h4>
-        <p style="font-size:12px; color:var(--text-sub); margin-top:4px;">Анонимные послания от друзей</p>
-      </div>
-      <div id="mailbox-list" style="display:flex; flex-direction:column; gap:10px;"></div>
-    </section>
-
-    <!-- 7. SWEET ARCHIVE (JARS) SCREEN -->
-    <section class="screen" id="screen-archive">
-      <h3>🍯 Сладкий архив</h3>
-      <p style="font-size:12px; color:var(--text-sub); margin-bottom:12px;">Старые диалоги бережно сохранены в баночки</p>
-      
-      <div class="jars-grid">
-        <div class="jar-card">
-          <div class="jar-icon">
-            <svg viewBox="0 0 60 70">
-              <rect x="10" y="15" width="40" height="50" rx="10" fill="#3a2333" stroke="#ff85c0" stroke-width="2"/>
-              <rect x="15" y="5" width="30" height="10" rx="3" fill="#ff85c0"/>
-            </svg>
-          </div>
-          <div class="jar-label">Luna</div>
-          <div class="jar-date">Май 2024</div>
-        </div>
-        <div class="jar-card">
-          <div class="jar-icon">
-            <svg viewBox="0 0 60 70">
-              <rect x="10" y="15" width="40" height="50" rx="10" fill="#1a2a42" stroke="#70b3ff" stroke-width="2"/>
-              <rect x="15" y="5" width="30" height="10" rx="3" fill="#70b3ff"/>
-            </svg>
-          </div>
-          <div class="jar-label">Mochi</div>
-          <div class="jar-date">Апрель 2024</div>
-        </div>
-        <div class="jar-card">
-          <div class="jar-icon">
-            <svg viewBox="0 0 60 70">
-              <rect x="10" y="15" width="40" height="50" rx="10" fill="#382e1c" stroke="#ffc857" stroke-width="2"/>
-              <rect x="15" y="5" width="30" height="10" rx="3" fill="#ffc857"/>
-            </svg>
-          </div>
-          <div class="jar-label">Kitty</div>
-          <div class="jar-date">Март 2024</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 8. BOTTLE MESSAGE SCREEN -->
-    <section class="screen" id="screen-bottle">
-      <div style="text-align:center; padding:20px 0;">
-        <svg viewBox="0 0 100 120" width="90" height="110">
-          <path d="M 40 10 L 60 10 L 60 25 L 80 45 L 80 110 L 20 110 L 20 45 L 40 25 Z" fill="none" stroke="#70b3ff" stroke-width="3"/>
-          <rect x="42" y="5" width="16" height="8" fill="#c2b28a"/>
-          <path d="M 30 70 Q 50 80 70 70" stroke="#f285c4" stroke-width="2" fill="none"/>
-        </svg>
-        <h3>Письмо в бутылке 🍾</h3>
-        <p style="font-size:12px; color:var(--text-sub); margin-top:4px;">Отправь послание случайному человеку в океан</p>
-      </div>
-
-      <div class="input-group">
-        <textarea id="bottle-text" class="custom-input" style="height:100px; padding:12px;" placeholder="Твоё сообщение..."></textarea>
-      </div>
-      <button class="btn-primary" id="send-bottle-btn">Отправить в океан 🌊</button>
-    </section>
-
-    <!-- 9. LETTER FROM PAST SCREEN -->
-    <section class="screen" id="screen-past-letter">
-      <div style="text-align:center; padding:20px;">
-        <svg viewBox="0 0 100 100" width="80" height="80">
-          <circle cx="50" cy="50" r="40" fill="none" stroke="#f285c4" stroke-width="3"/>
-          <polyline points="50,25 50,50 65,65" fill="none" stroke="#f285c4" stroke-width="3"/>
-        </svg>
-        <h3 style="margin-top:12px;">Письмо из прошлого ⏳</h3>
-        <p style="font-size:12px; color:var(--text-sub); margin-top:4px;">Ты написала себе письмо при регистрации</p>
-        
-        <div style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:20px; padding:20px; margin:20px 0;">
-          <p style="font-size:14px; font-weight:600;">Откроется через 29 дней</p>
-          <p style="font-size:11px; color:var(--accent-pink); margin-top:6px;">Ты удивишься, как изменилась 💜</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- 10. AUTORESPONDER SCREEN -->
-    <section class="screen" id="screen-autoresponder">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <h3>Умный автоответчик 🤖</h3>
-        <label class="toggle-switch">
-          <input type="checkbox" id="autoresponder-toggle" checked>
-          <span class="slider"></span>
-        </label>
-      </div>
-
-      <div class="menu-list">
-        <div class="menu-item">
-          <div>
-            <div style="font-size:14px; font-weight:600;">На занятиях</div>
-            <div style="font-size:11px; color:var(--text-sub);">Сейчас на занятиях, отвечу позже!</div>
-          </div>
-        </div>
-        <div class="menu-item">
-          <div>
-            <div style="font-size:14px; font-weight:600;">Сплю 😴</div>
-            <div style="font-size:11px; color:var(--text-sub);">Сплю как мишка 🐻</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 11. THEMES SCREEN -->
-    <section class="screen" id="screen-themes">
-      <h3>🎨 Темы оформления</h3>
-      <div class="menu-list" style="margin-top:14px;">
-        <div class="menu-item" onclick="setTheme('Kuromi Night')">
-          <div class="menu-item-left"><span>🖤 Kuromi Night</span></div>
-        </div>
-        <div class="menu-item" onclick="setTheme('My Melody Day')">
-          <div class="menu-item-left"><span>💗 My Melody Day</span></div>
-        </div>
-        <div class="menu-item" onclick="setTheme('Cinnamoroll Sky')">
-          <div class="menu-item-left"><span>☁️ Cinnamoroll Sky</span></div>
-        </div>
-        <div class="menu-item" onclick="setTheme('Pompompurin Cafe')">
-          <div class="menu-item-left"><span>🍮 Pompompurin Cafe</span></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 12. HAPTICS SCREEN -->
-    <section class="screen" id="screen-haptics">
-      <h3>🔔 Звуки и тактильный вайб</h3>
-      <div class="menu-list" style="margin-top:14px;">
-        <div class="menu-item">
-          <div>
-            <div style="font-size:14px;">Звук уведомлений</div>
-            <div style="font-size:11px; color:var(--text-sub);">Колокольчики 🔔</div>
-          </div>
-        </div>
-        <div class="menu-item">
-          <div>
-            <div style="font-size:14px;">Вибрация</div>
-            <div style="font-size:11px; color:var(--text-sub);">Мягкая (шёлк) ✨</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 13. PRIVACY SCREEN -->
-    <section class="screen" id="screen-privacy">
-      <h3>🔒 Настройки приватности</h3>
-      <div class="menu-list" style="margin-top:14px;">
-        <div class="menu-item">
-          <span>Кто может писать</span>
-          <span style="color:var(--text-sub);">Все &gt;</span>
-        </div>
-        <div class="menu-item">
-          <span>Кто видит онлайн</span>
-          <span style="color:var(--text-sub);">Друзья &gt;</span>
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- Bottom Navigation -->
-  <nav class="bottom-nav" id="app-nav" style="display:none;">
-    <div class="nav-item active" onclick="switchTab('dialogs')">
-      <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
-      <span>Чаты</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('bottle')">
-      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-      <span>Бутылка</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('profile')">
-      <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-      <span>Профиль</span>
-    </div>
-  </nav>
-
-  <!-- Canvas Co-Drawing Modal -->
-  <div class="drawing-modal" id="drawing-modal">
-    <div class="app-header">
-      <span>Совместный рисунок 🎨</span>
-      <button class="icon-btn" onclick="closeDrawingModal()">✕</button>
-    </div>
-    <canvas id="drawing-canvas"></canvas>
-    <div class="drawing-tools">
-      <div class="color-dot" style="background:#000000;" onclick="setDrawColor('#000000')"></div>
-      <div class="color-dot" style="background:#ff4f70;" onclick="setDrawColor('#ff4f70')"></div>
-      <div class="color-dot" style="background:#9d72ff;" onclick="setDrawColor('#9d72ff')"></div>
-      <div class="color-dot" style="background:#f285c4;" onclick="setDrawColor('#f285c4')"></div>
-      <button class="btn-primary" style="width:auto; padding:0 16px;" onclick="sendDrawing()">Отправить</button>
     </div>
   </div>
+  <button class="btn-pink" style="margin-top:24px;" onclick="doLogin()">Войти</button>
+</div>
 
+<!-- ===== REGISTER SCREEN ===== -->
+<div id="registerScreen" class="screen auth-screen">
+  <div class="auth-header">
+    <button class="back-btn" onclick="showScreen('welcomeScreen')">
+      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="auth-title">Регистрация</div>
+  </div>
+  <div class="avatar-upload" onclick="document.getElementById('regAvatar').click()">
+    <img id="regAvatarPreview" src="" class="hidden">
+    <svg id="regAvatarIcon" viewBox="0 0 36 36"><circle cx="18" cy="12" r="6" fill="currentColor"/><path d="M6 32c0-8 6-12 12-12s12 4 12 12" fill="currentColor"/></svg>
+    <input type="file" id="regAvatar" accept="image/*" onchange="previewAvatar(this,'regAvatarPreview','regAvatarIcon')">
+  </div>
+  <div class="input-group">
+    <label>Имя пользователя</label>
+    <input type="text" class="input-field" id="regName" placeholder="Sakura_Chan">
+  </div>
+  <div class="input-group">
+    <label>Юзернейм (@)</label>
+    <input type="text" class="input-field" id="regUsername" placeholder="sakura_chan" oninput="this.value=this.value.replace(/[^a-zA-Z0-9_]/g,'')">
+  </div>
+  <div class="input-group">
+    <label>Почта</label>
+    <input type="email" class="input-field" id="regEmail" placeholder="sakura@mail.com">
+  </div>
+  <div class="input-group">
+    <label>Пароль</label>
+    <div class="password-wrap">
+      <input type="password" class="input-field" id="regPassword" placeholder="••••••••">
+      <button class="eye-btn" onclick="togglePassword('regPassword',this)">
+        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="letter-future-box" style="margin:12px 0;">
+    <div style="font-size:13px;color:var(--pink);margin-bottom:8px;">✉️ Письмо себе из прошлого</div>
+    <textarea id="futureLetter" placeholder="Напиши себе письмо... Оно придёт через месяц 💌"></textarea>
+  </div>
+  <p style="font-size:11px;color:var(--text3);text-align:center;margin:8px 0;">Регистрируясь, вы соглашаетесь с Условиями использования</p>
+  <button class="btn-pink" onclick="doRegister()">Создать аккаунт</button>
+</div>
+
+<!-- ===== MAIN SCREEN ===== -->
+<div id="mainScreen" class="screen">
+  <div class="app-header">
+    <div class="header-avatar" onclick="showScreen('profileScreen')">
+      <img id="headerAvatar" src="" alt="">
+    </div>
+    <div class="header-info">
+      <div class="header-name" id="headerName">SakuraMail</div>
+      <div class="header-status" id="headerStatus"><span class="status-dot"></span>в сети</div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="showScreen('searchScreen')">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+      </button>
+      <button class="icon-btn" onclick="showScreen('mailboxScreen')">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" fill="none" stroke="currentColor" stroke-width="2"/><polyline points="22,6 12,13 2,6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="chat-list" id="chatList"></div>
+  <div class="bottom-nav">
+    <button class="nav-item active" onclick="switchTab('chats')">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+      Чаты
+    </button>
+    <button class="nav-item" onclick="showScreen('bottleScreen')">
+      <svg viewBox="0 0 24 24"><path d="M9 2v2m6-2v2M3 8h18M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><rect x="9" y="14" width="6" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      Звонки
+    </button>
+    <button class="nav-item" onclick="showScreen('mailboxScreen')">
+      <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" fill="none" stroke="currentColor" stroke-width="2"/><polyline points="22,6 12,13 2,6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      Письма
+    </button>
+    <button class="nav-item" onclick="showScreen('profileScreen')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Профиль
+    </button>
+  </div>
+</div>
+
+<!-- ===== CHAT SCREEN ===== -->
+<div id="chatScreen" class="screen">
+  <div class="chat-header">
+    <button class="back-btn" onclick="leaveChat()">
+      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="header-avatar" id="chatHeaderAvatar">
+      <img src="" alt="">
+    </div>
+    <div class="header-info" style="flex:1;">
+      <div class="header-name" id="chatHeaderName"></div>
+      <div class="header-status" id="chatHeaderStatus"><span class="status-dot"></span>в сети</div>
+    </div>
+    <button class="icon-btn" onclick="showScreen('drawScreen')">
+      <svg viewBox="0 0 24 24"><path d="M12 19l7-7 3 3-7 7-3-3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M2 2l7.5 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+    <button class="icon-btn" onclick="toggleChatMenu()">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="19" r="1.5" fill="currentColor"/></svg>
+    </button>
+  </div>
+  <div class="chat-messages" id="chatMessages"></div>
+  <div class="chat-input-area">
+    <div class="input-actions">
+      <button onclick="document.getElementById('fileInput').click()">
+        <svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <input type="file" id="fileInput" class="hidden" accept="image/*,video/*,audio/*" onchange="sendFile(this)">
+      <button onclick="toggleStickerPanel()">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 14s1.5 2 4 2 4-2 4-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="9" y1="9" x2="9.01" y2="9" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><line x1="15" y1="9" x2="15.01" y2="9" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="chat-input-wrap">
+      <input type="text" class="chat-input" id="chatInput" placeholder="Сообщение..." onkeypress="if(event.key==='Enter')sendMessage()">
+      <div class="input-actions">
+        <button onclick="toggleRiddleMode()">
+          <svg viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m0 16v1m8.66-8.66l-.707.707M4.343 4.343l-.707.707M21 12h-1M4 12H3m16.657 7.657l-.707-.707M4.343 19.657l-.707-.707" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="ghost-toggle" id="ghostToggle" onclick="toggleGhost()">
+      <svg viewBox="0 0 24 24"><path d="M9 10h.01M15 10h.01M12 2a8 8 0 00-8 8v12l3-3 3 3 3-3 3 3 3-3 3 3V10a8 8 0 00-8-8z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+      Призрак
+    </div>
+    <button class="send-btn" onclick="sendMessage()">
+      <svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+  <div class="sticker-panel" id="stickerPanel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <span style="font-weight:700;">Стикеры</span>
+      <button style="background:none;border:none;color:var(--pink);cursor:pointer;font-size:13px;" onclick="showScreen('stickerMakerScreen')">+ Создать</button>
+    </div>
+    <div class="sticker-grid" id="stickerGrid"></div>
+  </div>
+</div>
+
+<!-- ===== PROFILE SCREEN ===== -->
+<div id="profileScreen" class="screen">
+  <div class="app-header">
+    <button class="back-btn" onclick="showScreen('mainScreen')">
+      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="auth-title">Профиль</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div class="profile-header">
+    <div class="profile-avatar" onclick="document.getElementById('profileAvatarInput').click()">
+      <img id="profileAvatarImg" src="" alt="">
+      <div class="edit-overlay">Изменить</div>
+    </div>
+    <input type="file" id="profileAvatarInput" class="hidden" accept="image/*" onchange="updateProfileAvatar(this)">
+    <div class="profile-name" id="profileName"></div>
+    <div class="profile-username" id="profileUsername"></div>
+    <div class="profile-status-text" id="profileStatusText" contenteditable="true" onblur="saveStatusText(this.innerText)">Люблю чай и котиков 🍵🐱</div>
+  </div>
+  <div class="profile-menu">
+    <div class="profile-menu-item" onclick="showScreen('archiveScreen')">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 9h18" stroke="currentColor" stroke-width="2"/><path d="M9 21V9" stroke="currentColor" stroke-width="2"/></svg>
+      <span>Сладкий архив</span>
+      <svg class="arrow" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="profile-menu-item" onclick="showScreen('autoReplyScreen')">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+      <span>Автоответчик</span>
+      <svg class="arrow" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="profile-menu-item" onclick="showScreen('settingsScreen')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15 1.65 1.65 0 003.09 14H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.6 1.65 1.65 0 0010 3.09V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82 1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      <span>Настройки</span>
+      <svg class="arrow" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="profile-menu-item" onclick="showScreen('themeScreen')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <span>Оформление</span>
+      <span style="color:var(--text3);font-size:13px;">Тёмная Сакура</span>
+      <svg class="arrow" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="profile-menu-item">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      <span>Язык</span>
+      <span style="color:var(--text3);font-size:13px;">Русский</span>
+      <svg class="arrow" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="profile-menu-item" onclick="doLogout()">
+      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Выйти</span>
+      <svg class="arrow" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MAILBOX SCREEN ===== -->
+<div id="mailboxScreen" class="screen">
+  <div class="app-header">
+    <button class="back-btn" onclick="showScreen('mainScreen')">
+      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="auth-title">Почтовый ящик</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div class="mailbox-header">
+    <div class="mailbox-icon">
+      <svg viewBox="0 0 100 100" fill="none">
+        <rect x="15" y="30" width="70" height="50" rx="8" fill="var(--pink)" opacity="0.3" stroke="var(--pink)" stroke-width="2"/>
+        <rect x="20" y="35" width="60" height="40" rx="4" fill="var(--bg-card)"/>
+        <rect x="35" y="45" width="30" height="20" rx="3" fill="var(--bg-deep)" stroke="var(--pink)" stroke-width="1.5"/>
+        <circle cx="50" cy="55" r="4" fill="var(--pink)"/>
+        <path d="M25 20 Q50 5 75 20" fill="none" stroke="var(--pink)" stroke-width="2" stroke-linecap="round"/>
+        <ellipse cx="30" cy="15" rx="4" ry="6" fill="var(--pink3)" opacity="0.6" transform="rotate(-20 30 15)"/>
+        <ellipse cx="70" cy="12" rx="4" ry="6" fill="var(--pink3)" opacity="0.6" transform="rotate(20 70 12)"/>
+        <ellipse cx="50" cy="8" rx="5" ry="7" fill="var(--pink)" opacity="0.5" transform="rotate(0 50 8)"/>
+      </svg>
+    </div>
+    <div class="mailbox-count" id="mailboxCount">У вас 0 новых писем</div>
+    <button class="btn-pink" style="max-width:200px;" onclick="openMailbox()">Открыть</button>
+  </div>
+  <div class="mailbox-list" id="mailboxList"></div>
+</div>
+
+<!-- ===== ARCHIVE SCREEN ===== -->
+<div id="archiveScreen" class="screen">
+  <div class="app-header">
+    <button class="back-btn" onclick="showScreen('profileScreen')">
+      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="auth-title">Сладкий архив</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div class="section-sub" style="text-align:center;">Здесь хранятся твои тёплые воспоминания и важные разговоры.</div>
+  <div class="archive-grid" id="archiveGrid"></div>
+</div>
+
+<!-- ===== BOTTLE SCREEN ===== -->
+<div id="bottleScreen" class="screen bottle-screen">
+  <button class="back-btn" style="position:absolute;top:12px;left:12px;" onclick="showScreen('mainScreen')">
+    <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+  <div class="bottle-anim">
+    <svg viewBox="0 0 200 200" fill="none">
+      <ellipse cx="100" cy="170" rx="60" ry="10" fill="var(--pink)" opacity="0.15"/>
+      <path d="M85 50 Q80 30 100 25 Q120 30 115 50 L125 100 Q130 120 120 140 L110 155 Q105 160 100 160 Q95 160 90 155 L80 140 Q70 120 75 100 Z" fill="rgba(100,180,220,0.3)" stroke="rgba(100,180,220,0.5)" stroke-width="2"/>
+      <rect x="92" y="20" width="16" height="12" rx="2" fill="#c4956a"/>
+      <rect x="88" y="32" width="24" height="6" rx="2" fill="#b08555"/>
+      <rect x="90" y="80" width="20" height="35" rx="3" fill="#f5e6c8" stroke="#d4c4a0" stroke-width="1"/>
+      <line x1="94" y1="88" x2="106" y2="88" stroke="#b0a080" stroke-width="1"/>
+      <line x1="94" y1="95" x2="106" y2="95" stroke="#b0a080" stroke-width="1"/>
+      <line x1="94" y1="102" x2="102" y2="102" stroke="#b0a080" stroke-width="1"/>
+      <ellipse cx="60" cy="150" rx="8" ry="3" fill="var(--pink3)" opacity="0.4"/>
+      <ellipse cx="140" cy="155" rx="6" ry="2" fill="var(--pink3)" opacity="0.3"/>
+      <ellipse cx="100" cy="165" rx="4" ry="1.5" fill="var(--pink3)" opacity="0.5"/>
+      <path d="M70 60 Q75 55 80 60" fill="none" stroke="var(--pink3)" stroke-width="1.5" opacity="0.5"/>
+      <path d="M130 80 Q125 75 120 80" fill="none" stroke="var(--pink3)" stroke-width="1.5" opacity="0.5"/>
+      <path d="M50 100 Q55 95 60 100" fill="none" stroke="var(--pink3)" stroke-width="1.5" opacity="0.4"/>
+    </svg>
+  </div>
+  <div style="font-size:20px;font-weight:700;margin-bottom:8px;">Письмо в бутылке</div>
+  <div style="font-size:14px;color:var(--text2);margin-bottom:24px;max-width:280px;">Твоё сообщение уплывёт в океан... Кто-то получит его совсем скоро 🌸</div>
+  <textarea id="bottleMsg" style="width:90%;max-width:320px;padding:14px;border-radius:16px;border:1.5px solid var(--bg-input);background:var(--bg-card);color:var(--text);font-size:15px;font-family:inherit;resize:none;outline:none;min-height:80px;margin-bottom:16px;" placeholder="Напиши что-нибудь тёплое..."></textarea>
+  <button class="btn-pink" style="max-width:200px;" onclick="sendBottle()">Отправить в океан</button>
+  <div style="margin-top:32px;font-size:13px;color:var(--text3);">
+    <div style="margin-bottom:8px;">📨 Полученные бутылки:</div>
+    <div id="bottleList" style="max-height:200px;overflow-y:auto;"></div>
+  </div>
+</div>
+
+<!-- ===== DRAW SCREEN ===== -->
+<div id="drawScreen" class="screen">
+  <div class="app-header">
+    <button class="back-btn" onclick="showScreen('chatScreen')">
+      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="auth-title">Совместный рисунок</div>
+    <button class="icon-btn" onclick="sendDrawing()">
+      <svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+  <div style="padding:8px 16px;font-size:13px;color:var(--text3);text-align:center;" id="drawUsers"></div>
+  <div class="canvas-toolbar">
+    <button class="color-btn active" style="background:#e8a4c8;" onclick="setBrushColor('#e8a4c8',this)"></button>
+    <button class="color-btn" style="background:#7ee8a0;" onclick="setBrushColor('#7ee8a0',this)"></button>
+    <button class="color-btn" style="background:#a4c8f0;" onclick="setBrushColor('#a4c8f0',this)"></button>
+    <button class="color-btn" style="background:#f0e4a4;" onclick="setBrushColor('#f0e4a4',this)"></button>
+    <button class="color-btn" style="background:#d4a4f0;" onclick="setBrushColor('#d4a4f0',this)"></button>
+    <button class="color-btn" style="background:#f5e6f0;" onclick="setBrushColor('#f5e6f0',this)"></button>
+    <button class="color-btn" style="background:#1a1528;" onclick="setBrushColor('#1a1528',this)"></button>
+    <div style="width:1px;height:24px;background:var(--bg-input);margin:0 4px;"></div>
+    <button class="brush-btn active" onclick="setBrushSize(3,this)">Тонкий</button>
+    <button class="brush-btn" onclick="setBrushSize(8,this)">Средний</button>
+    <button class="brush-btn" onclick="setBrushSize(15,this)">Толстый</button>
+    <div style="width:1px;height:24px;background:var(--bg-input);margin:0 4px;"></div>
+    <button class="brush-btn" onclick="clearCanvas()">Очистить</button>
+  </div>
+  <canvas id="drawCanvas"></canvas>
+</div>
+
+<!-- ===== STICKER MAKER ===== -->
+<div id="stickerMakerScreen" class="screen">
+  <div class="app-header">
+    <button class="back-btn" onclick="showScreen('chatScreen')">
+      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="auth-title">Создать стикер</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div style="padding:16px;text-align:center;">
+    <div style="font-size:14px;color:var(--text2);margin-bottom:16px;">Нарисуй или выбери эмодзи:</div>
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:16px;" id="emojiPicker"></div>
+    <div style="background:var(--bg-card);border-radius:16px;padding:16px;margin-bottom:16px;">
+      <div style="font-size:13px;color:var(--text3);margin-bottom:8px;">Или загрузи своё:</div>
+      <input type="file" id="stickerFile" accept="image/*" onchange="createStickerFromFile(this)" style="color:var(--text);">
+    </div>
+    <div style="font-size:13px;color:var(--text3);margin-bottom:8px;">Твои стикеры:</div>
+    <div class="sticker-grid" id="myStickers"></div>
+  </div>
+</div>
+
+<!-- ===== SEARCH SCREEN ===== -->
+<div id="searchScreen" class="screen">
+  <div class="app-header">
+    <button class="back-btn" onclick="showScreen('mainScreen')">
+      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="auth-title">Найти друга</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div class="search-bar">
+    <input type="text" class="search-input" id="searchInput" placeholder="@username или email..." oninput="searchUsers(this.value)">
+  </div>
+  <div class="search-results" id="searchResults"></div>
+</div>
+
+<!-- ===== AUTO-REPLY SCREEN ===== -->
+<div id="autoReplyScreen" class="screen">
+  <div class="app-header">
+    <button class="back-btn" onclick="showScreen('profileScreen')">
+      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="auth-title">Автоответчик</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div class="section-sub">Умные ответы по шаблонам и с пониманием</div>
+  <div style="padding:0 16px;">
+    <div class="auto-reply-item">
+      <input type="text" id="arTrigger" placeholder="Триггер (например: привет)">
+    </div>
+    <div class="auto-reply-item">
+      <input type="text" id="arResponse" placeholder="Ответ (например: Привет! Как дела?)">
+      <button onclick="addAutoReply()">Добавить</button>
+    </div>
+    <div id="autoReplyList" style="margin-top:12px;"></div>
+    <div style="margin-top:16px;padding:12px;background:var(--bg-card);border-radius:12px;">
+      <div style="font-size:13px;color:var(--pink);margin-bottom:6px;">🤖 Умный режим</div>
+      <div style="font-size:12px;color:var(--text3);">Автоответчик понимает сообщения с ошибками и отвечает по контексту</div>
+      <label style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px;color:var(--text2);cursor:pointer;">
+        <input type="checkbox" id="smartAutoReply" style="accent-color:var(--pink);" onchange="saveSmartReply()"> Включить умный автоответ
+      </label>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SETTINGS SCREEN ===== -->
+<div id="settingsScreen" class="screen">
+  <div class="app-header">
+    <button class="back-btn" onclick="showScreen('profileScreen')">
+      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="auth-title">Настройки</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div class="profile-menu">
+    <div class="profile-menu-item">
+      <svg viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0118 0v6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      <span>Звуки уведомлений</span>
+      <label style="position:relative;display:inline-block;width:44px;height:24px;">
+        <input type="checkbox" id="soundToggle" checked style="opacity:0;width:0;height:0;" onchange="saveSetting('sounds',this.checked)">
+        <span style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--bg-input);border-radius:24px;transition:0.3s;"><span style="position:absolute;content:'';height:18px;width:18px;left:3px;bottom:3px;background:var(--text3);border-radius:50%;transition:0.3s;"></span></span>
+      </label>
+    </div>
+    <div class="profile-menu-item">
+      <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Вибрация</span>
+      <label style="position:relative;display:inline-block;width:44px;height:24px;">
+        <input type="checkbox" id="vibroToggle" checked style="opacity:0;width:0;height:0;" onchange="saveSetting('vibration',this.checked)">
+        <span style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--bg-input);border-radius:24px;transition:0.3s;"><span style="position:absolute;content:'';height:18px;width:18px;left:3px;bottom:3px;background:var(--text3);border-radius:50%;transition:0.3s;"></span></span>
+      </label>
+    </div>
+    <div class="profile-menu-item">
+      <svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13M9 9l12-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="18" r="3" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="16" r="3" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      <span>Фоновая музыка</span>
+      <label style="position:relative;display:inline-block;width:44px;height:24px;">
+        <input type="checkbox" id="musicToggle" style="opacity:0;width:0;height:0;" onchange="toggleMusic(this.checked)">
+        <span style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--bg-input);border-radius:24px;transition:0.3s;"><span style="position:absolute;content:'';height:18px;width:18px;left:3px;bottom:3px;background:var(--text3);border-radius:50%;transition:0.3s;"></span></span>
+      </label>
+    </div>
+    <div class="profile-menu-item">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15 1.65 1.65 0 003.09 14H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.6 1.65 1.65 0 0010 3.09V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82 1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      <span>Конфиденциальность</span>
+      <svg class="arrow" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+</div>
+
+<!-- ===== THEME SCREEN ===== -->
+<div id="themeScreen" class="screen">
+  <div class="app-header">
+    <button class="back-btn" onclick="showScreen('profileScreen')">
+      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="auth-title">Оформление</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div style="padding:16px;">
+    <div style="background:var(--bg-card);border-radius:16px;padding:16px;margin-bottom:12px;border:2px solid var(--pink);">
+      <div style="font-size:16px;font-weight:700;margin-bottom:4px;">🌸 Тёмная Сакура</div>
+      <div style="font-size:13px;color:var(--text3);">Текущая тема</div>
+    </div>
+    <div style="background:var(--bg-card);border-radius:16px;padding:16px;margin-bottom:12px;opacity:0.5;">
+      <div style="font-size:16px;font-weight:700;margin-bottom:4px;">☀️ Светлая Сакура</div>
+      <div style="font-size:13px;color:var(--text3);">Скоро...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div class="toast" id="toast"></div>
+
+<!-- ===== MODAL: MAIL READ ===== -->
+<div class="modal-overlay" id="mailModal">
+  <div class="modal-content" style="position:relative;">
+    <button class="modal-close" onclick="closeModal('mailModal')">
+      <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+    </button>
+    <div class="modal-title">✉️ Письмо</div>
+    <div id="mailContent" style="font-size:14px;line-height:1.6;color:var(--text);"></div>
+    <div id="mailTime" style="font-size:11px;color:var(--text3);margin-top:12px;text-align:right;"></div>
+    <button class="btn-pink" style="margin-top:16px;" onclick="replyToMail()">Ответить</button>
+  </div>
+</div>
+
+<!-- ===== MODAL: RIDDLE SOLVE ===== -->
+<div class="modal-overlay" id="riddleModal">
+  <div class="modal-content">
+    <div class="modal-title">🧩 Сообщение-загадка</div>
+    <div class="riddle-box">
+      <div class="riddle-hint" id="riddleHint"></div>
+      <input type="text" class="riddle-input" id="riddleAnswer" placeholder="Твой ответ..." onkeypress="if(event.key==='Enter')solveRiddle()">
+    </div>
+    <button class="btn-pink" style="margin-top:16px;" onclick="solveRiddle()">Угадать</button>
+  </div>
+</div>
+
+<!-- ===== MODAL: BOTTLE REPLY ===== -->
+<div class="modal-overlay" id="bottleReplyModal">
+  <div class="modal-content">
+    <div class="modal-title">🍾 Ответить на бутылку</div>
+    <textarea id="bottleReplyText" style="width:100%;padding:12px;border-radius:12px;border:1.5px solid var(--bg-input);background:var(--bg-card);color:var(--text);font-size:15px;font-family:inherit;resize:none;outline:none;min-height:80px;margin-bottom:12px;" placeholder="Твой ответ..."></textarea>
+    <div style="display:flex;gap:8px;">
+      <button class="btn-outline" style="flex:1;" onclick="releaseBottle()">Выпустить обратно</button>
+      <button class="btn-pink" style="flex:1;" onclick="replyBottle()">Ответить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MUSIC BAR ===== -->
+<div class="music-bar" id="musicBar">
+  <svg viewBox="0 0 24 24" onclick="toggleMusicPlay()"><path d="M9 18V5l12-2v13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="18" r="3" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="16" r="3" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+  <span class="music-title">🎵 Милая мелодия Сакуры</span>
+  <svg viewBox="0 0 24 24" onclick="toggleMusic(false)"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
 </div>
 
 <script>
-  // Firebase Configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyBm0mIvHVznIeF2PoFk6dtdaiT5r877wyA",
-    authDomain: "meow-874ce.firebaseapp.com",
-    databaseURL: "https://meow-874ce-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "meow-874ce",
-    storageBucket: "meow-874ce.firebasestorage.app",
-    messagingSenderId: "471541334599",
-    appId: "1:471541334599:web:567af3e7dbe70a37572762"
+// ===== FIREBASE INIT =====
+const firebaseConfig = {
+  apiKey: "AIzaSyBm0mIvHVznIeF2PoFk6dtdaiT5r877wyA",
+  authDomain: "meow-874ce.firebaseapp.com",
+  databaseURL: "https://meow-874ce-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "meow-874ce",
+  storageBucket: "meow-874ce.firebasestorage.app",
+  messagingSenderId: "471541334599",
+  appId: "1:471541334599:web:567af3e7dbe70a37572762"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+
+// ===== GLOBAL STATE =====
+let currentUser = null;
+let currentChatId = null;
+let currentChatPartner = null;
+let ghostMode = false;
+let riddleMode = false;
+let brushColor = '#e8a4c8';
+let brushSize = 3;
+let isDrawing = false;
+let lastX = 0, lastY = 0;
+let typingTimeout = null;
+let presenceRef = null;
+let listeners = [];
+let currentBottleId = null;
+let currentRiddleMsg = null;
+let musicPlaying = false;
+let unreadCounts = {};
+
+const EMOJIS = ['🌸','🐱','🍵','💌','🌙','✨','🎀','💖','🍡','🌺','🦋','🐾','🍓','🌿','⭐','🎐','🌷','💫','🐰','🍰','🌼','🎵','💕','🌱'];
+
+// ===== UTILS =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (id === 'mainScreen') loadChatList();
+  if (id === 'mailboxScreen') loadMailbox();
+  if (id === 'archiveScreen') loadArchive();
+  if (id === 'bottleScreen') loadBottles();
+  if (id === 'stickerMakerScreen') initStickerMaker();
+  if (id === 'autoReplyScreen') loadAutoReplies();
+}
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+function togglePassword(id, btn) {
+  const inp = document.getElementById(id);
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+function vibrate(ms=15) {
+  if (navigator.vibrate && document.getElementById('vibroToggle')?.checked) navigator.vibrate(ms);
+}
+function playSound(type='msg') {
+  if (!document.getElementById('soundToggle')?.checked) return;
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain); gain.connect(ctx.destination);
+  if (type === 'msg') { osc.frequency.value = 523; gain.gain.value = 0.05; }
+  else if (type === 'send') { osc.frequency.value = 659; gain.gain.value = 0.04; }
+  else if (type === 'bottle') { osc.frequency.value = 392; gain.gain.value = 0.05; }
+  osc.start(); osc.stop(ctx.currentTime + 0.15);
+}
+
+// ===== SAKURA PETALS =====
+function initSakura() {
+  const bg = document.getElementById('sakuraBg');
+  if (!bg) return;
+  for (let i = 0; i < 20; i++) {
+    const p = document.createElement('div');
+    p.className = 'sakura-petal';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (4 + Math.random() * 6) + 's';
+    p.style.animationDelay = Math.random() * 5 + 's';
+    p.style.width = (8 + Math.random() * 8) + 'px';
+    p.style.height = p.style.width;
+    bg.appendChild(p);
+  }
+}
+initSakura();
+
+// ===== AVATAR PREVIEW =====
+function previewAvatar(input, imgId, iconId) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById(imgId).src = e.target.result;
+    document.getElementById(imgId).classList.remove('hidden');
+    document.getElementById(iconId).classList.add('hidden');
+  };
+  reader.readAsDataURL(file);
+}
+
+// ===== REGISTER =====
+function doRegister() {
+  const name = document.getElementById('regName').value.trim();
+  const username = document.getElementById('regUsername').value.trim().toLowerCase();
+  const email = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const avatarFile = document.getElementById('regAvatar').files[0];
+  const futureLetter = document.getElementById('futureLetter').value.trim();
+  if (!name || !username || !email || !password) { showToast('Заполни все поля'); return; }
+  if (password.length < 6) { showToast('Пароль минимум 6 символов'); return; }
+  auth.createUserWithEmailAndPassword(email, password)
+    .then(cred => {
+      const uid = cred.user.uid;
+      let avatarData = '';
+      const saveUser = () => {
+        const userData = {
+          name, username, email, uid, avatar: avatarData,
+          status: 'Люблю чай и котиков 🍵🐱',
+          online: true, lastSeen: Date.now(),
+          createdAt: Date.now(),
+          autoReplies: {}, smartReply: false,
+          settings: { sounds: true, vibration: true, music: false },
+          stickers: {},
+          futureLetter: futureLetter || '',
+          futureLetterDate: futureLetter ? Date.now() + 30 * 24 * 60 * 60 * 1000 : 0
+        };
+        db.ref('users/' + uid).set(userData);
+        db.ref('usernames/' + username).set(uid);
+        showToast('Аккаунт создан! 🌸');
+        showScreen('mainScreen');
+        setupPresence(uid);
+        loadUserData();
+        sendWelcomeGift(uid);
+      };
+      if (avatarFile) {
+        const r = new FileReader();
+        r.onload = e => { avatarData = e.target.result; saveUser(); };
+        r.readAsDataURL(avatarFile);
+      } else { saveUser(); }
+    })
+    .catch(e => showToast(e.message));
+}
+
+// ===== LOGIN =====
+function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  auth.signInWithEmailAndPassword(email, password)
+    .then(cred => {
+      showToast('С возвращением! 🌸');
+      showScreen('mainScreen');
+      setupPresence(cred.user.uid);
+      loadUserData();
+      checkFutureLetter(cred.user.uid);
+    })
+    .catch(e => showToast(e.message));
+}
+
+// ===== LOGOUT =====
+function doLogout() {
+  if (presenceRef) presenceRef.remove();
+  db.ref('users/' + currentUser?.uid + '/online').set(false);
+  db.ref('users/' + currentUser?.uid + '/lastSeen').set(Date.now());
+  auth.signOut().then(() => {
+    currentUser = null;
+    showToast('До встречи! 🌸');
+    showScreen('welcomeScreen');
+  });
+}
+
+// ===== PRESENCE =====
+function setupPresence(uid) {
+  if (presenceRef) presenceRef.remove();
+  presenceRef = db.ref('users/' + uid + '/online');
+  presenceRef.onDisconnect().set(false);
+  presenceRef.onDisconnect().update({ lastSeen: Date.now() });
+  presenceRef.set(true);
+  db.ref('users/' + uid + '/lastSeen').set(Date.now());
+}
+
+// ===== LOAD USER DATA =====
+function loadUserData() {
+  const u = auth.currentUser;
+  if (!u) return;
+  currentUser = u;
+  db.ref('users/' + u.uid).once('value').then(snap => {
+    const data = snap.val() || {};
+    document.getElementById('headerAvatar').src = data.avatar || '';
+    document.getElementById('headerName').textContent = data.name || 'SakuraMail';
+    document.getElementById('profileAvatarImg').src = data.avatar || '';
+    document.getElementById('profileName').textContent = data.name || '';
+    document.getElementById('profileUsername').textContent = '@' + (data.username || '');
+    document.getElementById('profileStatusText').textContent = data.status || 'Люблю чай и котиков 🍵🐱';
+    if (data.settings) {
+      document.getElementById('soundToggle').checked = data.settings.sounds !== false;
+      document.getElementById('vibroToggle').checked = data.settings.vibration !== false;
+      document.getElementById('musicToggle').checked = data.settings.music === true;
+    }
+    loadChatList();
+  });
+}
+
+// ===== UPDATE PROFILE AVATAR =====
+function updateProfileAvatar(input) {
+  const file = input.files[0];
+  if (!file || !currentUser) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const data = e.target.result;
+    db.ref('users/' + currentUser.uid + '/avatar').set(data);
+    document.getElementById('profileAvatarImg').src = data;
+    document.getElementById('headerAvatar').src = data;
+    showToast('Аватарка обновлена! ✨');
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveStatusText(text) {
+  if (!currentUser) return;
+  db.ref('users/' + currentUser.uid + '/status').set(text.trim());
+}
+
+// ===== WELCOME GIFT =====
+function sendWelcomeGift(uid) {
+  const chatId = [uid, 'sakurabot'].sort().join('_');
+  const msg = {
+    text: 'Привет, дорогой друг! 🌸\n\nДобро пожаловать в SakuraMail — место, где сообщения становятся теплом.\n\n✨ Твой первый подарок: стикер «Сакура»\n🎀 Совет: попробуй «Письмо в бутылке»\n💌 Напиши себе письмо в будущее\n\nПусть каждое сообщение приносит радость!',
+    sender: 'sakurabot',
+    senderName: 'SakuraMail',
+    timestamp: Date.now(),
+    type: 'text'
+  };
+  db.ref('chats/' + chatId + '/messages').push(msg);
+  db.ref('chats/' + chatId + '/participants').set({ [uid]: true, sakurabot: true });
+}
+
+// ===== CHECK FUTURE LETTER =====
+function checkFutureLetter(uid) {
+  db.ref('users/' + uid).once('value').then(snap => {
+    const data = snap.val();
+    if (data?.futureLetter && data.futureLetterDate && Date.now() > data.futureLetterDate) {
+      const chatId = [uid, 'future'].sort().join('_');
+      db.ref('chats/' + chatId + '/messages').push({
+        text: '✉️ Письмо от себя из прошлого:\n\n' + data.futureLetter + '\n\n— Ты из прошлого 💫',
+        sender: 'future',
+        senderName: 'Ты из прошлого',
+        timestamp: Date.now(),
+        type: 'text'
+      });
+      db.ref('chats/' + chatId + '/participants').set({ [uid]: true, future: true });
+      db.ref('users/' + uid + '/futureLetter').remove();
+      showToast('✉️ Пришло письмо из прошлого!');
+    }
+  });
+}
+
+// ===== CHAT LIST (REALTIME) =====
+function loadChatList() {
+  if (!currentUser) return;
+  const list = document.getElementById('chatList');
+  list.innerHTML = '';
+
+  // Remove old listeners
+  listeners.forEach(l => l.off && l.off());
+  listeners = [];
+
+  const chatsRef = db.ref('chats');
+  const chatListener = chatsRef.on('value', snap => {
+    list.innerHTML = '';
+    const chats = snap.val() || {};
+    const chatArr = [];
+    Object.entries(chats).forEach(([chatId, chat]) => {
+      if (!chat.participants || !chat.participants[currentUser.uid]) return;
+      const partnerId = Object.keys(chat.participants).find(id => id !== currentUser.uid);
+      if (!partnerId) return;
+      const msgs = chat.messages || {};
+      const msgArr = Object.entries(msgs).map(([k,v]) => ({...v, key: k}));
+      msgArr.sort((a,b) => a.timestamp - b.timestamp);
+      const lastMsg = msgArr[msgArr.length - 1];
+      if (!lastMsg) return;
+      const unread = msgArr.filter(m => m.sender !== currentUser.uid && !m.read).length;
+      chatArr.push({ chatId, partnerId, lastMsg, unread, msgArr });
+    });
+    chatArr.sort((a,b) => (b.lastMsg?.timestamp||0) - (a.lastMsg?.timestamp||0));
+
+    chatArr.forEach(c => {
+      renderChatItem(c.partnerId, c.lastMsg, c.unread, c.chatId);
+    });
+  });
+  listeners.push(chatListener);
+}
+
+function renderChatItem(partnerId, lastMsg, unread, chatId) {
+  const list = document.getElementById('chatList');
+  db.ref('users/' + partnerId).once('value').then(snap => {
+    const user = snap.val() || {};
+    const div = document.createElement('div');
+    div.className = 'chat-item';
+    div.onclick = () => openChat(chatId, partnerId);
+    const time = lastMsg?.timestamp ? new Date(lastMsg.timestamp).toLocaleTimeString('ru', {hour:'2-digit',minute:'2-digit'}) : '';
+    const isGhost = lastMsg?.ghost ? '<div class="ghost-badge">👻 призрак</div>' : '';
+    const unreadBadge = unread > 0 ? `<div class="unread-badge">${unread}</div>` : '';
+    const preview = lastMsg?.type === 'image' ? '📷 Фото' : lastMsg?.type === 'video' ? '🎥 Видео' : lastMsg?.type === 'audio' ? '🎵 Аудио' : lastMsg?.type === 'sticker' ? 'Стикер' : lastMsg?.type === 'drawing' ? '🎨 Рисунок' : (lastMsg?.text || '').substring(0, 40);
+
+    // Listen for typing status in REALTIME
+    const typingRef = db.ref('typing/' + chatId + '/' + partnerId);
+    const typingListener = typingRef.on('value', tSnap => {
+      const isTyping = tSnap.val();
+      const nameEl = div.querySelector('.chat-item-name');
+      if (nameEl) {
+        const existing = nameEl.querySelector('.typing-text');
+        if (isTyping) {
+          if (!existing) {
+            const span = document.createElement('span');
+            span.className = 'typing-text';
+            span.textContent = 'печатает...';
+            nameEl.appendChild(span);
+          }
+        } else if (existing) {
+          existing.remove();
+        }
+      }
+    });
+    listeners.push(typingListener);
+
+    // Listen for online status in REALTIME
+    const onlineRef = db.ref('users/' + partnerId + '/online');
+    const onlineListener = onlineRef.on('value', oSnap => {
+      const online = oSnap.val();
+      const ring = div.querySelector('.online-ring');
+      if (ring) ring.style.display = online ? 'block' : 'none';
+    });
+    listeners.push(onlineListener);
+
+    // Listen for avatar changes in REALTIME
+    const avatarRef = db.ref('users/' + partnerId + '/avatar');
+    const avatarListener = avatarRef.on('value', aSnap => {
+      const ava = aSnap.val();
+      const img = div.querySelector('.chat-item-avatar img');
+      if (img && ava) img.src = ava;
+    });
+    listeners.push(avatarListener);
+
+    div.innerHTML = `
+      <div class="chat-item-avatar">
+        <img src="${user.avatar || ''}" alt="" onerror="this.style.display='none'">
+        <div class="online-ring" style="display:${user.online ? 'block' : 'none'};"></div>
+      </div>
+      <div class="chat-item-info">
+        <div class="chat-item-name">${user.name || 'Пользователь'}</div>
+        <div class="chat-item-preview">${preview}</div>
+      </div>
+      <div class="chat-item-meta">
+        <div class="chat-item-time">${time}</div>
+        ${isGhost}
+        ${unreadBadge}
+      </div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+// ===== OPEN CHAT =====
+function openChat(chatId, partnerId) {
+  currentChatId = chatId;
+  currentChatPartner = partnerId;
+  showScreen('chatScreen');
+  document.getElementById('chatMessages').innerHTML = '';
+  document.getElementById('chatInput').value = '';
+  ghostMode = false;
+  riddleMode = false;
+  document.getElementById('ghostToggle').classList.remove('active');
+
+  // Load partner info with REALTIME updates
+  db.ref('users/' + partnerId).once('value').then(snap => {
+    const user = snap.val() || {};
+    document.getElementById('chatHeaderName').textContent = user.name || 'Пользователь';
+    const ava = document.getElementById('chatHeaderAvatar').querySelector('img');
+    ava.src = user.avatar || '';
+    ava.onerror = () => ava.style.display = 'none';
+
+    // REALTIME: partner online status
+    const onlineRef = db.ref('users/' + partnerId + '/online');
+    const onlineL = onlineRef.on('value', oSnap => {
+      const online = oSnap.val();
+      const statusEl = document.getElementById('chatHeaderStatus');
+      if (online) {
+        statusEl.innerHTML = '<span class="status-dot"></span>в сети';
+        statusEl.className = 'header-status';
+      } else {
+        db.ref('users/' + partnerId + '/lastSeen').once('value').then(ls => {
+          const last = ls.val();
+          const time = last ? formatLastSeen(last) : 'давно';
+          statusEl.innerHTML = '<span class="status-dot offline"></span>был(а) ' + time;
+          statusEl.className = 'header-status offline';
+        });
+      }
+    });
+    listeners.push(onlineL);
+
+    // REALTIME: partner typing status
+    const typingRef = db.ref('typing/' + chatId + '/' + partnerId);
+    const typingL = typingRef.on('value', tSnap => {
+      const isTyping = tSnap.val();
+      const statusEl = document.getElementById('chatHeaderStatus');
+      if (isTyping) {
+        statusEl.innerHTML = '<span class="status-dot" style="background:var(--pink)"></span>печатает...';
+        statusEl.className = 'header-status typing';
+      }
+    });
+    listeners.push(typingL);
+
+    // REALTIME: partner avatar changes
+    const avatarRef = db.ref('users/' + partnerId + '/avatar');
+    const avatarL = avatarRef.on('value', aSnap => {
+      const newAva = aSnap.val();
+      if (newAva) ava.src = newAva;
+    });
+    listeners.push(avatarL);
+  });
+
+  // REALTIME: messages
+  const msgsRef = db.ref('chats/' + chatId + '/messages');
+  const msgsL = msgsRef.on('child_added', snap => {
+    const msg = snap.val();
+    renderMessage(msg, snap.key);
+    // Mark as read
+    if (msg.sender !== currentUser.uid) {
+      db.ref('chats/' + chatId + '/messages/' + snap.key + '/read').set(true);
+    }
+  });
+  listeners.push(msgsL);
+
+  // REALTIME: message changes (edited, read status)
+  const msgsChangedL = msgsRef.on('child_changed', snap => {
+    const msg = snap.val();
+    const existing = document.querySelector(`[data-msg-key="${snap.key}"]`);
+    if (existing) {
+      existing.remove();
+      renderMessage(msg, snap.key);
+    }
+  });
+  listeners.push(msgsChangedL);
+}
+
+function formatLastSeen(ts) {
+  const diff = Date.now() - ts;
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return 'только что';
+  if (m < 60) return m + ' мин. назад';
+  const h = Math.floor(m / 60);
+  if (h < 24) return h + ' ч. назад';
+  const d = Math.floor(h / 24);
+  return d + ' д. назад';
+}
+
+function leaveChat() {
+  // Stop all chat listeners
+  listeners.forEach(l => { try { l.off(); } catch(e) {} });
+  listeners = [];
+  currentChatId = null;
+  currentChatPartner = null;
+  showScreen('mainScreen');
+  loadChatList();
+}
+
+// ===== RENDER MESSAGE =====
+function renderMessage(msg, key) {
+  const container = document.getElementById('chatMessages');
+  const isMe = msg.sender === currentUser.uid;
+  const div = document.createElement('div');
+  div.className = 'msg-bubble ' + (isMe ? 'sent' : 'received') + (msg.ghost ? ' ghost' : '');
+  div.setAttribute('data-msg-key', key);
+
+  const time = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString('ru', {hour:'2-digit',minute:'2-digit'}) : '';
+  let content = '';
+
+  if (msg.type === 'image') {
+    content = `<img src="${msg.data}" alt="фото" onclick="window.open('${msg.data}')">`;
+  } else if (msg.type === 'video') {
+    content = `<video src="${msg.data}" controls style="max-width:100%;border-radius:12px;"></video>`;
+  } else if (msg.type === 'audio') {
+    content = `<audio src="${msg.data}" controls></audio>`;
+  } else if (msg.type === 'sticker') {
+    content = `<div style="font-size:48px;text-align:center;">${msg.data}</div>`;
+  } else if (msg.type === 'drawing') {
+    content = `<img src="${msg.data}" alt="рисунок" style="max-width:100%;border-radius:12px;" onclick="window.open('${msg.data}')">`;
+  } else if (msg.type === 'riddle') {
+    if (isMe || msg.solved) {
+      content = `<div>🧩 ${msg.text}</div>`;
+    } else {
+      content = `<div class="riddle-box" style="margin:0;padding:8px;"><div style="font-size:13px;color:var(--text3);margin-bottom:4px;">🧩 Загадка</div><div style="font-size:14px;">${msg.hint || 'Угадай, чтобы прочитать'}</div><button class="btn-pink" style="margin-top:8px;padding:8px 16px;font-size:13px;" onclick="openRiddle('${key}')">Угадать</button></div>`;
+    }
+  } else if (msg.type === 'bottle') {
+    content = `<div>🍾 <i>${msg.text}</i></div>`;
+  } else {
+    content = `<div>${escapeHtml(msg.text || '')}</div>`;
+  }
+
+  const readStatus = isMe ? `<span class="msg-status">${msg.read ? '✓✓' : '✓'}</span>` : '';
+  div.innerHTML = `${content}<div class="msg-time">${time} ${readStatus}</div>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function escapeHtml(t) {
+  const d = document.createElement('div');
+  d.textContent = t;
+  return d.innerHTML.replace(/\n/g, '<br>');
+}
+
+// ===== SEND MESSAGE =====
+function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text || !currentChatId || !currentUser) return;
+
+  vibrate(12);
+  playSound('send');
+
+  const msg = {
+    text: text,
+    sender: currentUser.uid,
+    senderName: document.getElementById('headerName').textContent,
+    timestamp: Date.now(),
+    read: false,
+    ghost: ghostMode
   };
 
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.database();
-
-  let currentUser = null;
-  let activeChatUserId = null;
-  let isGhostMode = false;
-  let audioCtx = null;
-
-  // Sound Synth Effects
-  function playChime() {
-    try {
-      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
-      osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.3); // A5
-      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start();
-      osc.stop(audioCtx.currentTime + 0.3);
-    } catch(e){}
+  if (riddleMode) {
+    msg.type = 'riddle';
+    msg.hint = text;
+    msg.text = text;
+    msg.solved = false;
+    riddleMode = false;
   }
 
-  function triggerHaptic() {
-    if (navigator.vibrate) {
-      navigator.vibrate([15, 30, 15]);
-    }
-  }
+  db.ref('chats/' + currentChatId + '/messages').push(msg);
+  db.ref('chats/' + currentChatId + '/participants').update({ [currentUser.uid]: true });
+  input.value = '';
 
-  // Navigation Logic
-  function switchTab(tab) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  // Check auto-reply
+  checkAutoReply(currentChatPartner, text);
+}
 
-    if (tab === 'dialogs') {
-      document.getElementById('screen-dialogs').classList.add('active');
-    } else if (tab === 'profile') {
-      document.getElementById('screen-profile').classList.add('active');
-    } else if (tab === 'bottle') {
-      document.getElementById('screen-bottle').classList.add('active');
-    }
-    triggerHaptic();
-  }
+// ===== TYPING INDICATOR =====
+document.getElementById('chatInput').addEventListener('input', function() {
+  if (!currentChatId || !currentUser) return;
+  db.ref('typing/' + currentChatId + '/' + currentUser.uid).set(true);
+  clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(() => {
+    db.ref('typing/' + currentChatId + '/' + currentUser.uid).set(false);
+  }, 2000);
+});
 
-  function openScreen(screenId) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    const target = document.getElementById('screen-' + screenId);
-    if (target) target.classList.add('active');
-  }
-
-  // Theme Switching
-  function setTheme(themeName) {
-    document.documentElement.setAttribute('data-theme', themeName);
-    if (currentUser) {
-      db.ref(`users/${currentUser.uid}/theme`).set(themeName);
-    }
-  }
-
-  // Auth State Listener & Realtime Sync
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      currentUser = user;
-      document.getElementById('app-nav').style.display = 'flex';
-      document.getElementById('logout-btn').style.display = 'flex';
-
-      // Setup Online Presence
-      const userRef = db.ref(`users/${user.uid}`);
-      db.ref('.info/connected').on('value', snap => {
-        if (snap.val() === true) {
-          userRef.update({
-            online: true,
-            lastSeen: firebase.database.ServerValue.TIMESTAMP
-          });
-          userRef.child('online').onDisconnect().set(false);
-          userRef.child('lastSeen').onDisconnect().set(firebase.database.ServerValue.TIMESTAMP);
-        }
-      });
-
-      // Realtime Profile Sync
-      userRef.on('value', snap => {
-        const val = snap.val() || {};
-        document.getElementById('profile-display-name').innerText = val.username || 'Тяночка';
-        document.getElementById('profile-tag').innerText = `@${val.username || 'user'}`;
-        if (val.avatar) {
-          document.getElementById('profile-avatar').src = val.avatar;
-        }
-        if (val.theme) setTheme(val.theme);
-      });
-
-      switchTab('dialogs');
-      loadDialogs();
-    } else {
-      currentUser = null;
-      document.getElementById('app-nav').style.display = 'none';
-      document.getElementById('logout-btn').style.display = 'none';
-      openScreen('auth');
-    }
-  });
-
-  // Auth Toggle
-  let isRegistering = false;
-  document.getElementById('auth-toggle-btn').addEventListener('click', () => {
-    isRegistering = !isRegistering;
-    document.getElementById('auth-username-group').style.display = isRegistering ? 'block' : 'none';
-    document.getElementById('auth-submit-btn').innerText = isRegistering ? 'Зарегистрироваться' : 'Войти';
-  });
-
-  document.getElementById('auth-submit-btn').addEventListener('click', () => {
-    const email = document.getElementById('auth-email').value;
-    const pass = document.getElementById('auth-password').value;
-    const username = document.getElementById('auth-username').value;
-
-    if (!email || !pass) return alert('Заполните все поля!');
-
-    if (isRegistering) {
-      auth.createUserWithEmailAndPassword(email, pass).then(res => {
-        db.ref(`users/${res.user.uid}`).set({
-          uid: res.user.uid,
-          email: email,
-          username: username || 'User',
-          avatar: '',
-          online: true,
-          theme: 'Kuromi Night'
-        });
-        openScreen('welcome');
-      }).catch(err => alert(err.message));
-    } else {
-      auth.signInWithEmailAndPassword(email, pass).catch(err => alert(err.message));
-    }
-  });
-
-  document.getElementById('logout-btn').addEventListener('click', () => {
-    auth.signOut();
-  });
-
-  // Realtime Dialogs List
-  function loadDialogs() {
-    db.ref('users').on('value', snap => {
-      const users = snap.val() || {};
-      const container = document.getElementById('dialogs-list');
-      container.innerHTML = '';
-
-      Object.keys(users).forEach(uid => {
-        if (uid === currentUser.uid) return;
-        const u = users[uid];
-        const item = document.createElement('div');
-        item.className = 'menu-item';
-        item.onclick = () => openChat(uid, u.username);
-        item.innerHTML = `
-          <div class="menu-item-left">
-            <div style="width:40px; height:40px; border-radius:50%; background:var(--card-inner); display:flex; align-items:center; justify-content:center; overflow:hidden;">
-              ${u.avatar ? `<img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;">` : '🌸'}
-            </div>
-            <div>
-              <div style="font-weight:600;">${u.username || 'Пользователь'}</div>
-              <div style="font-size:10px; color:${u.online ? 'var(--accent-pink)' : 'var(--text-sub)'};">
-                ${u.online ? 'в сети' : 'был(а) недавно'}
-              </div>
-            </div>
-          </div>
-        `;
-        container.appendChild(item);
-      });
+// ===== FILE SEND =====
+function sendFile(input) {
+  const file = input.files[0];
+  if (!file || !currentChatId) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const type = file.type.startsWith('image/') ? 'image' : file.type.startsWith('video/') ? 'video' : 'audio';
+    db.ref('chats/' + currentChatId + '/messages').push({
+      type, data: e.target.result,
+      sender: currentUser.uid,
+      senderName: document.getElementById('headerName').textContent,
+      timestamp: Date.now(),
+      read: false,
+      ghost: ghostMode
     });
-  }
+    vibrate(15);
+    playSound('send');
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
 
-  // Chat Functionality
-  function openChat(targetUid, targetName) {
-    activeChatUserId = targetUid;
-    document.getElementById('chat-user-name').innerText = targetName;
-    openScreen('chat');
+// ===== GHOST MODE =====
+function toggleGhost() {
+  ghostMode = !ghostMode;
+  document.getElementById('ghostToggle').classList.toggle('active', ghostMode);
+  showToast(ghostMode ? '👻 Призрачный режим' : 'Обычный режим');
+}
 
-    const chatId = [currentUser.uid, targetUid].sort().join('_');
-    
-    // Realtime Messages
-    db.ref(`chats/${chatId}/messages`).on('value', snap => {
-      const msgs = snap.val() || {};
-      const box = document.getElementById('chat-messages-box');
-      box.innerHTML = '';
+// ===== RIDDLE MODE =====
+function toggleRiddleMode() {
+  riddleMode = !riddleMode;
+  showToast(riddleMode ? '🧩 Режим загадки' : 'Обычный режим');
+}
 
-      Object.values(msgs).forEach(m => {
-        const bubble = document.createElement('div');
-        const isMe = m.senderId === currentUser.uid;
-        bubble.className = `msg-bubble ${isMe ? 'msg-outgoing' : 'msg-incoming'} ${m.isGhost ? 'msg-ghost' : ''}`;
-        
-        if (m.mediaUrl) {
-          bubble.innerHTML = `<img src="${m.mediaUrl}" class="msg-media">`;
+function openRiddle(key) {
+  const msgsRef = db.ref('chats/' + currentChatId + '/messages/' + key);
+  msgsRef.once('value').then(snap => {
+    const msg = snap.val();
+    currentRiddleMsg = key;
+    document.getElementById('riddleHint').textContent = msg.hint || 'Угадай ответ...';
+    document.getElementById('riddleAnswer').value = '';
+    document.getElementById('riddleModal').classList.add('active');
+  });
+}
+
+function solveRiddle() {
+  const answer = document.getElementById('riddleAnswer').value.trim().toLowerCase();
+  if (!answer || !currentRiddleMsg) return;
+  const msgRef = db.ref('chats/' + currentChatId + '/messages/' + currentRiddleMsg);
+  msgRef.once('value').then(snap => {
+    const msg = snap.val();
+    // Simple fuzzy match
+    if (answer.includes(msg.text.toLowerCase().substring(0, 3)) || 
+        msg.text.toLowerCase().includes(answer)) {
+      msgRef.update({ solved: true });
+      showToast('✨ Угадал!');
+      closeModal('riddleModal');
+    } else {
+      showToast('❌ Не угадал, попробуй ещё');
+    }
+  });
+}
+
+// ===== STICKERS =====
+function toggleStickerPanel() {
+  document.getElementById('stickerPanel').classList.toggle('open');
+  loadStickers();
+}
+
+function loadStickers() {
+  const grid = document.getElementById('stickerGrid');
+  grid.innerHTML = '';
+  // Default emojis
+  EMOJIS.forEach(e => {
+    const div = document.createElement('div');
+    div.className = 'sticker-item';
+    div.textContent = e;
+    div.onclick = () => sendSticker(e);
+    grid.appendChild(div);
+  });
+  // User stickers
+  if (currentUser) {
+    db.ref('users/' + currentUser.uid + '/stickers').once('value').then(snap => {
+      const stickers = snap.val() || {};
+      Object.values(stickers).forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'sticker-item';
+        if (s.startsWith('data:')) {
+          div.innerHTML = `<img src="${s}" style="width:40px;height:40px;object-fit:contain;">`;
         } else {
-          bubble.innerText = m.text;
+          div.textContent = s;
         }
-
-        const meta = document.createElement('div');
-        meta.className = 'msg-meta';
-        meta.innerText = new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        bubble.appendChild(meta);
-
-        box.appendChild(bubble);
+        div.onclick = () => sendSticker(s);
+        grid.appendChild(div);
       });
-      box.scrollTop = box.scrollHeight;
     });
   }
+}
 
-  document.getElementById('chat-send-btn').addEventListener('click', sendMessage);
-  function sendMessage() {
-    const input = document.getElementById('chat-msg-input');
-    const text = input.value.trim();
-    if (!text || !activeChatUserId) return;
-
-    const chatId = [currentUser.uid, activeChatUserId].sort().join('_');
-    const msgRef = db.ref(`chats/${chatId}/messages`).push();
-
-    msgRef.set({
-      senderId: currentUser.uid,
-      text: text,
-      timestamp: firebase.database.ServerValue.TIMESTAMP,
-      isGhost: isGhostMode
-    });
-
-    input.value = '';
-    playChime();
-    triggerHaptic();
-  }
-
-  // Ghost Mode Toggle
-  document.getElementById('ghost-toggle-btn').addEventListener('click', () => {
-    isGhostMode = !isGhostMode;
-    document.getElementById('ghost-toggle-btn').style.color = isGhostMode ? 'var(--accent-pink)' : 'var(--text-main)';
+function sendSticker(data) {
+  if (!currentChatId) return;
+  db.ref('chats/' + currentChatId + '/messages').push({
+    type: 'sticker', data,
+    sender: currentUser.uid,
+    senderName: document.getElementById('headerName').textContent,
+    timestamp: Date.now(),
+    read: false
   });
+  document.getElementById('stickerPanel').classList.remove('open');
+  vibrate(10);
+}
 
-  // Avatar Image Upload (Base64)
-  document.getElementById('avatar-file-input').addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        db.ref(`users/${currentUser.uid}/avatar`).set(evt.target.result);
+function initStickerMaker() {
+  const picker = document.getElementById('emojiPicker');
+  picker.innerHTML = '';
+  const allEmojis = ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🥸','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','😷','🤒','🤕','🤑','🤠','😈','👿','👹','👺','🤡','💩','👻','💀','☠️','👽','👾','🤖','🎃','😺','😸','😹','😻','😼','😽','🙀','😿','😾','🌸','🌺','🌻','🌹','🌷','🌼','🌿','☘️','🍀','🍁','🍂','🍃','🍄','🌾','💐','🌲','🌳','🌴','🌵','🌱','🌰','🍇','🍈','🍉','🍊','🍋','🍌','🍍','🥭','🍎','🍏','🍐','🍑','🍒','🍓','🫐','🥝','🍅','🫒','🥥','🥑','🍆','🥔','🥕','🌽','🌶️','🫑','🥒','🥬','🥦','🧄','🧅','🍄','🥜','🌰','🍞','🥐','🥖','🫓','🥨','🥯','🥞','🧇','🧀','🍖','🍗','🥩','🥓','🍔','🍟','🍕','🌭','🥪','🌮','🌯','🫔','🥙','🧆','🥚','🍳','🥘','🍲','🫕','🥣','🥗','🍿','🧈','🧂','🥫','🍱','🍘','🍙','🍚','🍛','🍜','🍝','🍠','🍢','🍣','🍤','🍥','🍡','🥟','🥠','🥡','🦀','🦞','🦐','🦑','🦪','🍦','🍧','🍨','🍩','🍪','🎂','🍰','🧁','🥧','🍫','🍬','🍭','🍮','🍯','🍼','🥛','☕','🫖','🍵','🧃','🥤','🧋','🍶','🍾','🍷','🍸','🍹','🍺','🍻','🥂','🥃','🫗','🥤','🧊','🥢','🍽️','🍴','🥄','🔪','🫙','🏺','🎀','🎁','🎗️','🏆','🏅','🥇','🥈','🥉','🎖️','🏵️','🎪','🎭','🩰','🎨','🎬','🎤','🎧','🎼','🎹','🥁','🪘','🎷','🎺','🪗','🎸','🪕','🎻','🎲','♟️','🎯','🎳','🎮','🎰','🧩','🎱','🪀','🏹','🤿','🎣','🎽','🥋','🥊','🎿','🛷','⛸️','🥌','🛼','🛹','🎣','🤿','🎽','🥋','🥊','🎿','🛷','⛸️','🥌','🛼','🛹','🪂','🏋️','🤼','🤽','🤾','🌊','🏄','🏊','🤺','🏇','⛷️','🏂','🏌️','🏓','🏸','🥅','🏒','🏑','🥍','🏏','⛳','🪃','🥏','🎾','🎳','🏹','🥎','🏐','🏉','🎱','🪀','🤿','🎣','🎽','🥋','🥊','🎿','🛷','⛸️','🥌','🛼','🛹','🪂','🏋️','🤼','🤽','🤾','🌊','🏄','🏊','🤺','🏇','⛷️','🏂','🏌️','🏓','🏸','🥅','🏒','🏑','🥍','🏏','⛳','🪃','🥏','🎾','🎳','🏹','🥎','🏐','🏉','🎱','🪀'];
+  allEmojis.slice(0, 72).forEach(e => {
+    const div = document.createElement('div');
+    div.style.cssText = 'font-size:28px;text-align:center;padding:8px;background:var(--bg-card2);border-radius:10px;cursor:pointer;';
+    div.textContent = e;
+    div.onclick = () => saveSticker(e);
+    picker.appendChild(div);
+  });
+  loadMyStickers();
+}
+
+function saveSticker(data) {
+  if (!currentUser) return;
+  const key = db.ref('users/' + currentUser.uid + '/stickers').push().key;
+  db.ref('users/' + currentUser.uid + '/stickers/' + key).set(data);
+  showToast('Стикер добавлен! ✨');
+  loadMyStickers();
+}
+
+function createStickerFromFile(input) {
+  const file = input.files[0];
+  if (!file || !currentUser) return;
+  const reader = new FileReader();
+  reader.onload = e => saveSticker(e.target.result);
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+function loadMyStickers() {
+  const grid = document.getElementById('myStickers');
+  grid.innerHTML = '';
+  if (!currentUser) return;
+  db.ref('users/' + currentUser.uid + '/stickers').once('value').then(snap => {
+    const stickers = snap.val() || {};
+    Object.entries(stickers).forEach(([k, v]) => {
+      const div = document.createElement('div');
+      div.className = 'sticker-item';
+      if (v.startsWith('data:')) {
+        div.innerHTML = `<img src="${v}" style="width:40px;height:40px;object-fit:contain;">`;
+      } else {
+        div.textContent = v;
+      }
+      div.onclick = () => {
+        db.ref('users/' + currentUser.uid + '/stickers/' + k).remove();
+        loadMyStickers();
       };
-      reader.readAsDataURL(file);
+      grid.appendChild(div);
+    });
+  });
+}
+
+// ===== DRAWING =====
+function initCanvas() {
+  const canvas = document.getElementById('drawCanvas');
+  if (!canvas) return;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = rect.width;
+  canvas.height = rect.height - 120;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#221c35';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  function getPos(e) {
+    const r = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x: clientX - r.left, y: clientY - r.top };
+  }
+
+  function startDraw(e) {
+    isDrawing = true;
+    const p = getPos(e);
+    lastX = p.x; lastY = p.y;
+  }
+  function draw(e) {
+    if (!isDrawing) return;
+    e.preventDefault();
+    const p = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(p.x, p.y);
+    ctx.strokeStyle = brushColor;
+    ctx.lineWidth = brushSize;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+    lastX = p.x; lastY = p.y;
+  }
+  function endDraw() { isDrawing = false; }
+
+  canvas.addEventListener('mousedown', startDraw);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', endDraw);
+  canvas.addEventListener('mouseout', endDraw);
+  canvas.addEventListener('touchstart', startDraw, {passive:false});
+  canvas.addEventListener('touchmove', draw, {passive:false});
+  canvas.addEventListener('touchend', endDraw);
+}
+
+function setBrushColor(c, btn) {
+  brushColor = c;
+  document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function setBrushSize(s, btn) {
+  brushSize = s;
+  document.querySelectorAll('.brush-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function clearCanvas() {
+  const canvas = document.getElementById('drawCanvas');
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#221c35';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+function sendDrawing() {
+  const canvas = document.getElementById('drawCanvas');
+  const data = canvas.toDataURL('image/png');
+  if (!currentChatId) return;
+  db.ref('chats/' + currentChatId + '/messages').push({
+    type: 'drawing', data,
+    sender: currentUser.uid,
+    senderName: document.getElementById('headerName').textContent,
+    timestamp: Date.now(),
+    read: false
+  });
+  showScreen('chatScreen');
+  vibrate(15);
+  playSound('send');
+}
+
+// ===== SEARCH USERS =====
+function searchUsers(query) {
+  const results = document.getElementById('searchResults');
+  results.innerHTML = '';
+  if (!query || query.length < 2) return;
+  const q = query.toLowerCase().replace('@', '');
+  db.ref('users').orderByChild('username').startAt(q).endAt(q + '\uf8ff').limitToFirst(10).once('value').then(snap => {
+    const users = snap.val() || {};
+    Object.entries(users).forEach(([uid, u]) => {
+      if (uid === currentUser.uid) return;
+      const div = document.createElement('div');
+      div.className = 'chat-item';
+      div.onclick = () => startChat(uid);
+      div.innerHTML = `
+        <div class="chat-item-avatar"><img src="${u.avatar || ''}" alt="" onerror="this.style.display='none'"></div>
+        <div class="chat-item-info"><div class="chat-item-name">${u.name || 'Пользователь'}</div><div class="chat-item-preview">@${u.username || ''}</div></div>
+      `;
+      results.appendChild(div);
+    });
+  });
+  // Also search by email
+  db.ref('users').orderByChild('email').startAt(q).endAt(q + '\uf8ff').limitToFirst(10).once('value').then(snap => {
+    const users = snap.val() || {};
+    Object.entries(users).forEach(([uid, u]) => {
+      if (uid === currentUser.uid) return;
+      const div = document.createElement('div');
+      div.className = 'chat-item';
+      div.onclick = () => startChat(uid);
+      div.innerHTML = `
+        <div class="chat-item-avatar"><img src="${u.avatar || ''}" alt="" onerror="this.style.display='none'"></div>
+        <div class="chat-item-info"><div class="chat-item-name">${u.name || 'Пользователь'}</div><div class="chat-item-preview">${u.email || ''}</div></div>
+      `;
+      results.appendChild(div);
+    });
+  });
+}
+
+function startChat(partnerId) {
+  if (!currentUser) return;
+  const chatId = [currentUser.uid, partnerId].sort().join('_');
+  db.ref('chats/' + chatId + '/participants').set({ [currentUser.uid]: true, [partnerId]: true });
+  openChat(chatId, partnerId);
+}
+
+// ===== MAILBOX =====
+function loadMailbox() {
+  if (!currentUser) return;
+  const list = document.getElementById('mailboxList');
+  list.innerHTML = '';
+  db.ref('mailbox/' + currentUser.uid).on('child_added', snap => {
+    const mail = snap.val();
+    const div = document.createElement('div');
+    div.className = 'mail-item';
+    div.onclick = () => readMail(snap.key, mail);
+    div.innerHTML = `
+      <div class="mail-sender">${mail.senderName || 'Аноним'} ${mail.anon ? '(анонимно)' : ''}</div>
+      <div class="mail-preview">${(mail.text || '').substring(0, 60)}${(mail.text || '').length > 60 ? '...' : ''}</div>
+      <div class="mail-time">${new Date(mail.timestamp).toLocaleString('ru')}</div>
+    `;
+    list.appendChild(div);
+  });
+  db.ref('mailbox/' + currentUser.uid).once('value').then(snap => {
+    const count = Object.keys(snap.val() || {}).length;
+    document.getElementById('mailboxCount').textContent = `У вас ${count} новых писем`;
+  });
+}
+
+function openMailbox() {
+  showToast('📬 Почтовый ящик открыт!');
+}
+
+function readMail(key, mail) {
+  document.getElementById('mailContent').textContent = mail.text || '';
+  document.getElementById('mailTime').textContent = new Date(mail.timestamp).toLocaleString('ru');
+  document.getElementById('mailModal').classList.add('active');
+  db.ref('mailbox/' + currentUser.uid + '/' + key).remove();
+}
+
+function replyToMail() {
+  closeModal('mailModal');
+  showToast('Ответ отправлен! 💌');
+}
+
+// ===== ARCHIVE =====
+function loadArchive() {
+  if (!currentUser) return;
+  const grid = document.getElementById('archiveGrid');
+  grid.innerHTML = '';
+  db.ref('chats').once('value').then(snap => {
+    const chats = snap.val() || {};
+    const jarData = [];
+    Object.entries(chats).forEach(([chatId, chat]) => {
+      if (!chat.participants || !chat.participants[currentUser.uid]) return;
+      const msgs = chat.messages || {};
+      const msgArr = Object.values(msgs);
+      if (msgArr.length === 0) return;
+      const lastMsg = msgArr[msgArr.length - 1];
+      const date = new Date(lastMsg.timestamp);
+      const year = date.getFullYear();
+      const seasons = ['Зима', 'Весна', 'Лето', 'Осень'];
+      const season = seasons[Math.floor((date.getMonth() + 1) % 12 / 3)];
+      const label = `${year} ${season}`;
+      const existing = jarData.find(j => j.label === label);
+      if (existing) {
+        existing.count++;
+      } else {
+        jarData.push({ label, count: 1, chatId });
+      }
+    });
+    jarData.forEach(jar => {
+      const div = document.createElement('div');
+      div.className = 'jar-item';
+      div.innerHTML = `
+        <svg class="jar-svg" viewBox="0 0 80 100" fill="none">
+          <ellipse cx="40" cy="12" rx="22" ry="6" fill="var(--pink)" opacity="0.4"/>
+          <path d="M18 12 L18 80 Q18 92 40 92 Q62 92 62 80 L62 12" fill="rgba(232,164,200,0.15)" stroke="var(--pink)" stroke-width="2"/>
+          <ellipse cx="40" cy="80" rx="22" ry="6" fill="rgba(232,164,200,0.2)" stroke="var(--pink)" stroke-width="1.5"/>
+          <rect x="28" y="4" width="24" height="10" rx="3" fill="#c4956a" stroke="#b08555" stroke-width="1"/>
+          <ellipse cx="40" cy="4" rx="12" ry="3" fill="#d4a070"/>
+          <text x="40" y="55" text-anchor="middle" fill="var(--pink3)" font-size="10" font-family="Nunito">${jar.label}</text>
+          <text x="40" y="70" text-anchor="middle" fill="var(--text3)" font-size="9" font-family="Nunito">${jar.count} чатов</text>
+        </svg>
+        <div class="jar-label">${jar.label}</div>
+      `;
+      grid.appendChild(div);
+    });
+    // Add locked jar
+    const lock = document.createElement('div');
+    lock.className = 'jar-item';
+    lock.innerHTML = `
+      <svg class="jar-svg" viewBox="0 0 80 100" fill="none">
+        <ellipse cx="40" cy="12" rx="22" ry="6" fill="var(--text3)" opacity="0.2"/>
+        <path d="M18 12 L18 80 Q18 92 40 92 Q62 92 62 80 L62 12" fill="rgba(138,112,144,0.1)" stroke="var(--text3)" stroke-width="2"/>
+        <ellipse cx="40" cy="80" rx="22" ry="6" fill="rgba(138,112,144,0.1)" stroke="var(--text3)" stroke-width="1.5"/>
+        <rect x="32" y="38" width="16" height="14" rx="2" fill="none" stroke="var(--text3)" stroke-width="2"/>
+        <circle cx="40" cy="32" r="5" fill="none" stroke="var(--text3)" stroke-width="2"/>
+        <circle cx="40" cy="45" r="2" fill="var(--text3)"/>
+      </svg>
+      <div class="jar-label">🔒 Секретно</div>
+    `;
+    grid.appendChild(lock);
+  });
+}
+
+// ===== BOTTLE MESSAGE =====
+function sendBottle() {
+  const text = document.getElementById('bottleMsg').value.trim();
+  if (!text || !currentUser) return;
+  db.ref('bottles').push({
+    text, sender: currentUser.uid,
+    senderName: document.getElementById('headerName').textContent,
+    timestamp: Date.now(),
+    pickedUp: false
+  });
+  document.getElementById('bottleMsg').value = '';
+  showToast('🍾 Бутылка уплыла в океан!');
+  vibrate(20);
+  playSound('bottle');
+}
+
+function loadBottles() {
+  if (!currentUser) return;
+  const list = document.getElementById('bottleList');
+  list.innerHTML = '';
+  db.ref('bottles').orderByChild('timestamp').limitToLast(20).once('value').then(snap => {
+    const bottles = snap.val() || {};
+    Object.entries(bottles).forEach(([key, b]) => {
+      if (b.sender === currentUser.uid) return;
+      if (b.pickedUp && b.pickedBy !== currentUser.uid) return;
+      const div = document.createElement('div');
+      div.style.cssText = 'background:var(--bg-card);border-radius:12px;padding:12px;margin-bottom:8px;cursor:pointer;';
+      div.onclick = () => openBottleReply(key, b);
+      div.innerHTML = `
+        <div style="font-size:13px;color:var(--pink);margin-bottom:4px;">🍾 Бутылка из океана</div>
+        <div style="font-size:14px;color:var(--text);">${(b.text || '').substring(0, 60)}${(b.text || '').length > 60 ? '...' : ''}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px;">${new Date(b.timestamp).toLocaleDateString('ru')}</div>
+      `;
+      list.appendChild(div);
+    });
+  });
+}
+
+function openBottleReply(key, bottle) {
+  currentBottleId = key;
+  document.getElementById('bottleReplyText').value = '';
+  document.getElementById('bottleReplyModal').classList.add('active');
+  db.ref('bottles/' + key + '/pickedUp').set(true);
+  db.ref('bottles/' + key + '/pickedBy').set(currentUser.uid);
+}
+
+function replyBottle() {
+  const text = document.getElementById('bottleReplyText').value.trim();
+  if (!text || !currentBottleId) return;
+  db.ref('bottles/' + currentBottleId).once('value').then(snap => {
+    const b = snap.val();
+    if (!b) return;
+    // Create chat between sender and current user
+    const chatId = [currentUser.uid, b.sender].sort().join('_');
+    db.ref('chats/' + chatId + '/messages').push({
+      text: '🍾 Ответ на бутылку:\n' + text,
+      sender: currentUser.uid,
+      senderName: document.getElementById('headerName').textContent,
+      timestamp: Date.now(),
+      read: false,
+      type: 'bottle'
+    });
+    db.ref('chats/' + chatId + '/participants').set({ [currentUser.uid]: true, [b.sender]: true });
+    closeModal('bottleReplyModal');
+    showToast('Ответ отправлен! 🍾');
+    currentBottleId = null;
+  });
+}
+
+function releaseBottle() {
+  if (!currentBottleId) return;
+  db.ref('bottles/' + currentBottleId).update({ pickedUp: false, pickedBy: null });
+  closeModal('bottleReplyModal');
+  showToast('Бутылка выпущена обратно в океан 🌊');
+  currentBottleId = null;
+}
+
+// ===== AUTO-REPLY =====
+function addAutoReply() {
+  const trigger = document.getElementById('arTrigger').value.trim().toLowerCase();
+  const response = document.getElementById('arResponse').value.trim();
+  if (!trigger || !response || !currentUser) return;
+  const key = db.ref('users/' + currentUser.uid + '/autoReplies').push().key;
+  db.ref('users/' + currentUser.uid + '/autoReplies/' + key).set({ trigger, response });
+  document.getElementById('arTrigger').value = '';
+  document.getElementById('arResponse').value = '';
+  loadAutoReplies();
+  showToast('Автоответ добавлен! 🤖');
+}
+
+function loadAutoReplies() {
+  if (!currentUser) return;
+  const list = document.getElementById('autoReplyList');
+  list.innerHTML = '';
+  db.ref('users/' + currentUser.uid + '/autoReplies').on('value', snap => {
+    list.innerHTML = '';
+    const replies = snap.val() || {};
+    Object.entries(replies).forEach(([k, r]) => {
+      const div = document.createElement('div');
+      div.className = 'auto-reply-item';
+      div.innerHTML = `
+        <div style="flex:1;"><div style="font-size:12px;color:var(--pink);margin-bottom:2px;">Триггер: "${r.trigger}"</div><div style="font-size:13px;">${r.response}</div></div>
+        <button onclick="deleteAutoReply('${k}')">Удалить</button>
+      `;
+      list.appendChild(div);
+    });
+  });
+}
+
+function deleteAutoReply(key) {
+  if (!currentUser) return;
+  db.ref('users/' + currentUser.uid + '/autoReplies/' + key).remove();
+}
+
+function saveSmartReply() {
+  if (!currentUser) return;
+  db.ref('users/' + currentUser.uid + '/smartReply').set(document.getElementById('smartAutoReply').checked);
+}
+
+function checkAutoReply(partnerId, text) {
+  if (!partnerId || !text) return;
+  db.ref('users/' + partnerId).once('value').then(snap => {
+    const user = snap.val();
+    if (!user) return;
+    const replies = user.autoReplies || {};
+    const lowerText = text.toLowerCase();
+    let matched = false;
+    Object.values(replies).forEach(r => {
+      if (lowerText.includes(r.trigger)) {
+        matched = true;
+        setTimeout(() => {
+          if (!currentChatId) return;
+          db.ref('chats/' + currentChatId + '/messages').push({
+            text: '🤖 ' + r.response,
+            sender: partnerId,
+            senderName: user.name || 'Автоответчик',
+            timestamp: Date.now(),
+            read: false,
+            type: 'text'
+          });
+        }, 1000 + Math.random() * 2000);
+      }
+    });
+    // Smart reply
+    if (!matched && user.smartReply) {
+      const smartResponses = {
+        'привет': 'Привет! Как дела? 🌸',
+        'как дела': 'У меня всё отлично, спасибо! А у тебя? ✨',
+        'что делаешь': 'Общаюсь с тобой 💕',
+        'спасибо': 'Всегда пожалуйста! 🌺',
+        'пока': 'До встречи! Береги себя 🌸',
+        'люблю': 'Это так мило... 💖',
+        'скучаю': 'Я тоже скучаю по тебе 🥺'
+      };
+      for (const [key, resp] of Object.entries(smartResponses)) {
+        if (lowerText.includes(key)) {
+          setTimeout(() => {
+            if (!currentChatId) return;
+            db.ref('chats/' + currentChatId + '/messages').push({
+              text: '🤖 ' + resp,
+              sender: partnerId,
+              senderName: user.name || 'Автоответчик',
+              timestamp: Date.now(),
+              read: false,
+              type: 'text'
+            });
+          }, 1500 + Math.random() * 2000);
+          break;
+        }
+      }
     }
   });
+}
 
-  // Drawing Modal & Canvas Logic
-  const canvas = document.getElementById('drawing-canvas');
-  const ctx = canvas.getContext('2d');
-  let isDrawing = false;
-  let currentColor = '#000000';
+// ===== SETTINGS =====
+function saveSetting(key, value) {
+  if (!currentUser) return;
+  db.ref('users/' + currentUser.uid + '/settings/' + key).set(value);
+}
 
-  document.getElementById('draw-btn').addEventListener('click', () => {
-    document.getElementById('drawing-modal').classList.add('active');
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
-    ctx.lineWidth = 4;
-    ctx.lineCap = 'round';
-  });
+// ===== MUSIC =====
+let musicCtx = null;
+let musicOsc = null;
+let musicGain = null;
+let musicInterval = null;
 
-  function closeDrawingModal() {
-    document.getElementById('drawing-modal').classList.remove('active');
+function toggleMusic(enable) {
+  if (enable) {
+    document.getElementById('musicBar').classList.add('active');
+    startMusic();
+  } else {
+    document.getElementById('musicBar').classList.remove('active');
+    stopMusic();
+  }
+  saveSetting('music', enable);
+}
+
+function startMusic() {
+  if (musicOsc) return;
+  musicCtx = new (window.AudioContext || window.webkitAudioContext)();
+  musicGain = musicCtx.createGain();
+  musicGain.gain.value = 0.03;
+  musicGain.connect(musicCtx.destination);
+
+  const notes = [523, 587, 659, 698, 784, 698, 659, 587];
+  let idx = 0;
+
+  function playNote() {
+    if (!musicCtx) return;
+    const osc = musicCtx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.value = notes[idx];
+    osc.connect(musicGain);
+    osc.start();
+    osc.stop(musicCtx.currentTime + 0.4);
+    idx = (idx + 1) % notes.length;
   }
 
-  function setDrawColor(col) {
-    currentColor = col;
+  musicInterval = setInterval(playNote, 500);
+  musicPlaying = true;
+}
+
+function stopMusic() {
+  if (musicInterval) clearInterval(musicInterval);
+  if (musicOsc) { try { musicOsc.stop(); } catch(e) {} }
+  musicOsc = null;
+  musicCtx = null;
+  musicPlaying = false;
+}
+
+function toggleMusicPlay() {
+  if (musicPlaying) stopMusic();
+  else startMusic();
+}
+
+// ===== CHAT MENU =====
+function toggleChatMenu() {
+  // Simple menu - could be expanded
+  const actions = ['📷 Фото', '🎥 Видео', '🎵 Аудио', '🎨 Рисунок', '🧩 Загадка', '👻 Призрак'];
+  // Using a simple prompt for now, can be styled later
+}
+
+// ===== AUTH STATE =====
+auth.onAuthStateChanged(user => {
+  if (user) {
+    currentUser = user;
+    setupPresence(user.uid);
+    loadUserData();
+    checkFutureLetter(user.uid);
+    showScreen('mainScreen');
+  } else {
+    currentUser = null;
+    showScreen('welcomeScreen');
   }
+});
 
-  canvas.addEventListener('touchstart', (e) => {
-    isDrawing = true;
-    ctx.strokeStyle = currentColor;
-    ctx.beginPath();
-    const rect = canvas.getBoundingClientRect();
-    ctx.moveTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
+// ===== INIT CANVAS ON SHOW =====
+const drawObserver = new MutationObserver(mutations => {
+  mutations.forEach(m => {
+    if (m.target.id === 'drawScreen' && m.target.classList.contains('active')) {
+      setTimeout(initCanvas, 100);
+    }
   });
+});
+drawObserver.observe(document.getElementById('drawScreen'), { attributes: true, attributeFilter: ['class'] });
 
-  canvas.addEventListener('touchmove', (e) => {
-    if (!isDrawing) return;
-    const rect = canvas.getBoundingClientRect();
-    ctx.lineTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
-    ctx.stroke();
-  });
+// ===== SWITCH TAB =====
+function switchTab(tab) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+}
 
-  canvas.addEventListener('touchend', () => isDrawing = false);
+// ===== PREVENT ZOOM ON INPUT =====
+document.addEventListener('gesturestart', e => e.preventDefault());
+document.addEventListener('gesturechange', e => e.preventDefault());
+document.addEventListener('gestureend', e => e.preventDefault());
 
-  function sendDrawing() {
-    const dataUrl = canvas.toDataURL();
-    const chatId = [currentUser.uid, activeChatUserId].sort().join('_');
-    db.ref(`chats/${chatId}/messages`).push({
-      senderId: currentUser.uid,
-      mediaUrl: dataUrl,
-      timestamp: firebase.database.ServerValue.TIMESTAMP
-    });
-    closeDrawingModal();
+// ===== HANDLE FILE INPUT FOR PROFILE =====
+document.addEventListener('DOMContentLoaded', () => {
+  // Ensure canvas is ready
+  const canvas = document.getElementById('drawCanvas');
+  if (canvas) {
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
   }
+});
+
+// ===== TOGGLE SWITCHES STYLING =====
+function updateToggleStyle(checkbox) {
+  const span = checkbox.nextElementSibling;
+  const knob = span.querySelector('span');
+  if (checkbox.checked) {
+    span.style.background = 'var(--pink)';
+    knob.style.transform = 'translateX(20px)';
+    knob.style.background = 'white';
+  } else {
+    span.style.background = 'var(--bg-input)';
+    knob.style.transform = 'translateX(0)';
+    knob.style.background = 'var(--text3)';
+  }
+}
+
+// Apply toggle styles
+document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+  cb.addEventListener('change', () => updateToggleStyle(cb));
+  updateToggleStyle(cb);
+});
+
+// ===== REALTIME: Listen for own profile changes =====
+function listenOwnProfile() {
+  if (!currentUser) return;
+  const profileRef = db.ref('users/' + currentUser.uid);
+  profileRef.on('value', snap => {
+    const data = snap.val() || {};
+    if (data.avatar) {
+      document.getElementById('headerAvatar').src = data.avatar;
+      document.getElementById('profileAvatarImg').src = data.avatar;
+    }
+    if (data.name) {
+      document.getElementById('headerName').textContent = data.name;
+      document.getElementById('profileName').textContent = data.name;
+    }
+    if (data.status) {
+      document.getElementById('profileStatusText').textContent = data.status;
+    }
+  });
+}
+
+// ===== REALTIME: Update chat list when new messages arrive =====
+function setupNotifications() {
+  if (!currentUser) return;
+  db.ref('chats').on('child_changed', snap => {
+    const chat = snap.val();
+    if (chat.participants && chat.participants[currentUser.uid]) {
+      // Refresh chat list to show new unread counts
+      loadChatList();
+    }
+  });
+}
+
+// ===== INIT =====
+window.addEventListener('load', () => {
+  // Check if already logged in
+  const u = auth.currentUser;
+  if (u) {
+    currentUser = u;
+    setupPresence(u.uid);
+    loadUserData();
+    listenOwnProfile();
+    setupNotifications();
+  }
+});
+
+// ===== BEFORE UNLOAD =====
+window.addEventListener('beforeunload', () => {
+  if (currentUser) {
+    db.ref('users/' + currentUser.uid + '/online').set(false);
+    db.ref('users/' + currentUser.uid + '/lastSeen').set(Date.now());
+  }
+});
+
+// ===== VISIBILITY API for online status =====
+document.addEventListener('visibilitychange', () => {
+  if (!currentUser) return;
+  if (document.hidden) {
+    db.ref('users/' + currentUser.uid + '/online').set(false);
+    db.ref('users/' + currentUser.uid + '/lastSeen').set(Date.now());
+  } else {
+    db.ref('users/' + currentUser.uid + '/online').set(true);
+    setupPresence(currentUser.uid);
+  }
+});
 </script>
 </body>
 </html>
