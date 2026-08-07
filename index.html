@@ -21,13 +21,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 .app-container{width:100%;height:100%;display:flex;flex-direction:column;position:fixed;top:0;left:0;right:0;bottom:0;overflow:hidden;}
 
 /* ===== LOADER ===== */
-.loader{position:fixed;inset:0;z-index:10000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity 0.5s;}
-.loader.hide{opacity:0;pointer-events:none;}
-.loader-kuromi{width:100px;height:100px;position:relative;}
-.loader-kuromi::before{content:"🌸";font-size:60px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);animation:pulse 1.5s ease-in-out infinite;}
-@keyframes pulse{0%,100%{transform:translate(-50%,-50%) scale(1);}50%{transform:translate(-50%,-50%) scale(1.2);}}
-.loader-text{color:var(--accent2);font-size:22px;font-weight:800;letter-spacing:2px;}
-.loader-sub{color:var(--text3);font-size:12px;}
+
 
 /* ===== AUTH ===== */
 #authScreen{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:40px 24px 24px;gap:16px;overflow-y:auto;}
@@ -497,11 +491,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
 <body>
-<div class="loader" id="loader">
-  <div class="loader-kuromi"></div>
-  <div class="loader-text">SakuraMail</div>
-  <div class="loader-sub">Загружаем твой уютный мир...</div>
-</div>
+
 
 <!-- ===== AUTH SCREEN ===== -->
 <div id="authScreen">
@@ -1209,7 +1199,7 @@ const icons = {
 window.onload = () => {
   auth.onAuthStateChanged(user => {
     if (user) { currentUser = user; loadUserData(user.uid); }
-    else { document.getElementById('loader').classList.add('hide'); document.getElementById('authScreen').style.display = 'flex'; }
+    else { document.getElementById('authScreen').classList.add('active'); }
   });
   renderStories();
   renderStickerGrid('default');
@@ -1312,7 +1302,7 @@ function handleAuth() {
 function loadUserData(uid) {
   db.ref('users/'+uid).once('value').then(snap => {
     const data = snap.val();
-    if (!data) { showToast('Ошибка загрузки профиля'); document.getElementById('loader').classList.add('hide'); return; }
+    if (!data) { showToast('Ошибка загрузки профиля'); document.getElementById('authScreen').classList.add('active'); return; }
     currentUserData = data;
     if (data.settings) settings = data.settings;
     if (data.stickers) customStickers = data.stickers;
@@ -1335,8 +1325,7 @@ function setupPresence(uid) {
 }
 
 function showWelcomeScreen() {
-  document.getElementById('loader').classList.add('hide');
-  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('authScreen').classList.remove('active');
   document.getElementById('welcomeScreen').classList.add('active');
 }
 
@@ -1346,8 +1335,7 @@ function closeWelcome() {
 }
 
 function enterApp() {
-  document.getElementById('loader').classList.add('hide');
-  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('authScreen').classList.remove('active');
   document.getElementById('welcomeScreen').classList.remove('active');
   document.getElementById('mainApp').style.display = 'flex';
   document.getElementById('settingsProfileDesc').textContent = '@' + (currentUserData?.username || 'user');
