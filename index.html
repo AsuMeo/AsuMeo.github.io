@@ -10,7 +10,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   :root {
@@ -18,11 +17,8 @@
   }
   html,body { height:100%; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; overflow:hidden; }
   #app { height:100%; display:flex; flex-direction:column; }
-
-  /* Safe area for Android address bar */
   .safe-top { height:env(safe-area-inset-top,0); background:var(--bg); }
 
-  /* Header */
   .header {
     display:flex; align-items:center; justify-content:space-between;
     padding:8px 16px 4px; background:var(--bg); position:sticky; top:0; z-index:100;
@@ -36,7 +32,6 @@
   }
   .filter-btn svg { width:18px; height:18px; stroke:var(--text); fill:none; stroke-width:2; }
 
-  /* Feed */
   .feed-wrap { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:0 8px 80px; }
   .feed { column-count:2; column-gap:8px; }
   .pin {
@@ -53,7 +48,6 @@
   .pin-more { color:var(--text); padding:4px; }
   .pin-title { padding:8px 10px 10px; font-size:13px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
-  /* Bottom Nav */
   .bottom-nav {
     position:fixed; bottom:0; left:0; right:0; height:56px; background:var(--bg); border-top:1px solid var(--surface2);
     display:flex; justify-content:space-around; align-items:center; padding-bottom:env(safe-area-inset-bottom,0); z-index:100;
@@ -67,7 +61,6 @@
   .nav-avatar { width:28px; height:28px; border-radius:50%; object-fit:cover; border:2px solid var(--text2); }
   .nav-item.active .nav-avatar { border-color:var(--text); }
 
-  /* Auth Modal */
   .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:200; display:none; align-items:center; justify-content:center; padding:20px; }
   .modal-overlay.show { display:flex; }
   .modal { background:var(--surface); border-radius:var(--radius); padding:28px 24px; width:100%; max-width:340px; }
@@ -79,7 +72,6 @@
   .modal .switch span { color:var(--text); text-decoration:underline; }
   .modal .error { color:#ff4444; font-size:13px; margin-top:8px; text-align:center; display:none; }
 
-  /* Upload Modal */
   .upload-modal { position:fixed; inset:0; background:var(--bg); z-index:200; display:none; flex-direction:column; }
   .upload-modal.show { display:flex; }
   .upload-header { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--surface2); }
@@ -95,23 +87,21 @@
   .upload-preview { width:100%; max-height:50vh; object-fit:contain; border-radius:var(--radius); display:none; }
   .upload-title-input { width:100%; max-width:400px; padding:14px 16px; border-radius:12px; border:none; background:var(--surface2); color:var(--text); font-size:15px; margin-top:16px; outline:none; display:none; }
   .upload-title-input::placeholder { color:var(--text2); }
+  .upload-progress { width:100%; max-width:400px; height:4px; background:var(--surface2); border-radius:2px; margin-top:12px; display:none; overflow:hidden; }
+  .upload-progress-bar { height:100%; width:0%; background:var(--accent); border-radius:2px; transition:width .3s; }
 
-  /* Loading */
   .loader { position:fixed; inset:0; background:var(--bg); z-index:300; display:flex; align-items:center; justify-content:center; }
   .loader.hide { display:none; }
   .spinner { width:40px; height:40px; border:3px solid var(--surface2); border-top-color:var(--accent); border-radius:50%; animation:spin 1s linear infinite; }
   @keyframes spin { to { transform:rotate(360deg); } }
 
-  /* Empty state */
   .empty { text-align:center; padding:60px 20px; color:var(--text2); }
   .empty svg { width:64px; height:64px; stroke:var(--text2); fill:none; stroke-width:1.5; margin-bottom:16px; }
   .empty p { font-size:15px; }
 
-  /* Toast */
   .toast { position:fixed; bottom:72px; left:50%; transform:translateX(-50%) translateY(100px); background:var(--surface2); color:var(--text); padding:10px 20px; border-radius:20px; font-size:14px; z-index:250; opacity:0; transition:all .3s; }
   .toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
 
-  /* Scrollbar hide */
   .feed-wrap::-webkit-scrollbar { display:none; }
   .feed-wrap { -ms-overflow-style:none; scrollbar-width:none; }
 </style>
@@ -159,7 +149,6 @@
   </div>
 </div>
 
-<!-- Auth Modal -->
 <div class="modal-overlay" id="authModal">
   <div class="modal">
     <h2 id="authTitle">Вход</h2>
@@ -171,7 +160,6 @@
   </div>
 </div>
 
-<!-- Upload Modal -->
 <div class="upload-modal" id="uploadModal">
   <div class="upload-header">
     <div class="cancel" id="uploadCancel">Отмена</div>
@@ -185,6 +173,7 @@
     </div>
     <img class="upload-preview" id="uploadPreview">
     <input type="text" class="upload-title-input" id="uploadTitle" placeholder="Добавьте название">
+    <div class="upload-progress" id="uploadProgress"><div class="upload-progress-bar" id="uploadProgressBar"></div></div>
     <input type="file" id="fileInput" accept="image/*" style="display:none;">
   </div>
 </div>
@@ -192,7 +181,6 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyBm0mIvHVznIeF2PoFk6dtdaiT5r877wyA",
   authDomain: "meow-874ce.firebaseapp.com",
@@ -206,17 +194,15 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
-const storage = firebase.storage();
 
-// State
 let currentUser = null;
 let userKey = null;
 let pins = [];
 let currentTab = 'for-you';
 let uploadFile = null;
 let isLogin = true;
+let userPassword = '';
 
-// DOM
 const loader = document.getElementById('loader');
 const authModal = document.getElementById('authModal');
 const authTitle = document.getElementById('authTitle');
@@ -235,11 +221,12 @@ const uploadPreview = document.getElementById('uploadPreview');
 const uploadTitle = document.getElementById('uploadTitle');
 const uploadDone = document.getElementById('uploadDone');
 const uploadCancel = document.getElementById('uploadCancel');
+const uploadProgress = document.getElementById('uploadProgress');
+const uploadProgressBar = document.getElementById('uploadProgressBar');
 const toast = document.getElementById('toast');
 const navAvatar = document.getElementById('navAvatar');
 const profileIcon = document.getElementById('profileIcon');
 
-// Crypto helpers
 async function deriveKey(email, password) {
   const enc = new TextEncoder();
   const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(email + password), 'PBKDF2', false, ['deriveKey']);
@@ -253,7 +240,10 @@ async function encryptData(key, data) {
   const enc = new TextEncoder();
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(data));
-  return btoa(String.fromCharCode(...iv, ...new Uint8Array(encrypted)));
+  const combined = new Uint8Array(iv.length + encrypted.byteLength);
+  combined.set(iv); combined.set(new Uint8Array(encrypted), iv.length);
+  let binary = ''; for (let i = 0; i < combined.length; i++) binary += String.fromCharCode(combined[i]);
+  return btoa(binary);
 }
 
 async function decryptData(key, base64) {
@@ -264,24 +254,24 @@ async function decryptData(key, base64) {
   return new TextDecoder().decode(decrypted);
 }
 
-// Image compression
-async function compressImage(file, maxWidth = 1200, quality = 0.85) {
+function compressImageToBase64(file, maxWidth = 900, quality = 0.7) {
   return new Promise((resolve) => {
     const img = new Image();
     img.onload = () => {
       const canvas = document.createElement('canvas');
       let w = img.width, h = img.height;
-      if (w > maxWidth) { h = h * maxWidth / w; w = maxWidth; }
+      if (w > maxWidth) { h = Math.round(h * maxWidth / w); w = maxWidth; }
       canvas.width = w; canvas.height = h;
       const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, w, h);
       ctx.drawImage(img, 0, 0, w, h);
-      canvas.toBlob((blob) => resolve(blob), 'image/jpeg', quality);
+      const base64 = canvas.toDataURL('image/jpeg', quality);
+      resolve(base64);
     };
     img.src = URL.createObjectURL(file);
   });
 }
 
-// Auth
 authBtn.addEventListener('click', async () => {
   const email = authEmail.value.trim();
   const pass = authPass.value.trim();
@@ -293,6 +283,7 @@ authBtn.addEventListener('click', async () => {
     } else {
       await auth.createUserWithEmailAndPassword(email, pass);
     }
+    userPassword = pass;
     authModal.classList.remove('show');
   } catch (e) {
     showAuthError(e.message);
@@ -310,7 +301,6 @@ authSwitch.addEventListener('click', () => {
 
 function showAuthError(msg) { authError.textContent = msg; authError.style.display = 'block'; }
 
-// Auth state
 auth.onAuthStateChanged(async (user) => {
   if (user) {
     currentUser = user;
@@ -328,10 +318,9 @@ auth.onAuthStateChanged(async (user) => {
   loader.classList.add('hide');
 });
 
-// Load pins
 async function loadPins() {
-  if (!currentUser) return;
-  const key = await deriveKey(currentUser.email, authPass.value || '');
+  if (!currentUser || !userPassword) return;
+  const key = await deriveKey(currentUser.email, userPassword);
   const snap = await db.ref(`pins/${userKey}`).once('value');
   const data = snap.val() || {};
   pins = [];
@@ -345,14 +334,13 @@ async function loadPins() {
   renderPins();
 }
 
-// Render
 function renderPins() {
   const filtered = currentTab === 'for-you' ? pins : pins.filter(p => p.liked);
   if (filtered.length === 0) { feed.innerHTML = ''; empty.style.display = 'block'; return; }
   empty.style.display = 'none';
   feed.innerHTML = filtered.map(p => `
     <div class="pin" data-id="${p.id}">
-      <img src="${p.url}" alt="${p.title || ''}" loading="lazy">
+      <img src="${p.imageBase64}" alt="${p.title || ''}" loading="lazy">
       <div class="pin-overlay"></div>
       <div class="pin-actions">
         <div class="pin-like ${p.liked ? 'liked' : ''}" onclick="toggleLike('${p.id}', event)">
@@ -372,8 +360,7 @@ function escapeHtml(t) {
   const d = document.createElement('div'); d.textContent = t; return d.innerHTML;
 }
 
-// Tabs
- document.querySelectorAll('.tab').forEach(t => {
+document.querySelectorAll('.tab').forEach(t => {
   t.addEventListener('click', () => {
     document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
     t.classList.add('active');
@@ -382,7 +369,6 @@ function escapeHtml(t) {
   });
 });
 
-// Upload
 addBtn.addEventListener('click', () => {
   if (!currentUser) { showToast('Войдите в аккаунт'); return; }
   uploadModal.classList.add('show');
@@ -406,22 +392,30 @@ fileInput.addEventListener('change', async (e) => {
 uploadCancel.addEventListener('click', resetUpload);
 
 uploadDone.addEventListener('click', async () => {
-  if (!uploadFile || !currentUser) return;
+  if (!uploadFile || !currentUser || !userPassword) return;
   uploadDone.textContent = '...'; uploadDone.style.pointerEvents = 'none';
-  try {
-    const compressed = await compressImage(uploadFile);
-    const fileName = `${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
-    const ref = storage.ref(`pins/${userKey}/${fileName}`);
-    await ref.put(compressed);
-    const url = await ref.getDownloadURL();
+  uploadProgress.style.display = 'block';
+  uploadProgressBar.style.width = '10%';
 
-    const key = await deriveKey(currentUser.email, authPass.value || '');
+  try {
+    uploadProgressBar.style.width = '30%';
+    const base64 = await compressImageToBase64(uploadFile, 900, 0.7);
+    uploadProgressBar.style.width = '60%';
+
+    const key = await deriveKey(currentUser.email, userPassword);
     const pinData = {
-      url, title: uploadTitle.value.trim() || '',
-      timestamp: Date.now(), liked: false, likes: 0
+      imageBase64: base64,
+      title: uploadTitle.value.trim() || '',
+      timestamp: Date.now(),
+      liked: false,
+      likes: 0
     };
+    uploadProgressBar.style.width = '80%';
+
     const encrypted = await encryptData(key, JSON.stringify(pinData));
-    await db.ref(`pins/${userKey}/${Date.now()}`).set({ data: encrypted });
+    const pinId = Date.now().toString();
+    await db.ref(`pins/${userKey}/${pinId}`).set({ data: encrypted });
+    uploadProgressBar.style.width = '100%';
 
     showToast('Пин сохранен!');
     resetUpload();
@@ -431,6 +425,8 @@ uploadDone.addEventListener('click', async () => {
     uploadDone.textContent = 'Готово';
     uploadDone.style.pointerEvents = 'auto';
   }
+  uploadProgress.style.display = 'none';
+  uploadProgressBar.style.width = '0%';
 });
 
 function resetUpload() {
@@ -442,22 +438,22 @@ function resetUpload() {
   uploadDone.textContent = 'Готово';
   uploadDone.style.opacity = '.3';
   uploadDone.style.pointerEvents = 'none';
+  uploadProgress.style.display = 'none';
+  uploadProgressBar.style.width = '0%';
 }
 
-// Like
 window.toggleLike = async (id, e) => {
   e.stopPropagation();
   const pin = pins.find(p => p.id === id);
-  if (!pin || !currentUser) return;
+  if (!pin || !currentUser || !userPassword) return;
   pin.liked = !pin.liked;
   pin.likes = (pin.likes || 0) + (pin.liked ? 1 : -1);
-  const key = await deriveKey(currentUser.email, authPass.value || '');
+  const key = await deriveKey(currentUser.email, userPassword);
   const encrypted = await encryptData(key, JSON.stringify(pin));
   await db.ref(`pins/${userKey}/${id}`).update({ data: encrypted });
   renderPins();
 };
 
-// Delete
 window.deletePin = async (id, e) => {
   e.stopPropagation();
   if (!confirm('Удалить пин?')) return;
@@ -467,15 +463,13 @@ window.deletePin = async (id, e) => {
   showToast('Пин удален');
 };
 
-// Toast
 function showToast(msg) {
   toast.textContent = msg;
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 2500);
 }
 
-// Bottom nav
- document.querySelectorAll('.nav-item[data-nav]').forEach(n => {
+document.querySelectorAll('.nav-item[data-nav]').forEach(n => {
   n.addEventListener('click', () => {
     document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
     n.classList.add('active');
@@ -488,18 +482,8 @@ function showToast(msg) {
   });
 });
 
-// Filter
- document.getElementById('filterBtn').addEventListener('click', () => {
+document.getElementById('filterBtn').addEventListener('click', () => {
   showToast('Фильтры скоро...');
-});
-
-// Infinite scroll
-let loadingMore = false;
-feedWrap.addEventListener('scroll', () => {
-  if (loadingMore) return;
-  if (feedWrap.scrollTop + feedWrap.clientHeight >= feedWrap.scrollHeight - 200) {
-    // Could load more here
-  }
 });
 </script>
 </body>
