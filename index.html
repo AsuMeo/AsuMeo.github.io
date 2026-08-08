@@ -2,1110 +2,505 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-<title>Она рядом — Глава 1: Случайная встреча</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Meow</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&family=Roboto:wght@300;400;700&display=swap');
-:root { --bg-dark:#0d0d1a; --bg-panel:#1a1a2e; --accent:#ff4d6d; --accent-soft:#ffb3c1; --text:#e8e8e8; --text-dim:#8888a0; --love:#ff6b9d; --fear:#ff4444; --trust:#4ecdc4; }
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-html,body { height:100%; overflow:hidden; font-family:'Roboto',sans-serif; background:var(--bg-dark); color:var(--text); }
-#loader { position:fixed; inset:0; z-index:9999; background:var(--bg-dark); display:flex; flex-direction:column; align-items:center; justify-content:center; }
-#loader h1 { font-family:'Noto Serif',serif; font-size:2.2rem; color:var(--accent); text-shadow:0 0 30px var(--accent); animation:pulse 2s infinite; }
-#loader p { margin-top:20px; color:var(--text-dim); font-size:0.9rem; }
-#loader .bar { width:200px; height:3px; background:#333; margin-top:30px; border-radius:2px; overflow:hidden; }
-#loader .bar-fill { width:0%; height:100%; background:var(--accent); animation:loadBar 0.8s ease forwards; }
-@keyframes pulse { 0%,100%{opacity:0.6;} 50%{opacity:1;} }
-@keyframes loadBar { to{width:100%;} }
-#game { width:100%; height:100%; display:none; flex-direction:column; position:relative; }
-#scene { flex:1; position:relative; overflow:hidden; }
-#bg { position:absolute; inset:0; background-size:cover; background-position:center; transition:opacity 1s ease; }
-#bg-overlay { position:absolute; inset:0; background:linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.6) 70%, rgba(0,0,0,0.9) 100%); pointer-events:none; }
-#char-container { position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:500px; height:65%; display:flex; align-items:flex-end; justify-content:center; pointer-events:none; z-index:2; }
-#char-sprite { max-height:100%; max-width:100%; opacity:0; transform:translateY(30px); transition:all 0.8s cubic-bezier(0.4,0,0.2,1); filter:drop-shadow(0 0 20px rgba(255,77,109,0.3)); }
-#char-sprite.show { opacity:1; transform:translateY(0); }
-#char-sprite.shake { animation:shake 0.4s ease; }
-@keyframes shake { 0%,100%{transform:translateX(0);} 20%{transform:translateX(-8px);} 40%{transform:translateX(8px);} 60%{transform:translateX(-5px);} 80%{transform:translateX(5px);} }
-#fx { position:absolute; inset:0; pointer-events:none; z-index:3; }
-.heartbeat { animation:heartbeat 1.5s ease infinite; }
-@keyframes heartbeat { 0%,100%{transform:scale(1);} 14%{transform:scale(1.03);} 28%{transform:scale(1);} 42%{transform:scale(1.03);} 70%{transform:scale(1);} }
-.vignette { position:absolute; inset:0; box-shadow:inset 0 0 150px rgba(0,0,0,0.8); pointer-events:none; }
-#ui { position:absolute; bottom:0; left:0; right:0; z-index:10; padding:0 12px 12px; }
-#name-tag { display:inline-block; background:var(--accent); color:#fff; padding:6px 20px; border-radius:20px 20px 0 0; font-weight:700; font-size:0.85rem; margin-left:8px; opacity:0; transform:translateY(10px); transition:all 0.3s ease; }
-#name-tag.show { opacity:1; transform:translateY(0); }
-#dialogue-box { background:rgba(13,13,26,0.92); border:1px solid rgba(255,77,109,0.3); border-radius:0 16px 16px 16px; padding:16px 18px; min-height:120px; position:relative; backdrop-filter:blur(10px); }
-#dialogue-text { font-size:1rem; line-height:1.7; color:var(--text); min-height:60px; }
-#dialogue-text .typing-cursor { display:inline-block; width:2px; height:1.1em; background:var(--accent); margin-left:2px; animation:blink 0.8s infinite; vertical-align:middle; }
-@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
-#next-indicator { position:absolute; bottom:12px; right:18px; width:24px; height:24px; border-right:2px solid var(--accent); border-bottom:2px solid var(--accent); transform:rotate(45deg); opacity:0; animation:arrowPulse 1.5s infinite; }
-@keyframes arrowPulse { 0%,100%{opacity:0.3; transform:rotate(45deg) translate(0,0);} 50%{opacity:1; transform:rotate(45deg) translate(4px,4px);} }
-#choices { display:none; flex-direction:column; gap:10px; margin-top:12px; animation:slideUp 0.4s ease; }
-@keyframes slideUp { from{opacity:0; transform:translateY(20px);} to{opacity:1; transform:translateY(0);} }
-.choice-btn { background:rgba(255,77,109,0.15); border:1px solid rgba(255,77,109,0.4); color:var(--text); padding:14px 18px; border-radius:12px; font-size:0.95rem; text-align:left; cursor:pointer; transition:all 0.2s; position:relative; overflow:hidden; }
-.choice-btn:hover, .choice-btn:active { background:rgba(255,77,109,0.3); border-color:var(--accent); transform:translateX(5px); }
-.choice-btn .tag { display:inline-block; font-size:0.7rem; padding:2px 8px; border-radius:10px; margin-right:8px; font-weight:700; }
-.tag-love { background:rgba(255,107,157,0.3); color:var(--love); }
-.tag-fear { background:rgba(255,68,68,0.3); color:var(--fear); }
-.tag-trust { background:rgba(78,205,196,0.3); color:var(--trust); }
-#stats-bar { display:flex; gap:12px; padding:8px 12px; background:rgba(13,13,26,0.8); border-radius:12px 12px 0 0; margin-bottom:4px; backdrop-filter:blur(10px); }
-.stat { display:flex; align-items:center; gap:6px; font-size:0.75rem; }
-.stat-bar { width:60px; height:6px; background:rgba(255,255,255,0.1); border-radius:3px; overflow:hidden; }
-.stat-fill { height:100%; border-radius:3px; transition:width 0.5s ease; }
-.stat-love { background:var(--love); }
-.stat-fear { background:var(--fear); }
-.stat-trust { background:var(--trust); }
-#top-bar { position:absolute; top:0; left:0; right:0; display:flex; justify-content:space-between; align-items:center; padding:10px 16px; z-index:10; background:linear-gradient(to bottom, rgba(0,0,0,0.6), transparent); }
-#chapter-title { font-family:'Noto Serif',serif; font-size:0.85rem; color:var(--accent-soft); }
-#menu-btn { width:36px; height:36px; background:rgba(255,255,255,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.2rem; cursor:pointer; border:none; color:var(--text); }
-#menu-modal { position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:100; display:none; flex-direction:column; align-items:center; justify-content:center; backdrop-filter:blur(10px); }
-#menu-modal.show { display:flex; animation:fadeIn 0.3s ease; }
-@keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
-.menu-btn { width:220px; padding:16px; margin:8px; background:var(--bg-panel); border:1px solid rgba(255,77,109,0.3); border-radius:12px; color:var(--text); font-size:1rem; cursor:pointer; transition:all 0.2s; }
-.menu-btn:hover { background:rgba(255,77,109,0.2); border-color:var(--accent); }
-#save-modal { position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:101; display:none; flex-direction:column; padding:20px; overflow-y:auto; }
-#save-modal.show { display:flex; }
-.save-slot { background:var(--bg-panel); border:1px solid rgba(255,77,109,0.2); border-radius:12px; padding:14px; margin:8px 0; cursor:pointer; transition:all 0.2s; }
-.save-slot:hover { border-color:var(--accent); }
-.save-slot .s-time { color:var(--text-dim); font-size:0.75rem; }
-.save-slot .s-text { color:var(--text); font-size:0.85rem; margin-top:4px; }
-#phone-screen { position:fixed; inset:0; background:#000; z-index:50; display:none; flex-direction:column; align-items:center; justify-content:center; }
-#phone-screen.show { display:flex; }
-.phone-frame { width:90%; max-width:340px; background:var(--bg-panel); border-radius:30px; padding:20px; border:3px solid #333; position:relative; }
-.phone-header { display:flex; align-items:center; gap:10px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.1); }
-.phone-avatar { width:40px; height:40px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-size:1.2rem; }
-.phone-name { font-weight:700; color:var(--text); }
-.phone-status { font-size:0.75rem; color:var(--text-dim); }
-.phone-chat { height:350px; overflow-y:auto; padding:12px 0; display:flex; flex-direction:column; gap:8px; }
-.msg { max-width:80%; padding:10px 14px; border-radius:16px; font-size:0.9rem; animation:msgIn 0.3s ease; }
-@keyframes msgIn { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
-.msg-in { align-self:flex-start; background:rgba(255,255,255,0.1); color:var(--text); border-bottom-left-radius:4px; }
-.msg-out { align-self:flex-end; background:var(--accent); color:#fff; border-bottom-right-radius:4px; }
-.msg-time { font-size:0.65rem; color:var(--text-dim); margin-top:4px; text-align:right; }
-.phone-input { display:flex; gap:8px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.1); }
-.phone-input input { flex:1; background:rgba(255,255,255,0.1); border:none; border-radius:20px; padding:10px 16px; color:var(--text); font-size:0.9rem; }
-.phone-input button { background:var(--accent); border:none; border-radius:50%; width:40px; height:40px; color:#fff; font-size:1.2rem; cursor:pointer; }
-.phone-close { position:absolute; top:-50px; right:0; background:rgba(255,255,255,0.1); border:none; border-radius:50%; width:40px; height:40px; color:#fff; font-size:1.2rem; cursor:pointer; }
-#inv-modal { position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:102; display:none; flex-direction:column; padding:20px; }
-#inv-modal.show { display:flex; }
-#inv-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:16px; }
-.inv-item { background:var(--bg-panel); border:1px solid rgba(255,77,109,0.2); border-radius:12px; padding:16px; text-align:center; cursor:pointer; transition:all 0.2s; }
-.inv-item:hover { border-color:var(--accent); }
-.inv-item .inv-icon { font-size:2rem; margin-bottom:8px; }
-.inv-item .inv-name { font-size:0.8rem; color:var(--text); }
-#journal-modal { position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:103; display:none; flex-direction:column; padding:20px; }
-#journal-modal.show { display:flex; }
-.journal-entry { background:var(--bg-panel); border-left:3px solid var(--accent); padding:14px 16px; margin:8px 0; border-radius:0 12px 12px 0; }
-.journal-entry .j-date { color:var(--accent-soft); font-size:0.75rem; }
-.journal-entry .j-text { color:var(--text); font-size:0.9rem; margin-top:6px; line-height:1.6; }
-#minigame-modal { position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:200; display:none; flex-direction:column; align-items:center; justify-content:center; }
-#minigame-modal.show { display:flex; }
-.lock-container { width:280px; height:280px; position:relative; }
-.lock-ring { position:absolute; inset:20px; border:8px solid #333; border-radius:50%; }
-.lock-target { position:absolute; top:20px; left:50%; transform:translateX(-50%); width:4px; height:30px; background:var(--accent); border-radius:2px; }
-.lock-cursor { position:absolute; inset:20px; border-radius:50%; animation:spin 4s linear infinite; }
-.lock-cursor::after { content:''; position:absolute; top:12px; left:50%; transform:translateX(-50%); width:6px; height:24px; background:#fff; border-radius:3px; }
-@keyframes spin { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
-.lock-btn { margin-top:30px; padding:14px 40px; background:var(--accent); border:none; border-radius:12px; color:#fff; font-size:1.1rem; cursor:pointer; }
-.lock-instruction { color:var(--text-dim); margin-bottom:20px; text-align:center; }
-.memory-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
-.memory-card { width:70px; height:70px; background:var(--bg-panel); border:2px solid rgba(255,77,109,0.3); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; cursor:pointer; transition:all 0.3s; }
-.memory-card.flipped { background:var(--accent); border-color:var(--accent); transform:rotateY(180deg); }
-.memory-card.matched { background:rgba(78,205,196,0.3); border-color:var(--trust); opacity:0.6; }
-#transition { position:fixed; inset:0; background:#000; z-index:500; display:none; align-items:center; justify-content:center; flex-direction:column; }
-#transition.show { display:flex; }
-#transition-text { font-family:'Noto Serif',serif; font-size:1.5rem; color:var(--accent); text-align:center; padding:20px; }
-#transition-sub { color:var(--text-dim); font-size:0.9rem; margin-top:10px; }
-#ending { position:fixed; inset:0; background:var(--bg-dark); z-index:600; display:none; flex-direction:column; align-items:center; justify-content:center; padding:30px; text-align:center; }
-#ending.show { display:flex; }
-#ending h2 { font-family:'Noto Serif',serif; font-size:2rem; color:var(--accent); margin-bottom:20px; }
-#ending p { color:var(--text-dim); line-height:1.8; max-width:400px; }
-#ending .end-stat { margin-top:30px; display:flex; gap:20px; }
-.end-stat-item { text-align:center; }
-.end-stat-item .es-val { font-size:1.5rem; font-weight:700; color:var(--accent); }
-.end-stat-item .es-label { font-size:0.75rem; color:var(--text-dim); }
-#notif { position:fixed; top:60px; left:50%; transform:translateX(-50%) translateY(-100px); background:var(--bg-panel); border:1px solid var(--accent); border-radius:12px; padding:12px 20px; z-index:300; transition:transform 0.4s ease; max-width:90%; text-align:center; }
-#notif.show { transform:translateX(-50%) translateY(0); }
-::-webkit-scrollbar { width:4px; }
-::-webkit-scrollbar-track { background:transparent; }
-::-webkit-scrollbar-thumb { background:var(--accent); border-radius:2px; }
-@media(max-width:400px) { #dialogue-text { font-size:0.9rem; } .choice-btn { font-size:0.85rem; padding:12px 14px; } .stat-bar { width:45px; } }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  :root {
+    --bg:#0a0a0a; --surface:#141414; --surface2:#1e1e1e; --text:#fff; --text2:#888; --accent:#e60023; --radius:16px;
+  }
+  html,body { height:100%; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; overflow:hidden; }
+  #app { height:100%; display:flex; flex-direction:column; }
+
+  /* Safe area for Android address bar */
+  .safe-top { height:env(safe-area-inset-top,0); background:var(--bg); }
+
+  /* Header */
+  .header {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:8px 16px 4px; background:var(--bg); position:sticky; top:0; z-index:100;
+  }
+  .tabs { display:flex; gap:20px; }
+  .tab { font-size:16px; font-weight:600; color:var(--text2); padding-bottom:6px; position:relative; cursor:pointer; }
+  .tab.active { color:var(--text); }
+  .tab.active::after { content:""; position:absolute; bottom:0; left:0; right:0; height:2.5px; background:var(--text); border-radius:2px; }
+  .filter-btn {
+    width:36px; height:36px; border-radius:50%; background:var(--surface2); display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .filter-btn svg { width:18px; height:18px; stroke:var(--text); fill:none; stroke-width:2; }
+
+  /* Feed */
+  .feed-wrap { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:0 8px 80px; }
+  .feed { column-count:2; column-gap:8px; }
+  .pin {
+    break-inside:avoid; margin-bottom:8px; border-radius:var(--radius); overflow:hidden; background:var(--surface); position:relative; cursor:pointer; animation:fadeIn .4s ease;
+  }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  .pin img { width:100%; display:block; border-radius:var(--radius); }
+  .pin-overlay { position:absolute; inset:0; background:linear-gradient(to top,rgba(0,0,0,.6) 0%,transparent 50%); opacity:0; transition:opacity .2s; border-radius:var(--radius); }
+  .pin:hover .pin-overlay, .pin:active .pin-overlay { opacity:1; }
+  .pin-actions { position:absolute; bottom:8px; left:8px; right:8px; display:flex; justify-content:space-between; align-items:center; opacity:0; transition:opacity .2s; }
+  .pin:hover .pin-actions, .pin:active .pin-actions { opacity:1; }
+  .pin-like { color:var(--text); font-size:13px; display:flex; align-items:center; gap:4px; }
+  .pin-like.liked { color:var(--accent); }
+  .pin-more { color:var(--text); padding:4px; }
+  .pin-title { padding:8px 10px 10px; font-size:13px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+  /* Bottom Nav */
+  .bottom-nav {
+    position:fixed; bottom:0; left:0; right:0; height:56px; background:var(--bg); border-top:1px solid var(--surface2);
+    display:flex; justify-content:space-around; align-items:center; padding-bottom:env(safe-area-inset-bottom,0); z-index:100;
+  }
+  .nav-item { width:48px; height:48px; display:flex; align-items:center; justify-content:center; cursor:pointer; border-radius:50%; transition:background .2s; }
+  .nav-item:active { background:var(--surface2); }
+  .nav-item svg { width:24px; height:24px; stroke:var(--text2); fill:none; stroke-width:2; }
+  .nav-item.active svg { stroke:var(--text); }
+  .nav-item.add { background:var(--text); }
+  .nav-item.add svg { stroke:var(--bg); }
+  .nav-avatar { width:28px; height:28px; border-radius:50%; object-fit:cover; border:2px solid var(--text2); }
+  .nav-item.active .nav-avatar { border-color:var(--text); }
+
+  /* Auth Modal */
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:200; display:none; align-items:center; justify-content:center; padding:20px; }
+  .modal-overlay.show { display:flex; }
+  .modal { background:var(--surface); border-radius:var(--radius); padding:28px 24px; width:100%; max-width:340px; }
+  .modal h2 { font-size:20px; margin-bottom:20px; text-align:center; }
+  .modal input { width:100%; padding:14px 16px; border-radius:12px; border:none; background:var(--surface2); color:var(--text); font-size:15px; margin-bottom:12px; outline:none; }
+  .modal input::placeholder { color:var(--text2); }
+  .modal button { width:100%; padding:14px; border-radius:12px; border:none; background:var(--accent); color:#fff; font-size:16px; font-weight:600; cursor:pointer; margin-top:8px; }
+  .modal .switch { text-align:center; margin-top:16px; color:var(--text2); font-size:14px; cursor:pointer; }
+  .modal .switch span { color:var(--text); text-decoration:underline; }
+  .modal .error { color:#ff4444; font-size:13px; margin-top:8px; text-align:center; display:none; }
+
+  /* Upload Modal */
+  .upload-modal { position:fixed; inset:0; background:var(--bg); z-index:200; display:none; flex-direction:column; }
+  .upload-modal.show { display:flex; }
+  .upload-header { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--surface2); }
+  .upload-header h3 { font-size:16px; }
+  .upload-header .cancel { color:var(--text2); font-size:14px; cursor:pointer; }
+  .upload-header .done { color:var(--accent); font-size:14px; font-weight:600; cursor:pointer; }
+  .upload-area { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; }
+  .upload-btn {
+    width:160px; height:160px; border-radius:var(--radius); background:var(--surface2); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; cursor:pointer; border:2px dashed var(--text2);
+  }
+  .upload-btn svg { width:40px; height:40px; stroke:var(--text2); fill:none; stroke-width:1.5; }
+  .upload-btn span { color:var(--text2); font-size:14px; }
+  .upload-preview { width:100%; max-height:50vh; object-fit:contain; border-radius:var(--radius); display:none; }
+  .upload-title-input { width:100%; max-width:400px; padding:14px 16px; border-radius:12px; border:none; background:var(--surface2); color:var(--text); font-size:15px; margin-top:16px; outline:none; display:none; }
+  .upload-title-input::placeholder { color:var(--text2); }
+
+  /* Loading */
+  .loader { position:fixed; inset:0; background:var(--bg); z-index:300; display:flex; align-items:center; justify-content:center; }
+  .loader.hide { display:none; }
+  .spinner { width:40px; height:40px; border:3px solid var(--surface2); border-top-color:var(--accent); border-radius:50%; animation:spin 1s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  /* Empty state */
+  .empty { text-align:center; padding:60px 20px; color:var(--text2); }
+  .empty svg { width:64px; height:64px; stroke:var(--text2); fill:none; stroke-width:1.5; margin-bottom:16px; }
+  .empty p { font-size:15px; }
+
+  /* Toast */
+  .toast { position:fixed; bottom:72px; left:50%; transform:translateX(-50%) translateY(100px); background:var(--surface2); color:var(--text); padding:10px 20px; border-radius:20px; font-size:14px; z-index:250; opacity:0; transition:all .3s; }
+  .toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+
+  /* Scrollbar hide */
+  .feed-wrap::-webkit-scrollbar { display:none; }
+  .feed-wrap { -ms-overflow-style:none; scrollbar-width:none; }
 </style>
 </head>
 <body>
+<div class="loader" id="loader"><div class="spinner"></div></div>
 
-<div id="loader">
-  <h1>Она рядом</h1>
-  <p>Глава 1: Случайная встреча</p>
-  <div class="bar"><div class="bar-fill"></div></div>
-</div>
-
-<div id="game">
-  <div id="top-bar">
-    <div id="chapter-title">Глава 1: Случайная встреча</div>
-    <button id="menu-btn" onclick="openMenu()">☰</button>
-  </div>
-  <div id="scene">
-    <div id="bg"></div>
-    <div id="bg-overlay"></div>
-    <div id="fx"></div>
-    <div class="vignette"></div>
-    <div id="char-container"><img id="char-sprite" src="" alt=""></div>
-  </div>
-  <div id="ui">
-    <div id="stats-bar">
-      <div class="stat"><span>❤️</span><div class="stat-bar"><div class="stat-fill stat-love" id="stat-love" style="width:10%"></div></div></div>
-      <div class="stat"><span>😰</span><div class="stat-bar"><div class="stat-fill stat-fear" id="stat-fear" style="width:5%"></div></div></div>
-      <div class="stat"><span>🤝</span><div class="stat-bar"><div class="stat-fill stat-trust" id="stat-trust" style="width:20%"></div></div></div>
+<div id="app">
+  <div class="safe-top"></div>
+  <div class="header">
+    <div class="tabs">
+      <div class="tab active" data-tab="for-you">Для вас</div>
+      <div class="tab" data-tab="saved">Сохраненное</div>
     </div>
-    <div id="name-tag"></div>
-    <div id="dialogue-box" onclick="advanceDialogue()">
-      <div id="dialogue-text"></div>
-      <div id="next-indicator"></div>
+    <div class="filter-btn" id="filterBtn">
+      <svg viewBox="0 0 24 24"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
     </div>
-    <div id="choices"></div>
   </div>
-</div>
 
-<div id="menu-modal">
-  <h2 style="font-family:'Noto Serif',serif; color:var(--accent); margin-bottom:20px;">Меню</h2>
-  <button class="menu-btn" onclick="saveGame()">💾 Сохранить</button>
-  <button class="menu-btn" onclick="loadGame()">📂 Загрузить</button>
-  <button class="menu-btn" onclick="openJournal()">📓 Дневник</button>
-  <button class="menu-btn" onclick="openInventory()">🎒 Инвентарь</button>
-  <button class="menu-btn" onclick="toggleAuto()" id="auto-btn">▶️ Авто: ВЫКЛ</button>
-  <button class="menu-btn" onclick="closeMenu()">⬅️ Назад</button>
-</div>
-
-<div id="save-modal">
-  <h2 style="font-family:'Noto Serif',serif; color:var(--accent); margin-bottom:10px;">Сохранения</h2>
-  <button class="menu-btn" onclick="closeSaveModal()" style="width:auto; padding:10px 20px; margin:0 0 10px;">⬅️ Назад</button>
-  <div id="save-slots"></div>
-</div>
-
-<div id="phone-screen">
-  <button class="phone-close" onclick="closePhone()">✕</button>
-  <div class="phone-frame">
-    <div class="phone-header">
-      <div class="phone-avatar">👩</div>
-      <div><div class="phone-name">Мира 💕</div><div class="phone-status">в сети</div></div>
+  <div class="feed-wrap" id="feedWrap">
+    <div class="feed" id="feed"></div>
+    <div class="empty" id="empty" style="display:none;">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+      <p>Нет сохраненных пинов</p>
     </div>
-    <div class="phone-chat" id="phone-chat"></div>
-    <div class="phone-input">
-      <input type="text" id="phone-msg-input" placeholder="Сообщение..." onkeypress="if(event.key==='Enter')sendPhoneMsg()">
-      <button onclick="sendPhoneMsg()">➤</button>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item active" data-nav="home">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    </div>
+    <div class="nav-item" data-nav="search">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    </div>
+    <div class="nav-item add" id="addBtn">
+      <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+    </div>
+    <div class="nav-item" data-nav="messages">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </div>
+    <div class="nav-item" data-nav="profile" id="profileNav">
+      <svg viewBox="0 0 24 24" id="profileIcon"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <img src="" class="nav-avatar" id="navAvatar" style="display:none;">
     </div>
   </div>
 </div>
 
-<div id="inv-modal">
-  <h2 style="font-family:'Noto Serif',serif; color:var(--accent); margin-bottom:10px;">🎒 Инвентарь</h2>
-  <button class="menu-btn" onclick="closeInventory()" style="width:auto; padding:10px 20px; margin:0 0 10px;">⬅️ Назад</button>
-  <div id="inv-grid"></div>
-</div>
-
-<div id="journal-modal">
-  <h2 style="font-family:'Noto Serif',serif; color:var(--accent); margin-bottom:10px;">📓 Дневник</h2>
-  <button class="menu-btn" onclick="closeJournal()" style="width:auto; padding:10px 20px; margin:0 0 10px;">⬅️ Назад</button>
-  <div id="journal-entries"></div>
-</div>
-
-<div id="minigame-modal"><div id="minigame-content"></div></div>
-
-<div id="transition">
-  <div id="transition-text"></div>
-  <div id="transition-sub"></div>
-</div>
-
-<div id="notif"></div>
-
-<div id="ending">
-  <h2 id="ending-title"></h2>
-  <p id="ending-desc"></p>
-  <div class="end-stat">
-    <div class="end-stat-item"><div class="es-val" id="end-love">0</div><div class="es-label">Любовь</div></div>
-    <div class="end-stat-item"><div class="es-val" id="end-fear">0</div><div class="es-label">Страх</div></div>
-    <div class="end-stat-item"><div class="es-val" id="end-trust">0</div><div class="es-label">Доверие</div></div>
+<!-- Auth Modal -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal">
+    <h2 id="authTitle">Вход</h2>
+    <input type="email" id="authEmail" placeholder="Email">
+    <input type="password" id="authPass" placeholder="Пароль">
+    <div class="error" id="authError"></div>
+    <button id="authBtn">Войти</button>
+    <div class="switch" id="authSwitch">Нет аккаунта? <span>Регистрация</span></div>
   </div>
-  <button class="menu-btn" onclick="location.reload()" style="margin-top:30px;">🔄 Начать заново</button>
 </div>
+
+<!-- Upload Modal -->
+<div class="upload-modal" id="uploadModal">
+  <div class="upload-header">
+    <div class="cancel" id="uploadCancel">Отмена</div>
+    <h3>Создать пин</h3>
+    <div class="done" id="uploadDone" style="opacity:.3;pointer-events:none;">Готово</div>
+  </div>
+  <div class="upload-area">
+    <div class="upload-btn" id="uploadBtn">
+      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <span>Выбрать из галереи</span>
+    </div>
+    <img class="upload-preview" id="uploadPreview">
+    <input type="text" class="upload-title-input" id="uploadTitle" placeholder="Добавьте название">
+    <input type="file" id="fileInput" accept="image/*" style="display:none;">
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
 
 <script>
-
-const GAME = {
-  love: 10, fear: 5, trust: 20,
-  inventory: [], journal: [], flags: {},
-  currentScene: 0, currentLine: 0,
-  autoMode: false, autoTimer: null,
-  isTyping: false,
-  saves: JSON.parse(localStorage.getItem('ona_ryadom_saves') || '[]'),
-  playTime: 0, timerInterval: null
+// Firebase Config
+const firebaseConfig = {
+  apiKey: "AIzaSyBm0mIvHVznIeF2PoFk6dtdaiT5r877wyA",
+  authDomain: "meow-874ce.firebaseapp.com",
+  databaseURL: "https://meow-874ce-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "meow-874ce",
+  storageBucket: "meow-874ce.firebasestorage.app",
+  messagingSenderId: "471541334599",
+  appId: "1:471541334599:web:567af3e7dbe70a37572762"
 };
 
-const BGS = {
-  room: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-  street: 'linear-gradient(180deg, #0d1b2a 0%, #1b2838 40%, #2d3a4a 100%)',
-  store: 'linear-gradient(180deg, #1a1a2e 0%, #1e1e3f 50%, #2a2a5a 100%)',
-  cafe: 'linear-gradient(135deg, #1a0a0a 0%, #2d1b1b 50%, #1a1a2e 100%)',
-  busstop: 'linear-gradient(180deg, #0a0a1a 0%, #1a1a2e 60%, #2a2a4a 100%)',
-  apartment: 'linear-gradient(135deg, #1a0a1a 0%, #2a1a2a 50%, #1a1a2e 100%)',
-  dark: 'linear-gradient(180deg, #000000 0%, #0d0d1a 100%)',
-  phone: 'linear-gradient(135deg, #0d0d1a 0%, #1a1a2e 100%)',
-  nightmare: 'linear-gradient(180deg, #1a0000 0%, #0d0d1a 50%, #000000 100%)',
-  park: 'linear-gradient(180deg, #0a1a0a 0%, #1a2a1a 50%, #0d1a0d 100%)',
-  kitchen: 'linear-gradient(135deg, #1a1a0a 0%, #2a2a1a 50%, #1a1a2e 100%)',
-  bedroom: 'linear-gradient(180deg, #1a0a1a 0%, #2a1a2a 100%)',
-  mirror: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a2a 50%, #0a0a1a 100%)',
-  rain: 'linear-gradient(180deg, #0d1a2a 0%, #1a2a3a 50%, #0d1a2a 100%)'
-};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+const storage = firebase.storage();
 
-function makeSVG(color1, color2, faceColor, eyeColor, mouthPath, cheeks, label) {
-  var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 500">';
-  svg += '<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="' + color1 + '"/><stop offset="100%" stop-color="' + color2 + '"/></linearGradient></defs>';
-  svg += '<rect width="300" height="500" fill="url(%23g)" rx="20"/>';
-  svg += '<circle cx="150" cy="180" r="70" fill="' + faceColor + '"/>';
-  svg += '<ellipse cx="120" cy="170" rx="12" ry="8" fill="' + eyeColor + '"/><ellipse cx="180" cy="170" rx="12" ry="8" fill="' + eyeColor + '"/>';
-  if (cheeks) svg += '<circle cx="110" cy="190" r="15" fill="rgba(255,0,0,0.3)"/><circle cx="190" cy="190" r="15" fill="rgba(255,0,0,0.3)"/>';
-  svg += '<path d="' + mouthPath + '" stroke="#c44569" stroke-width="3" fill="none"/>';
-  svg += '<rect x="80" y="250" width="140" height="200" fill="' + color1 + '" rx="20"/>';
-  svg += '<text x="150" y="420" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif">' + label + '</text>';
-  svg += '</svg>';
-  return 'data:image/svg+xml;base64,' + btoa(svg);
+// State
+let currentUser = null;
+let userKey = null;
+let pins = [];
+let currentTab = 'for-you';
+let uploadFile = null;
+let isLogin = true;
+
+// DOM
+const loader = document.getElementById('loader');
+const authModal = document.getElementById('authModal');
+const authTitle = document.getElementById('authTitle');
+const authEmail = document.getElementById('authEmail');
+const authPass = document.getElementById('authPass');
+const authBtn = document.getElementById('authBtn');
+const authSwitch = document.getElementById('authSwitch');
+const authError = document.getElementById('authError');
+const feed = document.getElementById('feed');
+const feedWrap = document.getElementById('feedWrap');
+const empty = document.getElementById('empty');
+const uploadModal = document.getElementById('uploadModal');
+const uploadBtn = document.getElementById('uploadBtn');
+const fileInput = document.getElementById('fileInput');
+const uploadPreview = document.getElementById('uploadPreview');
+const uploadTitle = document.getElementById('uploadTitle');
+const uploadDone = document.getElementById('uploadDone');
+const uploadCancel = document.getElementById('uploadCancel');
+const toast = document.getElementById('toast');
+const navAvatar = document.getElementById('navAvatar');
+const profileIcon = document.getElementById('profileIcon');
+
+// Crypto helpers
+async function deriveKey(email, password) {
+  const enc = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(email + password), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt: enc.encode('meow-salt-fixed'), iterations: 100000, hash: 'SHA-256' },
+    keyMaterial, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
+  );
 }
 
-const CHARS = {
-  mira: {
-    normal: makeSVG('#ff6b9d', '#ff8fab', '#ffe4d6', '#333', 'M130 200 Q150 220 170 200', false, 'Мира'),
-    smile: makeSVG('#ff6b9d', '#ff8fab', '#ffe4d6', '#333', 'M125 195 Q150 230 175 195', false, 'Мира'),
-    blush: makeSVG('#ff6b9d', '#ff8fab', '#ffe4d6', '#333', 'M125 200 Q150 220 175 200', true, 'Мира'),
-    dark: makeSVG('#8b0000', '#4a0000', '#e8d5c4', '#000', 'M130 200 L170 200', false, 'Мира'),
-    cry: makeSVG('#ff6b9d', '#ff8fab', '#ffe4d6', '#333', 'M125 205 Q150 215 175 205', false, 'Мира'),
-    yandere: makeSVG('#ff1744', '#b71c1c', '#ffe4d6', '#000', 'M125 200 Q150 225 175 200', false, 'Мира')
-  },
-  hero: {
-    normal: makeSVG('#1a1a2e', '#2d3a4a', '#d4a574', '#333', 'M130 200 Q150 210 170 200', false, 'Ты'),
-    scared: makeSVG('#1a1a2e', '#2d3a4a', '#c4956a', '#333', 'M125 205 Q150 195 175 205', false, 'Ты'),
-    angry: makeSVG('#1a1a2e', '#2d3a4a', '#d4a574', '#333', 'M130 205 Q150 195 170 205', false, 'Ты')
-  }
-};
-
-const SCRIPT = [
-
-// PROLOGUE
-{ type:'transition', text:'Глава 1', sub:'Случайная встреча' },
-{ type:'bg', bg:BGS.dark },
-{ type:'narrator', text:'Ты просыпаешься в холодном поту.', delay:2000 },
-{ type:'narrator', text:'Снова этот сон. Снова она.', delay:2000 },
-{ type:'narrator', text:'Ты не помнишь ее лица. Только голос. Теплый, как весеннее солнце, но с какой-то странной ноткой...', delay:3000 },
-{ type:'narrator', text:'"Ты найдешь меня", — говорит она. "Или я найду тебя."', delay:2500 },
-{ type:'narrator', text:'Ты вскакиваешь с кровати. 3:47 ночи. Комната погружена в темноту.', delay:2000 },
-{ type:'narrator', text:'На телефоне — уведомление от незнакомого номера.', delay:1500 },
-{ type:'phone', msgs:[
-  {from:'in', text:'Ты сегодня выглядел уставшим. Не забудь поесть.', time:'03:47'},
-  {from:'in', text:'Я видела тебя возле магазина. Ты купил рамен и энергетик. Плохо питаться одним фастфудом.', time:'03:48'}
-] },
-{ type:'narrator', text:'Твое сердце замирает. Откуда она знает?', delay:2000 },
-{ type:'hero', text:'Кто это? Как ты узнала мой номер?', emotion:'scared' },
-{ type:'phone', msgs:[
-  {from:'in', text:'Прости, если напугала. Я просто... хотела позаботиться.', time:'03:49'},
-  {from:'in', text:'Меня зовут Мира. Мы еще не знакомы официально, но я знаю о тебе почти все', time:'03:50'}
-] },
-{ type:'narrator', text:'Ты смотришь на экран. Хочешь заблокировать номер, но что-то останавливает тебя.', delay:2500 },
-{ type:'narrator', text:'Интерес? Страх? Или может... одиночество?', delay:2000 },
-{ type:'bg', bg:BGS.room },
-{ type:'narrator', text:'Утро. Солнце пробивается сквозь занавески. Ты решаешь, что все это был странный сон.', delay:3000 },
-{ type:'narrator', text:'Но телефон лежит рядом. И последнее сообщение горит на экране:', delay:2000 },
-{ type:'phone', msgs:[
-  {from:'in', text:'Увидимся сегодня. Я буду ждать тебя на автобусной остановке возле твоего дома. В 19:00. Не опаздывай', time:'07:15'}
-] },
-
-// SCENE 1 — Morning
-{ type:'transition', text:'Утро понедельника', sub:'8:00' },
-{ type:'bg', bg:BGS.room },
-{ type:'hero', text:'Нужно встать. Опять на работу...', emotion:'normal' },
-{ type:'narrator', text:'Ты живешь один в маленькой квартире на окраине. Работа — скучный офис. Друзей почти нет.', delay:2500 },
-{ type:'narrator', text:'После расставания с бывшей полгода назад ты замкнулся в себе.', delay:2000 },
-{ type:'choices', choices:[
-  { text:'Проверить соцсети', tag:'', effect:function(){ addJournal('Утро: Проверил соцсети. Ничего интересного.'); } },
-  { text:'Сразу собираться на работу', tag:'', effect:function(){ addJournal('Утро: Поторопился на работу, не проверив телефон.'); } },
-  { text:'Подумать о странном сообщении', tag:'', effect:function(){ GAME.fear += 5; updateStats(); addJournal('Утро: Не могу выкинуть из головы то сообщение...'); } }
-] },
-{ type:'narrator', text:'Ты идешь на кухню. Холодильник почти пуст, кроме...', delay:1500 },
-{ type:'narrator', text:'Кроме контейнера с домашней едой. С запиской: "Для тебя. Съешь, а то умрешь с голоду"', delay:2500 },
-{ type:'hero', text:'ЧТО?! Когда это здесь оказалось?!', emotion:'scared' },
-{ type:'narrator', text:'Ты не помнишь, чтобы кто-то заходил. Дверь была заперта. Окна тоже.', delay:2000 },
-{ type:'choices', choices:[
-  { text:'Выбросить еду — это подозрительно', tag:'fear', effect:function(){ GAME.fear += 10; GAME.flags.threwFood = true; updateStats(); addItem('🗑️','Выброшенная еда','Ты выбросил странную еду. Может, зря?'); } },
-  { text:'Попробовать — пахнет вкусно', tag:'love', effect:function(){ GAME.love += 10; GAME.flags.ateFood = true; updateStats(); addJournal('Утро: Еда была невероятно вкусной. Кто ее приготовил?'); } },
-  { text:'Оставить и уйти на работу', tag:'trust', effect:function(){ GAME.trust += 5; updateStats(); } }
-] },
-{ type:'narrator', text:'Ты выходишь из дома. Улица пустынна. Раннее утро, туман.', delay:2000 },
-{ type:'narrator', text:'Ты замечаешь на асфальте следы — кто-то стоял под твоим окном. Много часов.', delay:2500 },
-{ type:'hero', text:'Это... капли воска? От свечи?', emotion:'scared' },
-{ type:'narrator', text:'Рядом — выжженные на асфальте инициалы: Т + М.', delay:2000 },
-
-// SCENE 2 — Work
-{ type:'transition', text:'Рабочий день', sub:'10:00 — 18:00' },
-{ type:'bg', bg:BGS.cafe },
-{ type:'narrator', text:'Офис. Скучные отчеты, невыспавшиеся коллеги, кофе из автомата.', delay:2500 },
-{ type:'narrator', text:'Твой коллега Дима подсаживается рядом.', delay:1500 },
-{ type:'char', name:'Дима', text:'Эй, ты выглядишь как призрак. Опять не спал?', sprite:'', emotion:'' },
-{ type:'hero', text:'Странные сны. И вообще... странная девушка мне пишет.', emotion:'normal' },
-{ type:'char', name:'Дима', text:'О, новая девушка? Покажи фотку!', sprite:'', emotion:'' },
-{ type:'choices', choices:[
-  { text:'Показать переписку', tag:'trust', effect:function(){ GAME.trust += 5; } },
-  { text:'Не показывать — это личное', tag:'', effect:function(){ GAME.flags.private = true; } },
-  { text:'Сказать, что она кажется странной', tag:'fear', effect:function(){ GAME.fear += 5; } }
-] },
-{ type:'char', name:'Дима', text:'"Ты сегодня выглядел уставшим"... Бро, это либо она тебя сталкит, либо ты встретил свою судьбу.', sprite:'', emotion:'' },
-{ type:'hero', text:'Она знает, что я покупал вчера. И еда в холодильнике...', emotion:'scared' },
-{ type:'char', name:'Дима', text:'Окей, это уже крипово. Может, сходи к ней, но на всякий случай скажи мне, куда.', sprite:'', emotion:'' },
-{ type:'narrator', text:'Днем тебе снова пишет Мира.', delay:1500 },
-{ type:'phone', msgs:[
-  {from:'in', text:'Как твой рабочий день? Надеюсь, Дима не слишком тебя достает. Он вечно болтает на перерывах.', time:'14:30'},
-  {from:'in', text:'Кстати, та рубашка, что ты сегодня надел, очень идет тебе. Синий — твой цвет', time:'14:31'}
-] },
-{ type:'hero', text:'Она знает, что я надел?! Где она?!', emotion:'scared' },
-{ type:'narrator', text:'Ты оглядываешься по сторонам. В окно офиса видна улица. На скамейке напротив сидит девушка в розовом пальто.', delay:3000 },
-{ type:'narrator', text:'Она смотрит прямо на тебя. И машет рукой.', delay:2000 },
-{ type:'narrator', text:'Ты отшатываешься от окна. Сердце колотится.', delay:1500 },
-{ type:'choices', choices:[
-  { text:'Выйти и поговорить с ней', tag:'love', effect:function(){ GAME.love += 10; } },
-  { text:'Спрятаться и наблюдать', tag:'fear', effect:function(){ GAME.fear += 10; } },
-  { text:'Позвонить в полицию', tag:'fear', effect:function(){ GAME.fear += 15; GAME.flags.calledPolice = true; } }
-] },
-{ type:'narrator', text:'К концу рабочего дня ты решаешь, что встретишься с ней. Все равно она знает, где ты живешь.', delay:2500 },
-{ type:'narrator', text:'Лучше на твоих условиях. Лучше при свидетелях.', delay:2000 },
-
-// SCENE 3 — Bus Stop
-{ type:'transition', text:'Встреча', sub:'19:00 — Автобусная остановка' },
-{ type:'bg', bg:BGS.busstop },
-{ type:'narrator', text:'Туман сгущается. Уличные фонари горят тусклым желтым светом.', delay:2000 },
-{ type:'narrator', text:'Ты стоишь на остановке. Проверяешь телефон. 18:58.', delay:1500 },
-{ type:'narrator', text:'Шаги позади.', delay:1500 },
-{ type:'char', name:'???', text:'Привет. Ты пришел. Я так рада...', sprite:'', emotion:'' },
-{ type:'narrator', text:'Ты оборачиваешься.', delay:1000 },
-{ type:'bg', bg:BGS.busstop },
-{ type:'sprite', char:'mira', emotion:'normal' },
-{ type:'char', name:'Мира', text:'Наконец-то мы встретились официально. Я Мира. А ты... я знаю, кто ты.', emotion:'normal' },
-{ type:'hero', text:'Откуда ты меня знаешь? Как узнала мой номер? Как попала в мою квартиру?', emotion:'angry' },
-{ type:'sprite', char:'mira', emotion:'smile' },
-{ type:'char', name:'Мира', text:'Ой, столько вопросов сразу! Ты даже злишься красиво.', emotion:'smile' },
-{ type:'char', name:'Мира', text:'Я просто... следила за тобой некоторое время. Ты ведь такой одинокий. Такой несчастный.', emotion:'smile' },
-{ type:'choices', choices:[
-  { text:'"Это не дает тебе права вторгаться в мою жизнь"', tag:'fear', effect:function(){ GAME.fear += 10; GAME.trust -= 5; updateStats(); } },
-  { text:'"Почему именно я?"', tag:'trust', effect:function(){ GAME.trust += 5; updateStats(); } },
-  { text:'"Ты... красивая"', tag:'love', effect:function(){ GAME.love += 15; updateStats(); } }
-] },
-{ type:'sprite', char:'mira', emotion:'blush' },
-{ type:'char', name:'Мира', text:'Ты первый, кто заметил меня. Правда заметил.', emotion:'blush' },
-{ type:'char', name:'Мира', text:'Все остальные... они смотрят сквозь меня. Как будто я невидимка. Но ты...', emotion:'blush' },
-{ type:'char', name:'Мира', text:'Ты смотрел на меня в кафе три недели назад. Ты улыбнулся. Я запомнила эту улыбку.', emotion:'blush' },
-{ type:'hero', text:'Я... я даже не помню...', emotion:'scared' },
-{ type:'sprite', char:'mira', emotion:'normal' },
-{ type:'char', name:'Мира', text:'Я запомнила ВСЕ. Каждую деталь. Твои привычки, твои маршруты, твои вкусы.', emotion:'normal' },
-{ type:'char', name:'Мира', text:'Ты любишь рамен с курицей, ненавидишь лук, предпочитаешь черный кофе без сахара.', emotion:'normal' },
-{ type:'char', name:'Мира', text:'По вечерам ты смотришь ужасы, но отворачиваешься в самых страшных моментах. Мило.', emotion:'smile' },
-{ type:'narrator', text:'Ты чувствуешь, как по спине пробегает холодок. Она знает ВСЕ.', delay:2500 },
-{ type:'choices', choices:[
-  { text:'"Это безумие. Мне нужно уйти."', tag:'fear', effect:function(){ GAME.fear += 15; } },
-  { text:'"Ты слишком много обо мне знаешь..."', tag:'trust', effect:function(){ GAME.trust += 5; } },
-  { text:'"А что ты знаешь о моих чувствах?"', tag:'love', effect:function(){ GAME.love += 10; } }
-] },
-{ type:'sprite', char:'mira', emotion:'smile' },
-{ type:'char', name:'Мира', text:'Я знаю, что ты хочешь быть любимым. По-настоящему. Безусловно. Без предательств.', emotion:'smile' },
-{ type:'char', name:'Мира', text:'Я могу дать тебе это. Я уже даю. Ты ведь поел мой обед? Было вкусно?', emotion:'smile' },
-{ type:'narrator', text:'Мира делает шаг ближе. Ее глаза светятся в полумраке.', delay:2000 },
-{ type:'sprite', char:'mira', emotion:'dark' },
-{ type:'char', name:'Мира', text:'Но знай... если ты попытаешься уйти, если кто-то встанет между нами...', emotion:'dark' },
-{ type:'char', name:'Мира', text:'Я не смогу остановиться. Я уже не смогла остановиться один раз.', emotion:'dark' },
-{ type:'narrator', text:'Ты замечаешь на ее запястье шрам. Старый, но глубокий.', delay:2000 },
-{ type:'choices', choices:[
-  { text:'"Что ты имеешь в виду?"', tag:'fear', effect:function(){ GAME.fear += 10; } },
-  { text:'Промолчать', tag:'trust', effect:function(){ GAME.trust += 5; } },
-  { text:'Взять ее за руку', tag:'love', effect:function(){ GAME.love += 15; } }
-] },
-{ type:'sprite', char:'mira', emotion:'normal' },
-{ type:'char', name:'Мира', text:'Пойдем со мной. Я приготовила ужин. Настоящий ужин. Для нас двоих.', emotion:'normal' },
-{ type:'char', name:'Мира', text:'Ты ведь хочешь узнать меня получше? Я тоже хочу.', emotion:'blush' },
-{ type:'choices', choices:[
-  { text:'Согласиться пойти', tag:'love', effect:function(){ GAME.love += 10; GAME.flags.wentWithMira = true; } },
-  { text:'Предложить встретиться в кафе', tag:'trust', effect:function(){ GAME.trust += 10; GAME.flags.cafeDate = true; } },
-  { text:'Отказаться и уйти', tag:'fear', effect:function(){ GAME.fear += 20; GAME.flags.rejectedMira = true; } }
-] },
-
-// BRANCH A — Apartment
-{ type:'transition', text:'Квартира Миры', sub:'20:30' },
-{ type:'bg', bg:BGS.apartment },
-{ type:'sprite', char:'mira', emotion:'smile' },
-{ type:'char', name:'Мира', text:'Добро пожаловать в мой маленький мир. Надеюсь, тебе понравится.', emotion:'smile' },
-{ type:'narrator', text:'Квартира уютная, почти слишком уютная. Свечи, мягкие подушки, запах ванили.', delay:2500 },
-{ type:'narrator', text:'Но что-то не так. На стенах — фотографии. Много фотографий.', delay:2000 },
-{ type:'narrator', text:'ВСЕ фотографии — это ТЫ. Ты на работе, ты в магазине, ты спишь у окна.', delay:2500 },
-{ type:'hero', text:'Мира... это...', emotion:'scared' },
-{ type:'sprite', char:'mira', emotion:'normal' },
-{ type:'char', name:'Мира', text:'Моя коллекция. Моя любимая коллекция. Ты красивый со всех сторон, знаешь?', emotion:'normal' },
-{ type:'char', name:'Мира', text:'Эта — когда ты читал в парке. Эта — когда ты плакал в машине после расставания.', emotion:'smile' },
-{ type:'char', name:'Мира', text:'Я была рядом. Всегда рядом. Ты просто не видел.', emotion:'smile' },
-{ type:'choices', choices:[
-  { text:'"Ты фотографировала меня без разрешения"', tag:'fear', effect:function(){ GAME.fear += 15; } },
-  { text:'"Почему ты это делаешь?"', tag:'trust', effect:function(){ GAME.trust += 5; } },
-  { text:'"Это... трогательно, в каком-то смысле"', tag:'love', effect:function(){ GAME.love += 10; } }
-] },
-{ type:'narrator', text:'Мира ведет тебя на кухню. На столе — изысканный ужин. Две свечи. Вино.', delay:2000 },
-{ type:'sprite', char:'mira', emotion:'blush' },
-{ type:'char', name:'Мира', text:'Я готовила три дня. Все твои любимые блюда. Рамен с курицей, без лука.', emotion:'blush' },
-{ type:'char', name:'Мира', text:'И десерт. Твой любимый — тирамису. Я училась готовить специально для тебя.', emotion:'blush' },
-{ type:'choices', choices:[
-  { text:'Попробовать еду', tag:'love', effect:function(){ GAME.love += 10; addJournal('Ужин с Мирой: Еда была божественной. Она действительно знает меня.'); } },
-  { text:'Спросить, что в еде', tag:'fear', effect:function(){ GAME.fear += 10; } },
-  { text:'Предложить сначала поговорить', tag:'trust', effect:function(){ GAME.trust += 10; } }
-] },
-{ type:'narrator', text:'Во время ужина Мира рассказывает о себе. Она росла в приемной семье. Никогда не чувствовала любви.', delay:3000 },
-{ type:'narrator', text:'"Пока не увидела тебя", — говорит она, глядя тебе в глаза.', delay:2000 },
-{ type:'sprite', char:'mira', emotion:'cry' },
-{ type:'char', name:'Мира', text:'Ты первый, кто увидел меня. Правда. Даже если ты не помнишь.', emotion:'cry' },
-{ type:'char', name:'Мира', text:'В тот день, в кафе, ты поднял мне упавшую книгу. И улыбнулся.', emotion:'cry' },
-{ type:'char', name:'Мира', text:'Я заплакала в туалете после этого. Потому что... потому что кто-то наконец заметил меня.', emotion:'cry' },
-{ type:'choices', choices:[
-  { text:'Обнять ее', tag:'love', effect:function(){ GAME.love += 20; } },
-  { text:'Сказать, что понимаешь', tag:'trust', effect:function(){ GAME.trust += 15; } },
-  { text:'Осторожно отодвинуться', tag:'fear', effect:function(){ GAME.fear += 10; } }
-] },
-{ type:'narrator', text:'После ужина Мира включает музыку. Твою любимую группу. Как она знает?', delay:2000 },
-{ type:'narrator', text:'Она протягивает руку. "Потанцуем?"', delay:1500 },
-{ type:'sprite', char:'mira', emotion:'smile' },
-{ type:'char', name:'Мира', text:'Ты такой теплый. Я чувствую твое сердцебиение.', emotion:'smile' },
-{ type:'char', name:'Мира', text:'Бьется так быстро. Ты волнуешься? Или... тоже чувствуешь что-то?', emotion:'blush' },
-{ type:'narrator', text:'В этот момент ты замечаешь на полке что-то блестящее.', delay:2000 },
-{ type:'narrator', text:'Нож. Не кухонный. Охотничий. С длинным лезвием.', delay:2000 },
-{ type:'sprite', char:'mira', emotion:'dark' },
-{ type:'char', name:'Мира', text:'А, это? Не обращай внимания. Просто... на всякий случай.', emotion:'dark' },
-{ type:'char', name:'Мира', text:'Мир опасен для таких, как мы. Но я защищу тебя. Всегда.', emotion:'dark' },
-{ type:'choices', choices:[
-  { text:'Спросить о ноже напрямую', tag:'fear', effect:function(){ GAME.fear += 15; } },
-  { text:'Игнорировать и продолжить танец', tag:'love', effect:function(){ GAME.love += 10; } },
-  { text:'Предложить пойти домой', tag:'trust', effect:function(){ GAME.trust += 5; } }
-] },
-
-// BRANCH B — Cafe
-{ type:'transition', text:'Кафе «Лунный свет»', sub:'20:00' },
-{ type:'bg', bg:BGS.cafe },
-{ type:'sprite', char:'mira', emotion:'normal' },
-{ type:'char', name:'Мира', text:'Кафе... Хорошо. Публичное место. Ты не доверяешь мне.', emotion:'normal' },
-{ type:'char', name:'Мира', text:'Но я понимаю. Ты осторожный. Это одна из причин, почему ты мне нравишься.', emotion:'smile' },
-{ type:'narrator', text:'Вы сидите за столиком у окна. Мира заказывает за тебя — твой любимый кофе.', delay:2500 },
-{ type:'sprite', char:'mira', emotion:'blush' },
-{ type:'char', name:'Мира', text:'Прости, что навязалась. Но когда я вижу то, что хочу... я не могу остановиться.', emotion:'blush' },
-{ type:'char', name:'Мира', text:'Ты — то, чего я хочу. Больше всего на свете.', emotion:'blush' },
-{ type:'hero', text:'Мира, ты красивая. Но то, как ты ведешь себя... это пугает.', emotion:'normal' },
-{ type:'sprite', char:'mira', emotion:'cry' },
-{ type:'char', name:'Мира', text:'Пугает? Я... я просто хотела быть рядом. Я не умею иначе.', emotion:'cry' },
-{ type:'char', name:'Мира', text:'Все, кого я любила раньше... они уходили. Бросали меня. Говорили, что я "слишком много".', emotion:'cry' },
-{ type:'char', name:'Мира', text:'Я обещаю, я могу быть... нормальной. Если ты дашь мне шанс.', emotion:'cry' },
-{ type:'choices', choices:[
-  { text:'"Я дам тебе шанс. Но медленно."', tag:'trust', effect:function(){ GAME.trust += 20; GAME.love += 10; } },
-  { text:'"Мне нужно время подумать"', tag:'fear', effect:function(){ GAME.fear += 5; } },
-  { text:'"Я не могу. Прости."', tag:'fear', effect:function(){ GAME.fear += 20; GAME.love -= 10; } }
-] },
-{ type:'narrator', text:'Внезапно за окном кафе проходит твоя бывшая — Аня.', delay:2000 },
-{ type:'narrator', text:'Мира замечает твой взгляд. Ее лицо меняется.', delay:1500 },
-{ type:'sprite', char:'mira', emotion:'dark' },
-{ type:'char', name:'Мира', text:'Ты смотришь на нее. Почему ты смотришь на нее?', emotion:'dark' },
-{ type:'char', name:'Мира', text:'Она тебя бросила. Она тебя сломала. А ты все еще смотришь.', emotion:'dark' },
-{ type:'char', name:'Мира', text:'Я ненавижу ее. Я ненавижу всех, кто причинил тебе боль.', emotion:'dark' },
-{ type:'narrator', text:'Мира встает. Ее руки дрожат. Она смотрит на Аню сквозь стекло.', delay:2000 },
-{ type:'narrator', text:'"Подожди здесь", — шепчет она. — "Я кое-что проверю."', delay:2000 },
-{ type:'choices', choices:[
-  { text:'Удержать Миру за руку', tag:'love', effect:function(){ GAME.love += 15; } },
-  { text:'Сказать, чтобы она успокоилась', tag:'trust', effect:function(){ GAME.trust += 10; } },
-  { text:'Позволить ей выйти и позвонить в полицию', tag:'fear', effect:function(){ GAME.fear += 15; } }
-] },
-{ type:'narrator', text:'Мира возвращается через пять минут. Улыбается, как ни в чем не бывало.', delay:2000 },
-{ type:'sprite', char:'mira', emotion:'smile' },
-{ type:'char', name:'Мира', text:'Прости за истерику. Я просто... очень ревнивая. Когда дело касается тебя.', emotion:'smile' },
-{ type:'char', name:'Мира', text:'Пойдем ко мне? Я хочу показать тебе кое-что. Что-то важное.', emotion:'blush' },
-
-// BRANCH C — Rejection
-{ type:'transition', text:'Улицы ночного города', sub:'19:30' },
-{ type:'bg', bg:BGS.street },
-{ type:'sprite', char:'mira', emotion:'cry' },
-{ type:'char', name:'Мира', text:'Ты... ты отказываешься? После всего, что я для тебя сделала?', emotion:'cry' },
-{ type:'char', name:'Мира', text:'Я готовила для тебя. Я следила, чтобы ты ел. Я защищала тебя от той суки с работы.', emotion:'cry' },
-{ type:'hero', text:'От какой суки? О чем ты?', emotion:'scared' },
-{ type:'sprite', char:'mira', emotion:'dark' },
-{ type:'char', name:'Мира', text:'Та новая сотрудница. Которая флиртовала с тобой на прошлой неделе. Она больше не работает.', emotion:'dark' },
-{ type:'char', name:'Мира', text:'Она уехала. Далеко. Навсегда.', emotion:'dark' },
-{ type:'narrator', text:'Ты вспоминаешь — Лена, новая девушка из бухгалтерии. Она действительно пропала три дня назад.', delay:3000 },
-{ type:'narrator', text:'Полиция искала ее. Никто не знал, куда она делась.', delay:2000 },
-{ type:'hero', text:'Мира... что ты сделала?', emotion:'scared' },
-{ type:'sprite', char:'mira', emotion:'yandere' },
-{ type:'char', name:'Мира', text:'То, что нужно было сделать. Она хотела отнять тебя у меня. Еще ДО того, как я тебя получила.', emotion:'yandere' },
-{ type:'char', name:'Мира', text:'Никто не отнимет тебя у меня. НИКТО.', emotion:'yandere' },
-{ type:'narrator', text:'Мира достает из сумки что-то. Блеск металла.', delay:2000 },
-{ type:'narrator', text:'Нож.', delay:1000 },
-{ type:'choices', choices:[
-  { text:'Бежать', tag:'fear', effect:function(){ GAME.fear += 30; } },
-  { text:'Пытаться успокоить ее', tag:'trust', effect:function(){ GAME.trust += 10; } },
-  { text:'"Я передумал! Пойдем с тобой!"', tag:'love', effect:function(){ GAME.love += 10; GAME.flags.wentWithMira = true; } }
-] },
-
-// NIGHTMARE — All branches converge
-{ type:'transition', text:'Поздняя ночь', sub:'02:00' },
-{ type:'bg', bg:BGS.nightmare },
-{ type:'sprite', char:'mira', emotion:'dark' },
-{ type:'char', name:'Мира', text:'Ты устал. Я вижу. Пойдем спать.', emotion:'dark' },
-{ type:'narrator', text:'Ты оказываешься в спальне. Не помнишь, как сюда попал. Голова тяжелая.', delay:2500 },
-{ type:'narrator', text:'Мира сидит рядом на кровати. Гладит тебя по волосам.', delay:2000 },
-{ type:'sprite', char:'mira', emotion:'smile' },
-{ type:'char', name:'Мира', text:'Спи, мой хороший. Я буду рядом. Всегда рядом.', emotion:'smile' },
-{ type:'char', name:'Мира', text:'Никто не разлучит нас. Никогда.', emotion:'smile' },
-{ type:'narrator', text:'Ты пытаешься встать, но тело не слушается. В еде было что-то?', delay:2000 },
-{ type:'choices', choices:[
-  { text:'Попытаться убедить ее отпустить', tag:'trust', effect:function(){ GAME.trust += 5; } },
-  { text:'Притвориться, что согласен', tag:'love', effect:function(){ GAME.love += 10; } },
-  { text:'Кричать о помощи', tag:'fear', effect:function(){ GAME.fear += 15; } }
-] },
-{ type:'narrator', text:'Мира наклоняется. Ее дыхание щекочет твою шею.', delay:2000 },
-{ type:'sprite', char:'mira', emotion:'blush' },
-{ type:'char', name:'Мира', text:'Ты знаешь... я никогда не была с мужчиной. Никто не хотел меня.', emotion:'blush' },
-{ type:'char', name:'Мира', text:'Но ты... ты другой. Ты видишь меня. Настоящую меня.', emotion:'blush' },
-{ type:'narrator', text:'Она целует тебя в лоб. Потом в щеку. Ее губы горячие.', delay:2000 },
-{ type:'sprite', char:'mira', emotion:'dark' },
-{ type:'char', name:'Мира', text:'Но если ты попытаешься уйти... если ты предпочтешь кого-то другого...', emotion:'dark' },
-{ type:'char', name:'Мира', text:'Я не знаю, что со мной станет. Я уже потеряла контроль один раз.', emotion:'dark' },
-{ type:'char', name:'Мира', text:'Ты не хочешь знать, что я сделала. Поверь мне.', emotion:'dark' },
-{ type:'narrator', text:'Она показывает тебе фото на телефоне. Лежащая в луже крови девушка.', delay:2500 },
-{ type:'narrator', text:'Лена. Новая сотрудница. Та, что флиртовала с тобой.', delay:2000 },
-{ type:'hero', text:'Мира... ты убила ее?', emotion:'scared' },
-{ type:'sprite', char:'mira', emotion:'cry' },
-{ type:'char', name:'Мира', text:'Она хотела тебя отнять! Она заслужила! Я защищала НАШЕ будущее!', emotion:'cry' },
-{ type:'char', name:'Мира', text:'Ты же понимаешь? Ты же простишь меня?', emotion:'cry' },
-{ type:'choices', choices:[
-  { text:'"Я... я понимаю. Я прощаю."', tag:'love', effect:function(){ GAME.love += 25; GAME.flags.forgave = true; } },
-  { text:'"Это неправильно. Тебе нужна помощь."', tag:'trust', effect:function(){ GAME.trust += 10; } },
-  { text:'Молча смотреть в стену', tag:'fear', effect:function(){ GAME.fear += 20; } }
-] },
-
-// FINAL CHOICE
-{ type:'bg', bg:BGS.bedroom },
-{ type:'narrator', text:'Утро. Солнце врывается в комнату. Ты просыпаешься.', delay:2000 },
-{ type:'narrator', text:'Мира спит рядом, обняв тебя. Ее лицо умиротворенное. Как у ребенка.', delay:2500 },
-{ type:'sprite', char:'mira', emotion:'smile' },
-{ type:'char', name:'Мира', text:'*просыпается* Доброе утро, любимый. Ты выспался?', emotion:'smile' },
-{ type:'char', name:'Мира', text:'Я приготовила завтрак. Омлет, как ты любишь. И кофе. Черный, без сахара.', emotion:'blush' },
-{ type:'narrator', text:'Ты смотришь на нее. На эту девушку, которая убила ради тебя. Которая следит за тобой. Которая готова на все.', delay:3000 },
-{ type:'narrator', text:'И в то же время — она такая одинокая. Такая сломанная. Такая похожая на тебя.', delay:2500 },
-{ type:'choices', choices:[
-  { text:'Остаться с ней. Попытаться ее спасти.', tag:'love', effect:function(){ GAME.love += 30; GAME.flags.ending = 'redemption'; updateStats(); } },
-  { text:'Уйти, пока она не проснулась полностью.', tag:'fear', effect:function(){ GAME.fear += 30; GAME.flags.ending = 'escape'; updateStats(); } },
-  { text:'Сыграть в ее игру. Набрать время.', tag:'trust', effect:function(){ GAME.trust += 20; GAME.flags.ending = 'manipulation'; updateStats(); } }
-] },
-
-// ENDINGS
-{ type:'ending', condition:function(){return GAME.flags.ending==='redemption';}, title:'Глава 1 завершена', desc:'Ты решаешь остаться. Попытаться спасти душу, которая так отчаянно ищет любви. Мира — сломана, но не безнадежна. Вместе вы можете найти путь к свету... или утонуть во тьме вдвоем. Глава 2: «Жизнь вдвоем» — скоро.' },
-{ type:'ending', condition:function(){return GAME.flags.ending==='escape';}, title:'Глава 1 завершена', desc:'Ты уходишь. Но Мира не отпускает так просто. Она знает, где ты живешь. Она знает, где работаешь. Она знает ВСЕ. Бегство — лишь начало охоты. Глава 2: «Охота» — скоро.' },
-{ type:'ending', condition:function(){return GAME.flags.ending==='manipulation';}, title:'Глава 1 завершена', desc:'Ты решаешь играть в ее игру. День за днем ты набираешь ее доверие, ища способ вырваться. Но чем ближе ты подбираешься, тем сильнее путаешься. Кто манипулирует кем? Глава 2: «Игра в кошки-мышки» — скоро.' },
-{ type:'ending', condition:function(){return !GAME.flags.ending;}, title:'Глава 1 завершена', desc:'Твой путь только начинается. Мира ждет твоего следующего шага. Глава 2 — скоро.' }
-
-]; // END SCRIPT
-
-// ============================================================
-// GAME ENGINE
-// ============================================================
-
-var scriptIndex = 0;
-var isPaused = false;
-var typingTimer = null;
-
-function init() {
-  setTimeout(function() {
-    var loader = document.getElementById('loader');
-    var game = document.getElementById('game');
-    loader.style.opacity = '0';
-    setTimeout(function() {
-      loader.style.display = 'none';
-      game.style.display = 'flex';
-      startGame();
-    }, 500);
-  }, 800);
+async function encryptData(key, data) {
+  const enc = new TextEncoder();
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(data));
+  return btoa(String.fromCharCode(...iv, ...new Uint8Array(encrypted)));
 }
 
-function startGame() {
-  GAME.timerInterval = setInterval(function() { GAME.playTime++; }, 1000);
-  scriptIndex = 0;
-  processScene();
+async function decryptData(key, base64) {
+  const bytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+  const iv = bytes.slice(0, 12);
+  const data = bytes.slice(12);
+  const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, data);
+  return new TextDecoder().decode(decrypted);
 }
 
-function processScene() {
-  if (isPaused || scriptIndex >= SCRIPT.length) return;
-  var scene = SCRIPT[scriptIndex];
-  if (scene.condition && !scene.condition()) {
-    scriptIndex++;
-    processScene();
-    return;
-  }
-  switch(scene.type) {
-    case 'bg':
-      setBG(scene.bg);
-      scriptIndex++;
-      setTimeout(processScene, 500);
-      break;
-    case 'sprite':
-      showSprite(scene.char, scene.emotion);
-      scriptIndex++;
-      setTimeout(processScene, 600);
-      break;
-    case 'narrator':
-      showDialogue('', scene.text, scene.delay || 1500);
-      break;
-    case 'hero':
-      showDialogue('Ты', scene.text, scene.delay || 1500, 'hero', scene.emotion);
-      break;
-    case 'char':
-      showDialogue(scene.name, scene.text, scene.delay || 1500, 'char', scene.emotion);
-      break;
-    case 'choices':
-      showChoices(scene.choices);
-      break;
-    case 'phone':
-      showPhoneChat(scene.msgs);
-      break;
-    case 'transition':
-      showTransition(scene.text, scene.sub);
-      break;
-    case 'minigame':
-      startMinigame(scene.game, scene.data);
-      break;
-    case 'ending':
-      showEnding(scene.title, scene.desc);
-      break;
-    default:
-      scriptIndex++;
-      processScene();
-  }
-}
-
-function showDialogue(speaker, text, delay, type, emotion) {
-  isPaused = true;
-  var nameTag = document.getElementById('name-tag');
-  var dialogueText = document.getElementById('dialogue-text');
-  var nextIndicator = document.getElementById('next-indicator');
-  if (speaker) {
-    nameTag.textContent = speaker;
-    nameTag.className = 'show';
-    if (type === 'hero') nameTag.style.background = '#d4a574';
-    else if (type === 'char') nameTag.style.background = '#ff6b9d';
-    else nameTag.style.background = '#4ecdc4';
-  } else {
-    nameTag.className = '';
-  }
-  if (emotion && type === 'hero') {
-    showSprite('hero', emotion);
-  }
-  dialogueText.innerHTML = '<span class="typing-cursor"></span>';
-  nextIndicator.style.display = 'none';
-  var i = 0;
-  GAME.isTyping = true;
-  typingTimer = setInterval(function() {
-    if (i >= text.length) {
-      clearInterval(typingTimer);
-      GAME.isTyping = false;
-      dialogueText.innerHTML = text;
-      nextIndicator.style.display = 'block';
-      if (GAME.autoMode) {
-        GAME.autoTimer = setTimeout(function() { advanceDialogue(); }, delay);
-      }
-      return;
-    }
-    dialogueText.innerHTML = text.substring(0, i + 1) + '<span class="typing-cursor"></span>';
-    i++;
-  }, GAME.autoMode ? 20 : 35);
-}
-
-function advanceDialogue() {
-  if (GAME.isTyping) {
-    clearInterval(typingTimer);
-    clearTimeout(GAME.autoTimer);
-    GAME.isTyping = false;
-    var scene = SCRIPT[scriptIndex];
-    document.getElementById('dialogue-text').innerHTML = scene.text;
-    document.getElementById('next-indicator').style.display = 'block';
-    if (GAME.autoMode) {
-      GAME.autoTimer = setTimeout(function() {
-        isPaused = false;
-        scriptIndex++;
-        processScene();
-      }, scene.delay || 1500);
-    }
-    return;
-  }
-  clearTimeout(GAME.autoTimer);
-  isPaused = false;
-  scriptIndex++;
-  processScene();
-}
-
-function showChoices(choices) {
-  isPaused = true;
-  var container = document.getElementById('choices');
-  container.innerHTML = '';
-  container.style.display = 'flex';
-  choices.forEach(function(choice) {
-    var btn = document.createElement('button');
-    btn.className = 'choice-btn';
-    var tagHtml = '';
-    if (choice.tag === 'love') tagHtml = '<span class="tag tag-love">❤️</span>';
-    else if (choice.tag === 'fear') tagHtml = '<span class="tag tag-fear">😰</span>';
-    else if (choice.tag === 'trust') tagHtml = '<span class="tag tag-trust">🤝</span>';
-    btn.innerHTML = tagHtml + choice.text;
-    btn.onclick = function() { selectChoice(choice); };
-    container.appendChild(btn);
-  });
-}
-
-function selectChoice(choice) {
-  document.getElementById('choices').style.display = 'none';
-  if (choice.effect) choice.effect();
-  addJournal('Выбор: ' + choice.text);
-  isPaused = false;
-  scriptIndex++;
-  processScene();
-}
-
-function setBG(bgStyle) {
-  var bg = document.getElementById('bg');
-  bg.style.opacity = '0';
-  setTimeout(function() {
-    bg.style.background = bgStyle;
-    bg.style.opacity = '1';
-  }, 300);
-}
-
-function showSprite(char, emotion) {
-  var sprite = document.getElementById('char-sprite');
-  if (!char) {
-    sprite.classList.remove('show');
-    return;
-  }
-  var charData = CHARS[char];
-  if (!charData) return;
-  var img = charData[emotion] || charData.normal;
-  sprite.src = img;
-  sprite.classList.add('show');
-  if (emotion === 'scared' || emotion === 'dark' || emotion === 'yandere') {
-    sprite.classList.add('shake');
-    setTimeout(function() { sprite.classList.remove('shake'); }, 400);
-  }
-}
-
-function showTransition(text, sub) {
-  isPaused = true;
-  var trans = document.getElementById('transition');
-  document.getElementById('transition-text').textContent = text;
-  document.getElementById('transition-sub').textContent = sub || '';
-  trans.classList.add('show');
-  setTimeout(function() {
-    trans.classList.remove('show');
-    isPaused = false;
-    scriptIndex++;
-    processScene();
-  }, 3000);
-}
-
-function showPhoneChat(msgs) {
-  isPaused = true;
-  var phone = document.getElementById('phone-screen');
-  var chat = document.getElementById('phone-chat');
-  phone.classList.add('show');
-  chat.innerHTML = '';
-  var msgIndex = 0;
-  function showNextMsg() {
-    if (msgIndex >= msgs.length) return;
-    var msg = msgs[msgIndex];
-    var div = document.createElement('div');
-    div.className = 'msg msg-' + msg.from;
-    div.innerHTML = msg.text + '<div class="msg-time">' + msg.time + '</div>';
-    chat.appendChild(div);
-    chat.scrollTop = chat.scrollHeight;
-    msgIndex++;
-    setTimeout(showNextMsg, 1500);
-  }
-  setTimeout(showNextMsg, 500);
-}
-
-function closePhone() {
-  document.getElementById('phone-screen').classList.remove('show');
-  isPaused = false;
-  scriptIndex++;
-  processScene();
-}
-
-function sendPhoneMsg() {
-  var input = document.getElementById('phone-msg-input');
-  var text = input.value.trim();
-  if (!text) return;
-  var chat = document.getElementById('phone-chat');
-  var div = document.createElement('div');
-  div.className = 'msg msg-out';
-  div.innerHTML = text + '<div class="msg-time">Сейчас</div>';
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
-  input.value = '';
-}
-
-function startMinigame(game, data) {
-  isPaused = true;
-  var modal = document.getElementById('minigame-modal');
-  var content = document.getElementById('minigame-content');
-  modal.classList.add('show');
-  if (game === 'lockpick') {
-    startLockpick(data, function() { endMinigame(); });
-  } else if (game === 'memory') {
-    startMemory(data, function() { endMinigame(); });
-  }
-}
-
-function startLockpick(data, onComplete) {
-  var content = document.getElementById('minigame-content');
-  content.innerHTML = '<div class="lock-instruction">Нажми, когда курсор совпадет с меткой!</div><div class="lock-container"><div class="lock-ring"></div><div class="lock-target"></div><div class="lock-cursor" id="lock-cursor"></div></div><button class="lock-btn" id="lock-btn">ВЗЛОМАТЬ</button><div id="lock-result" style="margin-top:15px;color:#fff;"></div>';
-  var angle = 0;
-  var speed = 4;
-  var targetAngle = Math.random() * 360;
-  var attempts = 3;
-  var cursor = document.getElementById('lock-cursor');
-  var btn = document.getElementById('lock-btn');
-  function animate() {
-    angle = (angle + speed) % 360;
-    cursor.style.transform = 'rotate(' + angle + 'deg)';
-    if (document.getElementById('minigame-modal').classList.contains('show')) {
-      requestAnimationFrame(animate);
-    }
-  }
-  animate();
-  btn.onclick = function() {
-    var diff = Math.abs(angle - targetAngle);
-    var normalizedDiff = Math.min(diff, 360 - diff);
-    if (normalizedDiff < 20) {
-      document.getElementById('lock-result').innerHTML = '<span style="color:#4ecdc4;">✓ Взлом успешен!</span>';
-      setTimeout(onComplete, 1000);
-    } else {
-      attempts--;
-      if (attempts <= 0) {
-        document.getElementById('lock-result').innerHTML = '<span style="color:#ff4444;">✗ Взлом провален</span>';
-        setTimeout(onComplete, 1000);
-      } else {
-        document.getElementById('lock-result').innerHTML = '<span style="color:#ff8fab;">Промах! Осталось попыток: ' + attempts + '</span>';
-        targetAngle = Math.random() * 360;
-        speed += 1;
-      }
-    }
-  };
-}
-
-function startMemory(data, onComplete) {
-  var content = document.getElementById('minigame-content');
-  var emojis = ['❤️','🔪','💕','😰','🌸','💀','😊','😈'];
-  var cards = emojis.concat(emojis).sort(function() { return Math.random() - 0.5; });
-  content.innerHTML = '<div style="color:#fff;margin-bottom:15px;text-align:center;">Найди пары воспоминаний</div><div class="memory-grid" id="memory-grid"></div><div id="memory-result" style="margin-top:15px;color:#fff;"></div>';
-  var grid = document.getElementById('memory-grid');
-  var flipped = [];
-  var matched = 0;
-  cards.forEach(function(emoji, i) {
-    var card = document.createElement('div');
-    card.className = 'memory-card';
-    card.textContent = '❓';
-    card.onclick = function() {
-      if (flipped.length >= 2 || card.classList.contains('flipped') || card.classList.contains('matched')) return;
-      card.classList.add('flipped');
-      card.textContent = emoji;
-      flipped.push({card:card, emoji:emoji, index:i});
-      if (flipped.length === 2) {
-        if (flipped[0].emoji === flipped[1].emoji) {
-          flipped.forEach(function(c) { c.card.classList.add('matched'); });
-          matched++;
-          flipped = [];
-          if (matched === emojis.length) {
-            document.getElementById('memory-result').innerHTML = '<span style="color:#4ecdc4;">✓ Все воспоминания собраны!</span>';
-            setTimeout(onComplete, 1000);
-          }
-        } else {
-          setTimeout(function() {
-            flipped.forEach(function(c) {
-              c.card.classList.remove('flipped');
-              c.card.textContent = '❓';
-            });
-            flipped = [];
-          }, 800);
-        }
-      }
+// Image compression
+async function compressImage(file, maxWidth = 1200, quality = 0.85) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let w = img.width, h = img.height;
+      if (w > maxWidth) { h = h * maxWidth / w; w = maxWidth; }
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      canvas.toBlob((blob) => resolve(blob), 'image/jpeg', quality);
     };
-    grid.appendChild(card);
+    img.src = URL.createObjectURL(file);
   });
 }
 
-function endMinigame() {
-  document.getElementById('minigame-modal').classList.remove('show');
-  isPaused = false;
-  scriptIndex++;
-  processScene();
-}
-
-function updateStats() {
-  document.getElementById('stat-love').style.width = Math.min(100, GAME.love) + '%';
-  document.getElementById('stat-fear').style.width = Math.min(100, GAME.fear) + '%';
-  document.getElementById('stat-trust').style.width = Math.min(100, GAME.trust) + '%';
-  if (GAME.fear > 50) {
-    document.getElementById('fx').classList.add('heartbeat');
+// Auth
+authBtn.addEventListener('click', async () => {
+  const email = authEmail.value.trim();
+  const pass = authPass.value.trim();
+  if (!email || !pass) { showAuthError('Введите email и пароль'); return; }
+  authBtn.disabled = true; authBtn.textContent = '...';
+  try {
+    if (isLogin) {
+      await auth.signInWithEmailAndPassword(email, pass);
+    } else {
+      await auth.createUserWithEmailAndPassword(email, pass);
+    }
+    authModal.classList.remove('show');
+  } catch (e) {
+    showAuthError(e.message);
   }
-  if (GAME.fear > 80) {
-    document.getElementById('bg').style.filter = 'contrast(1.2) brightness(0.7)';
-  }
-}
+  authBtn.disabled = false; authBtn.textContent = isLogin ? 'Войти' : 'Зарегистрироваться';
+});
 
-function addItem(icon, name, desc) {
-  GAME.inventory.push({icon:icon, name:name, desc:desc});
-  showNotif('Получен предмет: ' + name);
-}
+authSwitch.addEventListener('click', () => {
+  isLogin = !isLogin;
+  authTitle.textContent = isLogin ? 'Вход' : 'Регистрация';
+  authBtn.textContent = isLogin ? 'Войти' : 'Зарегистрироваться';
+  authSwitch.innerHTML = isLogin ? 'Нет аккаунта? <span>Регистрация</span>' : 'Есть аккаунт? <span>Вход</span>';
+  authError.style.display = 'none';
+});
 
-function addJournal(text) {
-  var date = new Date().toLocaleDateString('ru-RU');
-  GAME.journal.push({date:date, text:text});
-}
+function showAuthError(msg) { authError.textContent = msg; authError.style.display = 'block'; }
 
-function showNotif(text) {
-  var notif = document.getElementById('notif');
-  notif.textContent = text;
-  notif.classList.add('show');
-  setTimeout(function() { notif.classList.remove('show'); }, 3000);
-}
-
-function openMenu() {
-  isPaused = true;
-  document.getElementById('menu-modal').classList.add('show');
-}
-
-function closeMenu() {
-  document.getElementById('menu-modal').classList.remove('show');
-  isPaused = false;
-}
-
-function toggleAuto() {
-  GAME.autoMode = !GAME.autoMode;
-  document.getElementById('auto-btn').textContent = GAME.autoMode ? '⏸ Авто: ВКЛ' : '▶️ Авто: ВЫКЛ';
-  closeMenu();
-}
-
-function saveGame() {
-  var saveData = {
-    love: GAME.love, fear: GAME.fear, trust: GAME.trust,
-    inventory: GAME.inventory, journal: GAME.journal,
-    flags: GAME.flags, scriptIndex: scriptIndex,
-    playTime: GAME.playTime,
-    date: new Date().toLocaleString('ru-RU')
-  };
-  GAME.saves.push(saveData);
-  if (GAME.saves.length > 10) GAME.saves.shift();
-  localStorage.setItem('ona_ryadom_saves', JSON.stringify(GAME.saves));
-  showNotif('Игра сохранена!');
-  closeMenu();
-}
-
-function loadGame() {
-  closeMenu();
-  var modal = document.getElementById('save-modal');
-  var slots = document.getElementById('save-slots');
-  slots.innerHTML = '';
-  if (GAME.saves.length === 0) {
-    slots.innerHTML = '<div style="color:#888;text-align:center;padding:20px;">Нет сохранений</div>';
+// Auth state
+auth.onAuthStateChanged(async (user) => {
+  if (user) {
+    currentUser = user;
+    userKey = btoa(user.email).replace(/[^a-zA-Z0-9]/g, '');
+    authModal.classList.remove('show');
+    navAvatar.style.display = 'block';
+    navAvatar.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}`;
+    profileIcon.style.display = 'none';
+    await loadPins();
   } else {
-    GAME.saves.forEach(function(save, i) {
-      var slot = document.createElement('div');
-      slot.className = 'save-slot';
-      slot.innerHTML = '<div class="s-time">' + save.date + '</div><div class="s-text">❤️' + save.love + ' 😰' + save.fear + ' 🤝' + save.trust + ' | ' + Math.floor(save.playTime/60) + ' мин</div>';
-      slot.onclick = function() {
-        GAME.love = save.love; GAME.fear = save.fear; GAME.trust = save.trust;
-        GAME.inventory = save.inventory; GAME.journal = save.journal;
-        GAME.flags = save.flags; scriptIndex = save.scriptIndex;
-        GAME.playTime = save.playTime;
-        updateStats();
-        closeSaveModal();
-        showNotif('Игра загружена!');
-        processScene();
-      };
-      slots.appendChild(slot);
-    });
+    authModal.classList.add('show');
+    navAvatar.style.display = 'none';
+    profileIcon.style.display = 'block';
   }
-  modal.classList.add('show');
-}
+  loader.classList.add('hide');
+});
 
-function closeSaveModal() {
-  document.getElementById('save-modal').classList.remove('show');
-  isPaused = false;
-}
-
-function openInventory() {
-  closeMenu();
-  var modal = document.getElementById('inv-modal');
-  var grid = document.getElementById('inv-grid');
-  grid.innerHTML = '';
-  if (GAME.inventory.length === 0) {
-    grid.innerHTML = '<div style="color:#888;text-align:center;grid-column:1/-1;">Инвентарь пуст</div>';
-  } else {
-    GAME.inventory.forEach(function(item) {
-      var div = document.createElement('div');
-      div.className = 'inv-item';
-      div.innerHTML = '<div class="inv-icon">' + item.icon + '</div><div class="inv-name">' + item.name + '</div>';
-      div.title = item.desc;
-      grid.appendChild(div);
-    });
+// Load pins
+async function loadPins() {
+  if (!currentUser) return;
+  const key = await deriveKey(currentUser.email, authPass.value || '');
+  const snap = await db.ref(`pins/${userKey}`).once('value');
+  const data = snap.val() || {};
+  pins = [];
+  for (const id in data) {
+    try {
+      const decrypted = await decryptData(key, data[id].data);
+      pins.push({ id, ...JSON.parse(decrypted) });
+    } catch (e) { console.log('Decrypt fail', id); }
   }
-  modal.classList.add('show');
+  pins.sort((a, b) => b.timestamp - a.timestamp);
+  renderPins();
 }
 
-function closeInventory() {
-  document.getElementById('inv-modal').classList.remove('show');
-  isPaused = false;
+// Render
+function renderPins() {
+  const filtered = currentTab === 'for-you' ? pins : pins.filter(p => p.liked);
+  if (filtered.length === 0) { feed.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  feed.innerHTML = filtered.map(p => `
+    <div class="pin" data-id="${p.id}">
+      <img src="${p.url}" alt="${p.title || ''}" loading="lazy">
+      <div class="pin-overlay"></div>
+      <div class="pin-actions">
+        <div class="pin-like ${p.liked ? 'liked' : ''}" onclick="toggleLike('${p.id}', event)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="${p.liked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          ${p.likes || 0}
+        </div>
+        <div class="pin-more" onclick="deletePin('${p.id}', event)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+        </div>
+      </div>
+      ${p.title ? `<div class="pin-title">${escapeHtml(p.title)}</div>` : ''}
+    </div>
+  `).join('');
 }
 
-function openJournal() {
-  closeMenu();
-  var modal = document.getElementById('journal-modal');
-  var entries = document.getElementById('journal-entries');
-  entries.innerHTML = '';
-  if (GAME.journal.length === 0) {
-    entries.innerHTML = '<div style="color:#888;text-align:center;padding:20px;">Дневник пуст</div>';
-  } else {
-    GAME.journal.forEach(function(entry) {
-      var div = document.createElement('div');
-      div.className = 'journal-entry';
-      div.innerHTML = '<div class="j-date">' + entry.date + '</div><div class="j-text">' + entry.text + '</div>';
-      entries.appendChild(div);
-    });
+function escapeHtml(t) {
+  const d = document.createElement('div'); d.textContent = t; return d.innerHTML;
+}
+
+// Tabs
+ document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    currentTab = t.dataset.tab;
+    renderPins();
+  });
+});
+
+// Upload
+addBtn.addEventListener('click', () => {
+  if (!currentUser) { showToast('Войдите в аккаунт'); return; }
+  uploadModal.classList.add('show');
+});
+
+uploadBtn.addEventListener('click', () => fileInput.click());
+
+fileInput.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  uploadFile = file;
+  const url = URL.createObjectURL(file);
+  uploadPreview.src = url;
+  uploadPreview.style.display = 'block';
+  uploadBtn.style.display = 'none';
+  uploadTitle.style.display = 'block';
+  uploadDone.style.opacity = '1';
+  uploadDone.style.pointerEvents = 'auto';
+});
+
+uploadCancel.addEventListener('click', resetUpload);
+
+uploadDone.addEventListener('click', async () => {
+  if (!uploadFile || !currentUser) return;
+  uploadDone.textContent = '...'; uploadDone.style.pointerEvents = 'none';
+  try {
+    const compressed = await compressImage(uploadFile);
+    const fileName = `${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
+    const ref = storage.ref(`pins/${userKey}/${fileName}`);
+    await ref.put(compressed);
+    const url = await ref.getDownloadURL();
+
+    const key = await deriveKey(currentUser.email, authPass.value || '');
+    const pinData = {
+      url, title: uploadTitle.value.trim() || '',
+      timestamp: Date.now(), liked: false, likes: 0
+    };
+    const encrypted = await encryptData(key, JSON.stringify(pinData));
+    await db.ref(`pins/${userKey}/${Date.now()}`).set({ data: encrypted });
+
+    showToast('Пин сохранен!');
+    resetUpload();
+    await loadPins();
+  } catch (e) {
+    showToast('Ошибка: ' + e.message);
+    uploadDone.textContent = 'Готово';
+    uploadDone.style.pointerEvents = 'auto';
   }
-  modal.classList.add('show');
+});
+
+function resetUpload() {
+  uploadModal.classList.remove('show');
+  uploadFile = null; fileInput.value = '';
+  uploadPreview.style.display = 'none';
+  uploadBtn.style.display = 'flex';
+  uploadTitle.style.display = 'none'; uploadTitle.value = '';
+  uploadDone.textContent = 'Готово';
+  uploadDone.style.opacity = '.3';
+  uploadDone.style.pointerEvents = 'none';
 }
 
-function closeJournal() {
-  document.getElementById('journal-modal').classList.remove('show');
-  isPaused = false;
+// Like
+window.toggleLike = async (id, e) => {
+  e.stopPropagation();
+  const pin = pins.find(p => p.id === id);
+  if (!pin || !currentUser) return;
+  pin.liked = !pin.liked;
+  pin.likes = (pin.likes || 0) + (pin.liked ? 1 : -1);
+  const key = await deriveKey(currentUser.email, authPass.value || '');
+  const encrypted = await encryptData(key, JSON.stringify(pin));
+  await db.ref(`pins/${userKey}/${id}`).update({ data: encrypted });
+  renderPins();
+};
+
+// Delete
+window.deletePin = async (id, e) => {
+  e.stopPropagation();
+  if (!confirm('Удалить пин?')) return;
+  await db.ref(`pins/${userKey}/${id}`).remove();
+  pins = pins.filter(p => p.id !== id);
+  renderPins();
+  showToast('Пин удален');
+};
+
+// Toast
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
 }
 
-function showEnding(title, desc) {
-  clearInterval(GAME.timerInterval);
-  var ending = document.getElementById('ending');
-  document.getElementById('ending-title').textContent = title;
-  document.getElementById('ending-desc').textContent = desc;
-  document.getElementById('end-love').textContent = GAME.love;
-  document.getElementById('end-fear').textContent = GAME.fear;
-  document.getElementById('end-trust').textContent = GAME.trust;
-  ending.classList.add('show');
-  var completions = JSON.parse(localStorage.getItem('ona_ryadom_complete') || '[]');
-  if (!completions.includes(GAME.flags.ending || 'default')) {
-    completions.push(GAME.flags.ending || 'default');
-    localStorage.setItem('ona_ryadom_complete', JSON.stringify(completions));
+// Bottom nav
+ document.querySelectorAll('.nav-item[data-nav]').forEach(n => {
+  n.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+    n.classList.add('active');
+    const nav = n.dataset.nav;
+    if (nav === 'home') { currentTab = 'for-you'; renderPins(); }
+    if (nav === 'search') showToast('Поиск скоро...');
+    if (nav === 'messages') showToast('Сообщения скоро...');
+    if (nav === 'profile') { currentTab = 'saved'; renderPins(); }
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === currentTab));
+  });
+});
+
+// Filter
+ document.getElementById('filterBtn').addEventListener('click', () => {
+  showToast('Фильтры скоро...');
+});
+
+// Infinite scroll
+let loadingMore = false;
+feedWrap.addEventListener('scroll', () => {
+  if (loadingMore) return;
+  if (feedWrap.scrollTop + feedWrap.clientHeight >= feedWrap.scrollHeight - 200) {
+    // Could load more here
   }
-}
-
-window.onload = init;
+});
 </script>
 </body>
 </html>
