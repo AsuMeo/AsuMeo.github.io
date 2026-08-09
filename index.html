@@ -22,7 +22,7 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:-apple-sys
 .filter-btn{width:38px;height:38px;border-radius:50%;background:var(--s3);display:flex;align-items:center;justify-content:center;cursor:pointer}
 .filter-btn svg{width:18px;height:18px;stroke:var(--t);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 
-/* Clean Pinterest Feed Grid (No text under images in grid!) */
+/* Clean Pinterest Feed Grid */
 .feed-wrap{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 6px 20px}
 .feed{column-count:2;column-gap:7px;padding-top:4px}
 .feed-wrap::-webkit-scrollbar{display:none}
@@ -67,7 +67,7 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:-apple-sys
 .modal .switch span{color:var(--t);font-weight:600}
 .modal .error{color:var(--a);font-size:13px;margin-top:10px;text-align:center;display:none;font-weight:500}
 
-/* Upload Modal */
+/* Upload Pin Modal */
 .upload-modal{position:fixed;inset:0;background:var(--bg);z-index:200;display:none;flex-direction:column}
 .upload-modal.show{display:flex}
 .upload-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0}
@@ -87,7 +87,7 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:-apple-sys
 .upload-progress-bar{height:100%;width:0%;background:var(--a);border-radius:2px;transition:width .3s cubic-bezier(.22,1,.36,1)}
 .upload-info{color:var(--t2);font-size:12px;margin-top:10px;font-weight:500;display:none}
 
-/* Viewer (Pinterest Style with REAL Author Details) */
+/* Viewer */
 .viewer{position:fixed;inset:0;background:var(--bg);z-index:300;display:none;flex-direction:column;overflow-y:auto}
 .viewer.show{display:flex}
 .viewer-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;flex-shrink:0;position:sticky;top:0;background:rgba(0,0,0,.85);backdrop-filter:blur(15px);z-index:10}
@@ -170,6 +170,20 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:-apple-sys
 .edit-banner-preview{width:100%;height:130px;border-radius:var(--rs);object-fit:cover;margin-bottom:8px;background:var(--s3);cursor:pointer;border:1px dashed rgba(255,255,255,.2)}
 .edit-avatar-preview{width:90px;height:90px;border-radius:50%;object-fit:cover;margin:0 auto 8px;display:block;background:var(--s3);cursor:pointer;border:3px solid var(--s2)}
 
+/* Avatar & Banner Cropper / Editor Modal */
+.cropper-modal{position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:450;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.cropper-modal.show{display:flex}
+.cropper-container{width:100%;max-width:400px;background:var(--s2);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;align-items:center;border:1px solid rgba(255,255,255,.08)}
+.cropper-preview-box{width:240px;height:240px;background:#000;border-radius:50%;overflow:hidden;position:relative;margin:16px 0;border:3px solid var(--a);display:flex;align-items:center;justify-content:center}
+.cropper-preview-box.banner-mode{width:100%;height:140px;border-radius:12px}
+.cropper-preview-box img{max-width:none;position:absolute;cursor:grab;user-select:none}
+.cropper-controls{width:100%;display:flex;flex-direction:column;gap:12px;margin-top:10px}
+.cropper-slider{width:100%;accent-color:var(--a)}
+.cropper-btns{display:flex;gap:10px;width:100%;margin-top:10px}
+.cropper-btn{flex:1;padding:12px;border-radius:var(--rs);font-weight:700;font-size:15px;cursor:pointer;border:none}
+.cropper-btn.cancel{background:var(--s3);color:var(--t)}
+.cropper-btn.apply{background:var(--a);color:#fff}
+
 /* Messenger */
 .messenger-wrap{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:none;flex-direction:column}
 .messenger-wrap.show{display:flex}
@@ -207,16 +221,53 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:-apple-sys
 .chat-room-header .chat-status{font-size:12px;color:var(--t2);font-weight:500}
 .chat-room-header .chat-status.online{color:var(--g)}
 .chat-room-header .chat-status.typing{color:var(--g);font-weight:600}
-.chat-messages{flex:1;overflow-y:auto;padding:16px 12px;display:flex;flex-direction:column;gap:4px}
+.chat-messages{flex:1;overflow-y:auto;padding:16px 12px;display:flex;flex-direction:column;gap:6px}
 .chat-messages::-webkit-scrollbar{display:none}
 .msg-date{text-align:center;color:var(--t3);font-size:12px;font-weight:600;margin:12px 0;padding:4px 12px;background:var(--s2);border-radius:12px;align-self:center}
+
+/* Message Bubbles Styling */
 .msg-bubble{max-width:78%;padding:10px 14px;border-radius:var(--rs);font-size:15px;line-height:1.45;word-break:break-word;position:relative;animation:mi .25s cubic-bezier(.22,1,.36,1)}
 @keyframes mi{from{opacity:0;transform:translateY(10px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
-.msg-bubble.out{align-self:flex-end;background:var(--a);color:#fff;border-bottom-right-radius:4px}
+.msg-bubble.out{align-self:flex-end;background:#343434;color:#fff;border-bottom-right-radius:4px}
 .msg-bubble.in{align-self:flex-start;background:var(--s3);color:var(--t);border-bottom-left-radius:4px}
-.msg-bubble img{max-width:100%;border-radius:var(--rx);margin:-4px -6px;display:block}
-.msg-bubble video{max-width:100%;border-radius:var(--rx);margin:-4px -6px;display:block;max-height:280px}
-.msg-bubble audio{width:100%;min-width:200px;margin:-2px 0}
+
+/* Telegram Style Media & Collages (No borders, time in bottom right corner) */
+.msg-media-wrap{position:relative;display:inline-block;border-radius:var(--rx);overflow:hidden;cursor:pointer;margin:-4px -6px}
+.msg-media-wrap img, .msg-media-wrap video{width:100%;display:block;border:none!important;outline:none!important;box-shadow:none!important;background:var(--s3)}
+.msg-media-wrap video{max-height:300px;object-fit:cover}
+.media-time-badge{position:absolute;bottom:6px;right:8px;background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);color:#fff;font-size:10px;padding:2px 6px;border-radius:8px;font-weight:600;display:flex;align-items:center;gap:3px;z-index:2}
+.media-time-badge svg{width:10px;height:10px;stroke:#fff;fill:none;stroke-width:2.5}
+
+/* Telegram Collage Grid */
+.tg-collage{display:grid;gap:3px;margin:-4px -6px;border-radius:var(--rx);overflow:hidden}
+.tg-collage.c-1{grid-template-columns:1fr}
+.tg-collage.c-2{grid-template-columns:1fr 1fr}
+.tg-collage.c-3{grid-template-columns:2fr 1fr;grid-template-rows:repeat(2,1fr)}
+.tg-collage.c-3 .collage-item:first-child{grid-row:span 2}
+.tg-collage.c-4{grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(2,1fr)}
+.collage-item{position:relative;background:var(--s3);cursor:pointer;overflow:hidden;min-height:90px}
+.collage-item img, .collage-item video{width:100%;height:100%;object-fit:cover;display:block;border:none!important}
+
+/* Telegram Custom Audio Player */
+.tg-audio-player{display:flex;align-items:center;gap:12px;background:rgba(0,0,0,0.25);padding:10px 14px;border-radius:14px;margin:-2px 0;width:100%;min-width:220px}
+.tg-audio-btn{width:38px;height:38px;border-radius:50%;background:#fff;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:transform .15s}
+.tg-audio-btn:active{transform:scale(.92)}
+.tg-audio-btn svg{width:16px;height:16px;fill:var(--bg);stroke:none;margin-left:2px}
+.tg-audio-btn.playing svg{margin-left:0}
+.tg-audio-info{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0}
+.tg-audio-title{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tg-audio-timeline{width:100%;height:4px;background:rgba(255,255,255,0.2);border-radius:2px;position:relative;cursor:pointer;overflow:hidden}
+.tg-audio-progress{height:100%;background:#fff;width:0%;border-radius:2px}
+.tg-audio-duration{font-size:11px;opacity:0.7;display:flex;justify-content:space-between;margin-top:2px}
+
+/* Telegram Custom Video Player Modal */
+.video-player-modal{position:fixed;inset:0;background:#000;z-index:500;display:none;flex-direction:column;align-items:center;justify-content:center}
+.video-player-modal.show{display:flex}
+.video-player-header{position:absolute;top:0;left:0;right:0;padding:16px;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(to bottom,rgba(0,0,0,.8),transparent);z-index:10}
+.video-player-close{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.15);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.video-player-close svg{width:22px;height:22px;stroke:#fff;stroke-width:2;fill:none}
+.video-player-modal video{max-width:100%;max-height:100vh;outline:none}
+
 .msg-time{font-size:10px;opacity:.65;margin-top:4px;text-align:right;font-weight:500}
 .msg-status{display:inline-flex;margin-left:4px}
 .msg-status svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -267,7 +318,7 @@ input[type="file"]{display:none!important}
 <div class="filter-btn" id="filterBtn"><svg viewBox="0 0 24 24"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg></div>
 </div>
 
-<!-- Clean Pinterest Feed Grid (No text under images!) -->
+<!-- Feed Grid -->
 <div class="feed-wrap" id="feedWrap"><div class="feed" id="feed"></div><div class="empty" id="empty" style="display:none;"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg><p>Нет пинов</p></div></div>
 
 <!-- Messenger Area -->
@@ -319,13 +370,13 @@ input[type="file"]{display:none!important}
 
 <!-- Upload Pin Modal -->
 <div class="upload-modal" id="uploadModal">
-<div class="upload-header"><div class="cancel" id="uploadCancel">Отмена</div><h3>Создать пин</h3><div class="done" id="uploadDone">Готово</div></div>
+<div class="upload-header"><div class="cancel" id="uploadCancel">Отмена</div><h3>Создать историю (пин)</h3><div class="done" id="uploadDone">Готово</div></div>
 <div class="upload-area">
-<div class="upload-btn" id="uploadBtn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span>Выбрать из галереи</span></div>
+<div class="upload-btn" id="uploadBtn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span>Выбрать фото</span></div>
 <img class="upload-preview" id="uploadPreview">
 <div class="upload-inputs">
 <input type="text" id="uploadTitle" placeholder="Название пина">
-<textarea id="uploadBio" placeholder="Добавьте подробное описание..."></textarea>
+<textarea id="uploadBio" placeholder="Добавьте описание..."></textarea>
 </div>
 <div class="upload-progress" id="uploadProgress"><div class="upload-progress-bar" id="uploadProgressBar"></div></div>
 <div class="upload-info" id="uploadInfo"></div>
@@ -333,7 +384,7 @@ input[type="file"]{display:none!important}
 </div>
 </div>
 
-<!-- Detailed Pinterest Viewer with REAL Author Info -->
+<!-- Pinterest Viewer -->
 <div class="viewer" id="viewer">
 <div class="viewer-header">
 <div class="back" id="viewerBack"><svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></div>
@@ -380,12 +431,12 @@ input[type="file"]{display:none!important}
 <button type="button" class="chat-send" id="chatSend"><svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
 </div>
 <div class="attach-menu" id="attachMenu">
-<div class="attach-item" id="attachPhoto"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><span>Фото</span></div>
-<div class="attach-item" id="attachVideo"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2.18"/><path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 17h5M17 7h5"/></svg><span>Видео</span></div>
+<div class="attach-item" id="attachPhoto"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><span>Фото / Коллаж</span></div>
+<div class="attach-item" id="attachVideo"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2.18"/><path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 17h5M17 7h5"/></svg><span>Видео / Коллаж</span></div>
 <div class="attach-item" id="attachAudio"><svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><span>Музыка</span></div>
 </div>
-<input type="file" id="attachPhotoInput" accept="image/*">
-<input type="file" id="attachVideoInput" accept="video/*">
+<input type="file" id="attachPhotoInput" accept="image/*" multiple>
+<input type="file" id="attachVideoInput" accept="video/*" multiple>
 <input type="file" id="attachAudioInput" accept="audio/*">
 </div>
 </div>
@@ -408,6 +459,32 @@ input[type="file"]{display:none!important}
 </div>
 </div>
 
+<!-- Powerful Avatar & Cover Cropper / Editor Modal -->
+<div class="cropper-modal" id="cropperModal">
+<div class="cropper-container">
+<h3 id="cropperTitle" style="font-size:18px;font-weight:700">Редактор фото</h3>
+<div class="cropper-preview-box" id="cropperBox">
+<img id="cropperImg" src="">
+</div>
+<div class="cropper-controls">
+<label style="font-size:12px;color:var(--t2)">Масштаб</label>
+<input type="range" min="0.5" max="3" step="0.05" value="1" class="cropper-slider" id="cropperZoom">
+</div>
+<div class="cropper-btns">
+<button type="button" class="cropper-btn cancel" id="cropperCancel">Отмена</button>
+<button type="button" class="cropper-btn apply" id="cropperApply">Готово</button>
+</div>
+</div>
+</div>
+
+<!-- Telegram Video Fullscreen Player Modal -->
+<div class="video-player-modal" id="videoPlayerModal">
+<div class="video-player-header">
+<div class="video-player-close" id="videoPlayerClose"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
+</div>
+<video id="videoPlayerModalEl" controls playsinline></video>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -425,10 +502,17 @@ const chatRoom=document.getElementById('chatRoom'),chatBack=document.getElementB
 const profileBanner=document.getElementById('profileBanner'),profileAvatar=document.getElementById('profileAvatar'),profileName=document.getElementById('profileName'),profileUsername=document.getElementById('profileUsername'),profileBio=document.getElementById('profileBio'),profileStatus=document.getElementById('profileStatus'),statPins=document.getElementById('statPins'),statSaved=document.getElementById('statSaved'),statViews=document.getElementById('statViews'),profileFeed=document.getElementById('profileFeed'),editProfileBtn=document.getElementById('editProfileBtn'),shareProfileBtn=document.getElementById('shareProfileBtn'),bannerEditBtn=document.getElementById('bannerEditBtn'),avatarEditBtn=document.getElementById('avatarEditBtn');
 const editModal=document.getElementById('editModal'),editCancel=document.getElementById('editCancel'),editSave=document.getElementById('editSave'),editBannerPreview=document.getElementById('editBannerPreview'),editAvatarPreview=document.getElementById('editAvatarPreview'),editBannerInput=document.getElementById('editBannerInput'),editAvatarInput=document.getElementById('editAvatarInput'),editName=document.getElementById('editName'),editUsername=document.getElementById('editUsername'),editBio=document.getElementById('editBio');
 
+// Cropper UI Elements
+const cropperModal=document.getElementById('cropperModal'),cropperTitle=document.getElementById('cropperTitle'),cropperBox=document.getElementById('cropperBox'),cropperImg=document.getElementById('cropperImg'),cropperZoom=document.getElementById('cropperZoom'),cropperCancel=document.getElementById('cropperCancel'),cropperApply=document.getElementById('cropperApply');
+let cropperMode = 'avatar', cropperCallback = null, cropImgObj = new Image(), cropState = { scale: 1, x: 0, y: 0, startX: 0, startY: 0, dragging: false };
+
+// Video Fullscreen Modal Elements
+const videoPlayerModal=document.getElementById('videoPlayerModal'),videoPlayerModalEl=document.getElementById('videoPlayerModalEl'),videoPlayerClose=document.getElementById('videoPlayerClose');
+
 // Loader Hide Safety
 setTimeout(()=>{ if(loader) loader.classList.add('hide'); }, 1800);
 
-// --- CLOUD PBKDF2 + AES-GCM ENCRYPTION DERIVED FROM USER EMAIL + PASSWORD ---
+// --- CRYPTOGRAPHY ---
 async function dk(e, p){
     if(!e || !p) throw new Error("Auth missing");
     const en = new TextEncoder();
@@ -441,7 +525,6 @@ async function dk(e, p){
     }, km, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
 }
 
-// SHARED CHAT KEY FOR REALTIME MESSAGES
 async function getChatEncryptionKey(ck){
     const en = new TextEncoder();
     const km = await crypto.subtle.importKey('raw', en.encode(ck + '_meow_shared_secret'), 'PBKDF2', false, ['deriveKey']);
@@ -504,6 +587,93 @@ function ft(ts){
 function fmt(ts){ const d = new Date(ts); return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0'); }
 function fdd(ts){ const d = new Date(ts), n = new Date(); if(d.toDateString() === n.toDateString()) return 'Сегодня'; const y = new Date(n); y.setDate(y.getDate()-1); if(d.toDateString() === y.toDateString()) return 'Вчера'; const mo = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря']; return d.getDate() + ' ' + mo[d.getMonth()]; }
 
+// --- POWERFUL CROPPER EDITOR ---
+function openCropper(file, mode, cb){
+    cropperMode = mode;
+    cropperCallback = cb;
+    cropperTitle.textContent = mode === 'avatar' ? 'Редактор аватарки' : 'Редактор обложки';
+    if(mode === 'banner'){
+        cropperBox.className = 'cropper-preview-box banner-mode';
+    } else {
+        cropperBox.className = 'cropper-preview-box';
+    }
+
+    const url = URL.createObjectURL(file);
+    cropImgObj.onload = () => {
+        cropState.scale = 1;
+        cropState.x = 0;
+        cropState.y = 0;
+        cropperZoom.value = 1;
+        updateCropView();
+        cropperModal.classList.add('show');
+    };
+    cropImgObj.src = url;
+}
+
+function updateCropView(){
+    const boxW = cropperBox.clientWidth;
+    const boxH = cropperBox.clientHeight;
+    const imgW = cropImgObj.naturalWidth;
+    const imgH = cropImgObj.naturalHeight;
+
+    const baseScale = Math.max(boxW / imgW, boxH / imgH);
+    const totalScale = baseScale * cropState.scale;
+
+    cropperImg.src = cropImgObj.src;
+    cropperImg.style.width = (imgW * totalScale) + 'px';
+    cropperImg.style.height = (imgH * totalScale) + 'px';
+    cropperImg.style.left = ((boxW - (imgW * totalScale)) / 2 + cropState.x) + 'px';
+    cropperImg.style.top = ((boxH - (imgH * totalScale)) / 2 + cropState.y) + 'px';
+}
+
+cropperZoom.addEventListener('input', (e) => {
+    cropState.scale = parseFloat(e.target.value);
+    updateCropView();
+});
+
+cropperBox.addEventListener('pointerdown', (e) => {
+    cropState.dragging = true;
+    cropState.startX = e.clientX - cropState.x;
+    cropState.startY = e.clientY - cropState.y;
+    cropperBox.setPointerCapture(e.pointerId);
+});
+
+cropperBox.addEventListener('pointermove', (e) => {
+    if(!cropState.dragging) return;
+    cropState.x = e.clientX - cropState.startX;
+    cropState.y = e.clientY - cropState.startY;
+    updateCropView();
+});
+
+cropperBox.addEventListener('pointerup', (e) => { cropState.dragging = false; });
+cropperCancel.addEventListener('click', () => cropperModal.classList.remove('show'));
+
+cropperApply.addEventListener('click', () => {
+    const boxW = cropperBox.clientWidth;
+    const boxH = cropperBox.clientHeight;
+    const c = document.createElement('canvas');
+    c.width = boxW * 2; c.height = boxH * 2;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, c.width, c.height);
+
+    const imgW = cropImgObj.naturalWidth;
+    const imgH = cropImgObj.naturalHeight;
+    const baseScale = Math.max(boxW / imgW, boxH / imgH);
+    const totalScale = baseScale * cropState.scale * 2;
+
+    const drawW = imgW * totalScale;
+    const drawH = imgH * totalScale;
+    const drawX = (c.width - drawW) / 2 + (cropState.x * 2);
+    const drawY = (c.height - drawH) / 2 + (cropState.y * 2);
+
+    ctx.drawImage(cropImgObj, drawX, drawY, drawW, drawH);
+    const resultB64 = c.toDataURL('image/jpeg', 0.85);
+
+    cropperModal.classList.remove('show');
+    if(cropperCallback) cropperCallback(resultB64);
+});
+
 // --- AUTHENTICATION ---
 authBtn.addEventListener('click', async () => {
     const em = authEmail.value.trim(), ps = authPass.value.trim();
@@ -554,7 +724,7 @@ auth.onAuthStateChanged(async (u) => {
     }
 });
 
-// --- TELEGRAM SMART PRESENCE ---
+// --- PRESENCE ---
 function setupOnline(){
     if(!currentUser || !userKey) return;
     const pr = db.ref('presence/' + userKey);
@@ -591,7 +761,7 @@ function fos(s, ls){
     return 'был(а) ' + ft(ls);
 }
 
-// --- PROFILE SYSTEM & UNIQUE USERNAME CHECK ---
+// --- PROFILE & COVERS ---
 async function initProfile(){
     if(!currentUser || !userKey) return;
     try {
@@ -650,7 +820,6 @@ function renderProfileFeed(targetUserKey){
         profileFeed.innerHTML = '<div class="empty" style="padding:40px 20px;"><p>Нет пинов</p></div>';
         return;
     }
-    // Clean Image Grid for Profile Feed
     profileFeed.innerHTML = f.map(p => `
         <div class="pin" onclick="openViewer('${p.id}')">
             <img src="${p.imageBase64}" loading="lazy">
@@ -678,7 +847,7 @@ async function viewUserProfile(targetKey){
     } catch(e) { showToast('Ошибка загрузки'); }
 }
 
-// WORKING COVER & PROFILE EDIT BUTTONS
+// WORKING PROFILE & BANNER EDIT BUTTONS (WITH CROPPER)
 editProfileBtn.addEventListener('click', openEditModal);
 bannerEditBtn.addEventListener('click', (e) => { e.stopPropagation(); editBannerInput.click(); });
 profileBanner.addEventListener('click', () => { if(displayedProfileKey === userKey) editBannerInput.click(); });
@@ -701,16 +870,20 @@ function openEditModal(){
 editBannerPreview.addEventListener('click', () => editBannerInput.click());
 editAvatarPreview.addEventListener('click', () => editAvatarInput.click());
 
-editBannerInput.addEventListener('change', async (e) => {
+editBannerInput.addEventListener('change', (e) => {
     const f = e.target.files[0]; if(!f) return;
-    const b = await cib(f, 900, 0.65);
-    editBannerPreview.src = b; editBannerPreview.style.display = 'block';
+    openCropper(f, 'banner', (resB64) => {
+        editBannerPreview.src = resB64;
+        editBannerPreview.style.display = 'block';
+    });
 });
 
-editAvatarInput.addEventListener('change', async (e) => {
+editAvatarInput.addEventListener('change', (e) => {
     const f = e.target.files[0]; if(!f) return;
-    const b = await cib(f, 300, 0.7);
-    editAvatarPreview.src = b; editAvatarPreview.style.display = 'block';
+    openCropper(f, 'avatar', (resB64) => {
+        editAvatarPreview.src = resB64;
+        editAvatarPreview.style.display = 'block';
+    });
 });
 
 editCancel.addEventListener('click', () => editModal.classList.remove('show'));
@@ -751,7 +924,7 @@ editSave.addEventListener('click', async () => {
     finally { editSave.textContent = 'Сохранить'; }
 });
 
-// --- CLOUD ENCRYPTED PINS SYSTEM ---
+// --- PINS & STORIES ---
 async function loadEncryptedUserPins(){
     if(!currentUser) return;
     if(!userPassword){ renderPins(); return; }
@@ -769,7 +942,6 @@ async function loadEncryptedUserPins(){
             } catch(e){ console.log("Pin decrypt err:", e); }
         }
 
-        // Load public pins as well
         const pubSnap = await db.ref('publicPins').once('value');
         const pubData = pubSnap.val() || {};
         for(const id in pubData){
@@ -784,7 +956,6 @@ async function loadEncryptedUserPins(){
     } catch(e) { console.error("loadEncryptedUserPins err:", e); }
 }
 
-// CLEAN PINTEREST FEED GRID (Only clean images with hover save icon, NO text/titles in grid!)
 function renderPins(){
     const f = currentTab === 'for-you' ? pins : pins.filter(p => p.liked);
     if(f.length === 0){ feed.innerHTML = ''; empty.style.display = 'block'; return; }
@@ -801,7 +972,6 @@ function renderPins(){
     `).join('');
 }
 
-// UPLOAD PIN
 addBtn.addEventListener('click', () => {
     if(!currentUser){ showToast('Войдите в аккаунт'); return; }
     if(!userPassword){ showToast('Введите пароль повторно'); authModal.classList.add('show'); return; }
@@ -830,11 +1000,10 @@ uploadDone.addEventListener('click', async () => {
     uploadProgressBar.style.width = '20%';
 
     try {
-        uploadInfo.textContent = 'Шифрование...';
+        uploadInfo.textContent = 'Обработка...';
         const b64 = await cib(uploadFile, 800, 0.6);
         const k = await dk(currentUser.email, userPassword);
 
-        // ALWAYS attach REAL author details
         const pinData = {
             imageBase64: b64,
             title: uploadTitle.value.trim() || '',
@@ -850,13 +1019,13 @@ uploadDone.addEventListener('click', async () => {
         const pid = Date.now().toString();
 
         uploadProgressBar.style.width = '70%';
-        uploadInfo.textContent = 'Сохранение...';
+        uploadInfo.textContent = 'Публикация истории...';
 
         await db.ref('pins/' + userKey + '/' + pid).set({ data: encData });
         await db.ref('publicPins/' + pid).set(pinData);
 
         uploadProgressBar.style.width = '100%';
-        showToast('🔒 Пин сохранен!');
+        showToast('✨ Публичная история опубликована!');
         resetUpload();
         await loadEncryptedUserPins();
     } catch(e) {
@@ -876,7 +1045,6 @@ function resetUpload(){
     uploadInfo.style.display = 'none';
 }
 
-// VIEWER: DISPLAY REAL AUTHOR AVATAR, NAME, @USERNAME, TITLE & DESCRIPTION!
 async function openViewer(id){
     const p = pins.find(x => x.id === id);
     if(!p) return;
@@ -891,7 +1059,6 @@ async function openViewer(id){
 
     viewerDate.textContent = 'Опубликовано ' + (p.timestamp ? ft(p.timestamp) : 'недавно');
 
-    // Fetch fresh profile if available or fallback to pin's stored real author info
     let authorName = p.authorName || 'Пользователь';
     let authorUser = p.authorUser || 'username';
     let authorAvatar = p.authorAvatar || ('https://api.dicebear.com/7.x/avataaars/svg?seed=' + (p.authorKey || 'meow'));
@@ -945,7 +1112,7 @@ window.toggleLike = async (id, e) => {
         viewerSaveBtn.className = 'viewer-save-btn' + (p.liked ? ' saved' : '');
     }
     renderPins();
-    showToast(p.liked ? 'Сохранено в профиль' : 'Удалено из сохраненных');
+    showToast(p.liked ? 'Сохранено в ваш личный раздел «Сохранено»' : 'Удалено из сохраненных');
 };
 
 // NAVIGATION & SCREENS
@@ -1032,10 +1199,10 @@ async function loadChatList(){
                     const dj = JSON.parse(de);
 
                     if(dj.type === 'text') lp = dj.text;
-                    else if(dj.type === 'image'){
+                    else if(dj.type === 'image' || dj.type === 'collage'){
                         lp = 'Фото';
                         isPhoto = true;
-                        photoData = dj.data;
+                        photoData = dj.type === 'collage' ? dj.items[0].data : dj.data;
                     }
                     else if(dj.type === 'video') lp = '📹 Видео';
                     else if(dj.type === 'audio') lp = '🎵 Аудио';
@@ -1082,7 +1249,6 @@ async function loadChatList(){
             </div>
         `).join('');
 
-        // Typing Status Listeners for Dialog List
         ca.forEach(c => {
             db.ref(`typing/${c.key}/${c.otherKey}`).on('value', snap => {
                 const val = snap.val();
@@ -1105,7 +1271,7 @@ async function loadChatList(){
     }
 }
 
-// OPEN CHAT ROOM WITH INSTANT REALTIME MESSAGES
+// OPEN CHAT ROOM (FIXED CLICK ON SIBLING PROFILE)
 window.openChat = async (ouk, oname, oavatar, ouname) => {
     if(!currentUser) return;
     chatKey = gck(userKey, ouk);
@@ -1119,7 +1285,6 @@ window.openChat = async (ouk, oname, oavatar, ouname) => {
     chatRoomAvatar.onclick = () => viewUserProfile(ouk);
     chatRoomProfileClick.onclick = () => viewUserProfile(ouk);
 
-    // Online Status
     if(chatOnlineRef) chatOnlineRef.off();
     chatOnlineRef = getOnline(ouk, (s, ls) => {
         isOtherOnline = (s === 'online');
@@ -1133,7 +1298,6 @@ window.openChat = async (ouk, oname, oavatar, ouname) => {
         }
     });
 
-    // Realtime Typing Listener for Header
     if(typingRef) typingRef.off();
     typingRef = db.ref(`typing/${chatKey}/${ouk}`);
     typingRef.on('value', snap => {
@@ -1150,10 +1314,8 @@ window.openChat = async (ouk, oname, oavatar, ouname) => {
         }
     });
 
-    // Clear Unread Counter
     try { await db.ref(`userChats/${userKey}/${chatKey}`).update({ unread: 0 }); } catch(e){}
 
-    // INSTANT REALTIME MESSAGE LISTENER (no page refresh needed!)
     if(chatListener) chatListener.off();
     const sharedKey = await getChatEncryptionKey(chatKey);
 
@@ -1186,23 +1348,134 @@ window.openChat = async (ouk, oname, oavatar, ouname) => {
     });
 };
 
+// RENDER MESSAGES WITH TELEGRAM AUDIO, COLLAGES & TIMINGS
 function renderMsg(m, id){
     const el = document.createElement('div');
     el.className = 'msg-bubble ' + (m.sender === userKey ? 'out' : 'in');
     el.setAttribute('data-msgid', id);
 
     let content = '';
-    if(m.type === 'text') content = esc(m.text);
-    else if(m.type === 'image') content = `<img src="${m.data}" onclick="viewMedia(this)" style="cursor:pointer">`;
-    else if(m.type === 'video') content = `<video src="${m.data}" controls preload="metadata"></video>`;
-    else if(m.type === 'audio') content = `<audio src="${m.data}" controls></audio>`;
+    const timeStr = fmt(m.timestamp);
+    const statusIcon = m.sender === userKey ? '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' : '';
 
-    el.innerHTML = content + `<div class="msg-time">${fmt(m.timestamp)}<span class="msg-status">${m.sender === userKey ? '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' : ''}</span></div>`;
+    if(m.type === 'text'){
+        content = `${esc(m.text)}<div class="msg-time">${timeStr}<span class="msg-status">${statusIcon}</span></div>`;
+    } 
+    else if(m.type === 'image' || m.type === 'video'){
+        const isVid = m.type === 'video';
+        content = `
+            <div class="msg-media-wrap" onclick="${isVid ? `openVideoPlayer('${m.data}')` : `viewMediaImage('${m.data}')`}">
+                ${isVid ? `<video src="${m.data}" preload="metadata"></video>` : `<img src="${m.data}" loading="lazy">`}
+                <div class="media-time-badge">
+                    ${isVid ? '<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>' : ''}
+                    ${timeStr} ${statusIcon}
+                </div>
+            </div>
+        `;
+    }
+    else if(m.type === 'collage'){
+        const len = m.items.length;
+        const cls = len === 1 ? 'c-1' : len === 2 ? 'c-2' : len === 3 ? 'c-3' : 'c-4';
+        const itemsHtml = m.items.map((item, idx) => `
+            <div class="collage-item" onclick="event.stopPropagation(); ${item.type === 'video' ? `openVideoPlayer('${item.data}')` : `viewMediaImage('${item.data}')`}">
+                ${item.type === 'video' ? `<video src="${item.data}" preload="metadata"></video>` : `<img src="${item.data}" loading="lazy">`}
+                ${idx === m.items.length - 1 ? `
+                    <div class="media-time-badge">
+                        ${timeStr} ${statusIcon}
+                    </div>
+                ` : ''}
+            </div>
+        `).join('');
+        content = `<div class="tg-collage ${cls}">${itemsHtml}</div>`;
+    }
+    else if(m.type === 'audio'){
+        content = `
+            <div class="tg-audio-player" data-src="${m.data}">
+                <button type="button" class="tg-audio-btn" onclick="toggleAudioPlayer(this)">
+                    <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                </button>
+                <div class="tg-audio-info">
+                    <div class="tg-audio-title">Аудиозапись</div>
+                    <div class="tg-audio-timeline" onclick="seekAudio(event, this)">
+                        <div class="tg-audio-progress"></div>
+                    </div>
+                    <div class="tg-audio-duration"><span class="aud-curr">0:00</span><span>🎵</span></div>
+                </div>
+            </div>
+            <div class="msg-time">${timeStr}<span class="msg-status">${statusIcon}</span></div>
+        `;
+    }
+
+    el.innerHTML = content;
     chatMessages.appendChild(el);
 }
 
 function scrollToBottom(){ chatMessages.scrollTop = chatMessages.scrollHeight; }
-function viewMedia(el){ viewerContent.innerHTML = el.outerHTML; viewer.classList.add('show'); }
+
+function viewMediaImage(src){
+    viewerContent.innerHTML = `<img src="${src}">`;
+    viewer.classList.add('show');
+}
+
+function openVideoPlayer(src){
+    videoPlayerModalEl.src = src;
+    videoPlayerModal.classList.add('show');
+    videoPlayerModalEl.play();
+}
+
+videoPlayerClose.addEventListener('click', () => {
+    videoPlayerModalEl.pause();
+    videoPlayerModal.classList.remove('show');
+});
+
+// TELEGRAM CUSTOM MUSIC PLAYER ENGINE
+let activeAudioEl = null, activeAudioBtn = null, activeAudioProgress = null, audioInterval = null;
+
+function toggleAudioPlayer(btn){
+    const player = btn.closest('.tg-audio-player');
+    const src = player.dataset.src;
+    const progress = player.querySelector('.tg-audio-progress');
+    const currTimeSpan = player.querySelector('.aud-curr');
+
+    if(!activeAudioEl || activeAudioEl.src !== src){
+        if(activeAudioEl){ activeAudioEl.pause(); if(activeAudioBtn) activeAudioBtn.classList.remove('playing'); }
+        activeAudioEl = new Audio(src);
+        activeAudioBtn = btn;
+        activeAudioProgress = progress;
+
+        activeAudioEl.ontimeupdate = () => {
+            if(!activeAudioEl) return;
+            const pct = (activeAudioEl.currentTime / activeAudioEl.duration) * 100;
+            if(activeAudioProgress) activeAudioProgress.style.width = pct + '%';
+            const m = Math.floor(activeAudioEl.currentTime / 60);
+            const s = Math.floor(activeAudioEl.currentTime % 60).toString().padStart(2,'0');
+            currTimeSpan.textContent = m + ':' + s;
+        };
+
+        activeAudioEl.onended = () => {
+            btn.classList.remove('playing');
+            btn.querySelector('svg').innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
+            if(activeAudioProgress) activeAudioProgress.style.width = '0%';
+        };
+    }
+
+    if(activeAudioEl.paused){
+        activeAudioEl.play();
+        btn.classList.add('playing');
+        btn.querySelector('svg').innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+    } else {
+        activeAudioEl.pause();
+        btn.classList.remove('playing');
+        btn.querySelector('svg').innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
+    }
+}
+
+function seekAudio(e, timeline){
+    if(!activeAudioEl) return;
+    const rect = timeline.getBoundingClientRect();
+    const pos = (e.clientX - rect.left) / rect.width;
+    activeAudioEl.currentTime = pos * activeAudioEl.duration;
+}
 
 chatBack.addEventListener('click', () => {
     chatRoom.classList.remove('show');
@@ -1214,19 +1487,15 @@ chatBack.addEventListener('click', () => {
     loadChatList();
 });
 
-// TELEGRAM TYPING INPUT SENDER
 chatInput.addEventListener('input', () => {
     if(!chatKey || !userKey) return;
-
     db.ref(`typing/${chatKey}/${userKey}`).set(Date.now());
-
     if(typingTimer) clearTimeout(typingTimer);
     typingTimer = setTimeout(() => {
         db.ref(`typing/${chatKey}/${userKey}`).remove();
     }, 1200);
 });
 
-// SEND MESSAGE (Instant Delivery)
 chatSend.addEventListener('click', sendMsg);
 chatInput.addEventListener('keydown', (e) => {
     if(e.key === 'Enter' && !e.shiftKey){
@@ -1255,7 +1524,7 @@ async function sendMsg(){
     } catch(e) { showToast('Ошибка отправки'); }
 }
 
-// ATTACHMENTS
+// ATTACHMENTS & COLLAGES (TELEGRAM STYLE)
 chatAttach.addEventListener('click', (e) => { e.stopPropagation(); attachMenu.classList.toggle('show'); });
 document.addEventListener('click', (e) => { if(!attachMenu.contains(e.target) && e.target !== chatAttach) attachMenu.classList.remove('show'); });
 
@@ -1263,31 +1532,45 @@ attachPhoto.addEventListener('click', () => { attachMenu.classList.remove('show'
 attachVideo.addEventListener('click', () => { attachMenu.classList.remove('show'); attachVideoInput.click(); });
 attachAudio.addEventListener('click', () => { attachMenu.classList.remove('show'); attachAudioInput.click(); });
 
-attachPhotoInput.addEventListener('change', (e) => sendMedia(e.target.files[0], 'image'));
-attachVideoInput.addEventListener('change', (e) => sendMedia(e.target.files[0], 'video'));
-attachAudioInput.addEventListener('change', (e) => sendMedia(e.target.files[0], 'audio'));
+attachPhotoInput.addEventListener('change', (e) => sendMediaFiles(e.target.files, 'image'));
+attachVideoInput.addEventListener('change', (e) => sendMediaFiles(e.target.files, 'video'));
+attachAudioInput.addEventListener('change', (e) => sendMediaFiles(e.target.files, 'audio'));
 
-async function sendMedia(file, type){
-    if(!file || !currentChat) return;
-    showToast('Обработка...');
+async function sendMediaFiles(files, type){
+    if(!files || files.length === 0 || !currentChat) return;
+    showToast('Обработка медиа...');
+
     try {
-        let data = '';
-        if(type === 'image') data = await cib(file, 800, 0.6);
-        else data = await f2b(file);
+        const processedItems = [];
+        for(let i=0; i<files.length; i++){
+            const f = files[i];
+            let data = '';
+            if(type === 'image') data = await cib(f, 800, 0.6);
+            else data = await f2b(f);
 
-        if(data.length > 9000000){ showToast('Файл слишком большой'); return; }
+            if(data.length > 9000000){ showToast('Файл слишком большой'); continue; }
+            processedItems.push({ type: type === 'image' ? 'image' : 'video', data: data });
+        }
+
+        if(processedItems.length === 0) return;
 
         const sharedKey = await getChatEncryptionKey(chatKey);
-        const msg = { sender: userKey, type: type, data: data, timestamp: Date.now() };
-        const enc = await ed(sharedKey, JSON.stringify(msg));
+        let msg = {};
 
+        if(processedItems.length === 1){
+            msg = { sender: userKey, type: processedItems[0].type, data: processedItems[0].data, timestamp: Date.now() };
+        } else {
+            msg = { sender: userKey, type: 'collage', items: processedItems, timestamp: Date.now() };
+        }
+
+        const enc = await ed(sharedKey, JSON.stringify(msg));
         const mid = Date.now().toString();
         await db.ref(`chats/${chatKey}/messages/${mid}`).set({ data: enc });
 
         await db.ref(`userChats/${userKey}/${chatKey}`).set({ otherKey: currentChat.otherKey, lastMsg: Date.now(), unread: 0 });
         await db.ref(`userChats/${currentChat.otherKey}/${chatKey}`).set({ otherKey: userKey, lastMsg: Date.now(), unread: firebase.database.ServerValue.increment(1) });
         showToast('Отправлено!');
-    } catch(e) { showToast('Ошибка отправки'); }
+    } catch(e) { showToast('Ошибка отправки медиа'); }
 }
 
 // SEARCH USER
