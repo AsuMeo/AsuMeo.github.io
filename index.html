@@ -42,7 +42,7 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:-apple-sys
 .pin-save.saved svg{fill:var(--a);stroke:var(--a)}
 
 /* Bottom Nav */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:rgba(0,0,0,.92);backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-around;align-items:center;padding-bottom:env(safe-area-inset-bottom,0);z-index:100}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:rgba(0,0,0,.92);backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,.06);display:flex;justify-style:space-around;align-items:center;padding-bottom:env(safe-area-inset-bottom,0);z-index:100}
 .nav-item{width:52px;height:48px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:14px;transition:background .15s;position:relative}
 .nav-item:active{background:rgba(255,255,255,.06)}
 .nav-item svg{width:26px;height:26px;stroke:var(--t3);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:stroke .2s}
@@ -271,7 +271,7 @@ input[type="file"]{display:none!important}
 </div>
 
 <!-- Feed Area -->
-<div class="feed-wrap" id="feedWrap"><div class="feed" id="feed"></div><div class="empty" id="empty" style="display:none;"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg><p>Нет сохраненных пинов</p></div></div>
+<div class="feed-wrap" id="feedWrap"><div class="feed" id="feed"></div><div class="empty" id="empty" style="display:none;"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg><p>Нет пинов</p></div></div>
 
 <!-- Messenger Area -->
 <div class="messenger-wrap" id="messengerWrap">
@@ -290,7 +290,7 @@ input[type="file"]{display:none!important}
 <div class="profile-status" id="profileStatus" style="display:none;"><div class="profile-status-dot"></div><span>в сети</span></div>
 <div class="profile-bio" id="profileBio">Описание профиля</div>
 <div class="profile-stats"><div class="profile-stat"><div class="profile-stat-num" id="statPins">0</div><div class="profile-stat-label">пинов</div></div><div class="profile-stat"><div class="profile-stat-num" id="statSaved">0</div><div class="profile-stat-label">сохранено</div></div><div class="profile-stat"><div class="profile-stat-num" id="statViews">0</div><div class="profile-stat-label">просмотров</div></div></div>
-<div class="profile-buttons"><button class="profile-btn primary" id="editProfileBtn">Изменить</button><button class="profile-btn secondary" id="shareProfileBtn">Поделиться</button></div>
+<div class="profile-buttons"><button type="button" class="profile-btn primary" id="editProfileBtn">Изменить</button><button type="button" class="profile-btn secondary" id="shareProfileBtn">Поделиться</button></div>
 </div>
 <div class="profile-tabs"><div class="profile-tab active" data-ptab="created">Созданные</div><div class="profile-tab" data-ptab="saved">Сохранено</div></div>
 <div class="profile-feed" id="profileFeed"></div>
@@ -315,7 +315,7 @@ input[type="file"]{display:none!important}
 <input type="email" id="authEmail" placeholder="Email">
 <input type="password" id="authPass" placeholder="Пароль">
 <div class="error" id="authError"></div>
-<button id="authBtn">Войти</button>
+<button type="button" id="authBtn">Войти</button>
 <div class="switch" id="authSwitch">Нет аккаунта? <span>Регистрация</span></div>
 </div>
 </div>
@@ -342,7 +342,7 @@ input[type="file"]{display:none!important}
 <div class="back" id="viewerBack"><svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></div>
 <div class="viewer-actions">
 <div class="icon-btn" id="viewerShare"><svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></div>
-<button class="download-btn" id="viewerDownload">Скачать</button>
+<button type="button" class="download-btn" id="viewerDownload">Скачать</button>
 </div>
 </div>
 <div class="viewer-body">
@@ -356,7 +356,7 @@ input[type="file"]{display:none!important}
 <div class="viewer-author-user" id="viewerAuthorUser">@username</div>
 </div>
 </div>
-<button class="viewer-save-btn" id="viewerSaveBtn">Сохранить</button>
+<button type="button" class="viewer-save-btn" id="viewerSaveBtn">Сохранить</button>
 </div>
 <div class="viewer-title" id="viewerTitle"></div>
 <div class="viewer-desc" id="viewerDesc"></div>
@@ -380,7 +380,7 @@ input[type="file"]{display:none!important}
 <div class="chat-input-row">
 <div class="chat-attach" id="chatAttach"><svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></div>
 <textarea class="chat-input" id="chatInput" placeholder="Сообщение" rows="1"></textarea>
-<button class="chat-send" id="chatSend"><svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
+<button type="button" class="chat-send" id="chatSend"><svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
 </div>
 <div class="attach-menu" id="attachMenu">
 <div class="attach-item" id="attachPhoto"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><span>Фото</span></div>
@@ -419,7 +419,7 @@ const firebaseConfig={apiKey:"AIzaSyBm0mIvHVznIeF2PoFk6dtdaiT5r877wyA",authDomai
 firebase.initializeApp(firebaseConfig);
 const auth=firebase.auth(),db=firebase.database();
 
-let currentUser=null,userKey=null,pins=[],currentTab='for-you',currentPtab='created',currentScreen='home',uploadFile=null,isLogin=true,userPassword=localStorage.getItem('meow_pass')||'',currentProfile={},viewingPin=null,currentChat=null,chatKey=null,chatListener=null,typingTimer=null,typingRef=null,typingListeners={},chatOnlineRef=null,activeChatListRef=null,displayedProfileKey=null;
+let currentUser=null,userKey=null,pins=[],currentTab='for-you',currentPtab='created',currentScreen='home',uploadFile=null,isLogin=true,userPassword=localStorage.getItem('meow_pass')||'',currentProfile={},viewingPin=null,currentChat=null,chatKey=null,chatListener=null,typingTimer=null,typingRef=null,chatOnlineRef=null,displayedProfileKey=null,isOtherOnline=false;
 
 // UI Elements
 const loader=document.getElementById('loader'),authModal=document.getElementById('authModal'),authTitle=document.getElementById('authTitle'),authEmail=document.getElementById('authEmail'),authPass=document.getElementById('authPass'),authBtn=document.getElementById('authBtn'),authSwitch=document.getElementById('authSwitch'),authError=document.getElementById('authError'),feed=document.getElementById('feed'),feedWrap=document.getElementById('feedWrap'),empty=document.getElementById('empty'),homeHeader=document.getElementById('homeHeader'),messengerWrap=document.getElementById('messengerWrap'),chatListEl=document.getElementById('chatList'),chatSearchInput=document.getElementById('chatSearchInput'),profileWrap=document.getElementById('profileWrap'),uploadModal=document.getElementById('uploadModal'),uploadBtn=document.getElementById('uploadBtn'),fileInput=document.getElementById('fileInput'),uploadPreview=document.getElementById('uploadPreview'),uploadDone=document.getElementById('uploadDone'),uploadCancel=document.getElementById('uploadCancel'),uploadProgress=document.getElementById('uploadProgress'),uploadProgressBar=document.getElementById('uploadProgressBar'),uploadInfo=document.getElementById('uploadInfo'),uploadTitle=document.getElementById('uploadTitle'),uploadBio=document.getElementById('uploadBio');
@@ -428,188 +428,234 @@ const chatRoom=document.getElementById('chatRoom'),chatBack=document.getElementB
 const profileBanner=document.getElementById('profileBanner'),profileAvatar=document.getElementById('profileAvatar'),profileName=document.getElementById('profileName'),profileUsername=document.getElementById('profileUsername'),profileBio=document.getElementById('profileBio'),profileStatus=document.getElementById('profileStatus'),statPins=document.getElementById('statPins'),statSaved=document.getElementById('statSaved'),statViews=document.getElementById('statViews'),profileFeed=document.getElementById('profileFeed'),editProfileBtn=document.getElementById('editProfileBtn'),shareProfileBtn=document.getElementById('shareProfileBtn'),bannerEditBtn=document.getElementById('bannerEditBtn'),avatarEditBtn=document.getElementById('avatarEditBtn');
 const editModal=document.getElementById('editModal'),editCancel=document.getElementById('editCancel'),editSave=document.getElementById('editSave'),editBannerPreview=document.getElementById('editBannerPreview'),editAvatarPreview=document.getElementById('editAvatarPreview'),editBannerInput=document.getElementById('editBannerInput'),editAvatarInput=document.getElementById('editAvatarInput'),editName=document.getElementById('editName'),editUsername=document.getElementById('editUsername'),editBio=document.getElementById('editBio');
 
-// Safety Loader Timer
-setTimeout(()=>{ if(loader) loader.classList.add('hide'); }, 2500);
+// Safety Loader Hide
+setTimeout(()=>{ if(loader) loader.classList.add('hide'); }, 2000);
 
-// --- SHARED CHAT ENCRYPTION KEY ---
-// Standard PBKDF2 using chatKey as secret salt ensures both users get the same AES Key!
+// --- PBKDF2 + AES-GCM ENCRYPTION DERIVED FROM EMAIL + PASSWORD ---
+async function dk(e, p){
+    if(!e || !p) throw new Error("Missing auth credentials");
+    const en = new TextEncoder();
+    const km = await crypto.subtle.importKey('raw', en.encode(e + p), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey({
+        name: 'PBKDF2',
+        salt: en.encode('meow-salt-v2-2026'),
+        iterations: 100000,
+        hash: 'SHA-256'
+    }, km, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+}
+
+// SHARED CHAT KEY FOR MESSAGES
 async function getChatEncryptionKey(ck){
     const en = new TextEncoder();
     const km = await crypto.subtle.importKey('raw', en.encode(ck + '_meow_shared_secret'), 'PBKDF2', false, ['deriveKey']);
     return crypto.subtle.deriveKey({name:'PBKDF2', salt: en.encode('meow-chat-salt-2026'), iterations: 50000, hash:'SHA-256'}, km, {name:'AES-GCM', length:256}, false, ['encrypt','decrypt']);
 }
 
-// User-specific Encryption Key (for private saved pins)
-async function dk(e,p){
-    const en=new TextEncoder(),km=await crypto.subtle.importKey('raw',en.encode(e+p),'PBKDF2',false,['deriveKey']);
-    return crypto.subtle.deriveKey({name:'PBKDF2',salt:en.encode('meow-salt-v2-2026'),iterations:100000,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+async function ed(k, d){
+    const en = new TextEncoder();
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const e = await crypto.subtle.encrypt({name:'AES-GCM', iv}, k, en.encode(d));
+    const c = new Uint8Array(iv.length + e.byteLength);
+    c.set(iv);
+    c.set(new Uint8Array(e), iv.length);
+    let b = '';
+    for(let i=0; i<c.length; i++) b += String.fromCharCode(c[i]);
+    return btoa(b);
 }
 
-async function ed(k,d){const en=new TextEncoder(),iv=crypto.getRandomValues(new Uint8Array(12)),e=await crypto.subtle.encrypt({name:'AES-GCM',iv},k,en.encode(d)),c=new Uint8Array(iv.length+e.byteLength);c.set(iv);c.set(new Uint8Array(e),iv.length);let b='';for(let i=0;i<c.length;i++)b+=String.fromCharCode(c[i]);return btoa(b)}
-async function dd(k,b){const u=Uint8Array.from(atob(b),c=>c.charCodeAt(0)),iv=u.slice(0,12),d=u.slice(12),de=await crypto.subtle.decrypt({name:'AES-GCM',iv},k,d);return new TextDecoder().decode(de)}
+async function dd(k, b){
+    const u = Uint8Array.from(atob(b), c => c.charCodeAt(0));
+    const iv = u.slice(0, 12);
+    const d = u.slice(12);
+    const de = await crypto.subtle.decrypt({name:'AES-GCM', iv}, k, d);
+    return new TextDecoder().decode(de);
+}
 
-function cib(f,mw=700,q=0.55){return new Promise((res,rej)=>{const i=new Image();i.onload=()=>{const c=document.createElement('canvas');let w=i.width,h=i.height;if(w>mw){h=Math.round(h*mw/w);w=mw}c.width=w;c.height=h;const x=c.getContext('2d');x.fillStyle='#000';x.fillRect(0,0,w,h);x.drawImage(i,0,0,w,h);res(c.toDataURL('image/jpeg',q))};i.onerror=rej;i.src=URL.createObjectURL(f)})}
-function f2b(f){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(f)})}
+function cib(f, mw=800, q=0.6){
+    return new Promise((res, rej)=>{
+        const i = new Image();
+        i.onload = () => {
+            const c = document.createElement('canvas');
+            let w = i.width, h = i.height;
+            if(w > mw){ h = Math.round(h * mw / w); w = mw; }
+            c.width = w; c.height = h;
+            const x = c.getContext('2d');
+            x.fillStyle = '#000';
+            x.fillRect(0,0,w,h);
+            x.drawImage(i, 0, 0, w, h);
+            res(c.toDataURL('image/jpeg', q));
+        };
+        i.onerror = rej;
+        i.src = URL.createObjectURL(f);
+    });
+}
+
+function f2b(f){ return new Promise((res, rej)=>{ const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(f); }); }
 
 function ft(ts){
     if(!ts) return 'был(а) давно';
-    const d=new Date(ts),n=new Date(),df=Math.floor((n-d)/1000),pd=n=>n.toString().padStart(2,'0');
-    if(df<60)return'только что';
-    if(df<3600)return Math.floor(df/60)+' мин назад';
-    if(d.toDateString()===n.toDateString())return'сегодня в '+pd(d.getHours())+':'+pd(d.getMinutes());
-    const y=new Date(n);y.setDate(y.getDate()-1);
-    if(d.toDateString()===y.toDateString())return'вчера в '+pd(d.getHours())+':'+pd(d.getMinutes());
-    const mo=['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
-    return d.getDate()+' '+mo[d.getMonth()]+' в '+pd(d.getHours())+':'+pd(d.getMinutes());
+    const d = new Date(ts), n = new Date(), df = Math.floor((n-d)/1000), pd = n => n.toString().padStart(2,'0');
+    if(df < 60) return 'только что';
+    if(df < 3600) return Math.floor(df/60) + ' мин назад';
+    if(d.toDateString() === n.toDateString()) return 'сегодня в ' + pd(d.getHours()) + ':' + pd(d.getMinutes());
+    const y = new Date(n); y.setDate(y.getDate() - 1);
+    if(d.toDateString() === y.toDateString()) return 'вчера в ' + pd(d.getHours()) + ':' + pd(d.getMinutes());
+    const mo = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
+    return d.getDate() + ' ' + mo[d.getMonth()] + ' в ' + pd(d.getHours()) + ':' + pd(d.getMinutes());
 }
-function fmt(ts){const d=new Date(ts);return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0')}
-function fdd(ts){const d=new Date(ts),n=new Date();if(d.toDateString()===n.toDateString())return'Сегодня';const y=new Date(n);y.setDate(y.getDate()-1);if(d.toDateString()===y.toDateString())return'Вчера';const mo=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];return d.getDate()+' '+mo[d.getMonth()]}
 
-// --- AUTH LOGIC ---
-authBtn.addEventListener('click',async()=>{
-    const em=authEmail.value.trim(),ps=authPass.value.trim();
-    if(!em||!ps){showAuthError('Введите email и пароль');return}
-    authBtn.disabled=true;authBtn.textContent='...';
-    try{
-        if(isLogin){await auth.signInWithEmailAndPassword(em,ps)}
-        else{await auth.createUserWithEmailAndPassword(em,ps)}
-        userPassword=ps;
-        localStorage.setItem('meow_pass',ps);
+function fmt(ts){ const d = new Date(ts); return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0'); }
+function fdd(ts){ const d = new Date(ts), n = new Date(); if(d.toDateString() === n.toDateString()) return 'Сегодня'; const y = new Date(n); y.setDate(y.getDate()-1); if(d.toDateString() === y.toDateString()) return 'Вчера'; const mo = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря']; return d.getDate() + ' ' + mo[d.getMonth()]; }
+
+// --- AUTHENTICATION SYSTEM ---
+authBtn.addEventListener('click', async () => {
+    const em = authEmail.value.trim(), ps = authPass.value.trim();
+    if(!em || !ps){ showAuthError('Введите email и пароль'); return; }
+    authBtn.disabled = true; authBtn.textContent = '...';
+    try {
+        if(isLogin){ await auth.signInWithEmailAndPassword(em, ps); }
+        else { await auth.createUserWithEmailAndPassword(em, ps); }
+        userPassword = ps;
+        localStorage.setItem('meow_pass', ps);
         authModal.classList.remove('show');
-    }catch(e){showAuthError(e.message)}
-    finally{authBtn.disabled=false;authBtn.textContent=isLogin?'Войти':'Зарегистрироваться';}
+    } catch(e) { showAuthError(e.message); }
+    finally { authBtn.disabled = false; authBtn.textContent = isLogin ? 'Войти' : 'Зарегистрироваться'; }
 });
 
-authSwitch.addEventListener('click',()=>{isLogin=!isLogin;authTitle.textContent=isLogin?'Вход':'Регистрация';authBtn.textContent=isLogin?'Войти':'Зарегистрироваться';authSwitch.innerHTML=isLogin?'Нет аккаунта? <span>Регистрация</span>':'Есть аккаунт? <span>Вход</span>';authError.style.display='none'});
-function showAuthError(m){authError.textContent=m;authError.style.display='block'}
+authSwitch.addEventListener('click', () => {
+    isLogin = !isLogin;
+    authTitle.textContent = isLogin ? 'Вход' : 'Регистрация';
+    authBtn.textContent = isLogin ? 'Войти' : 'Зарегистрироваться';
+    authSwitch.innerHTML = isLogin ? 'Нет аккаунта? <span>Регистрация</span>' : 'Есть аккаунт? <span>Вход</span>';
+    authError.style.display = 'none';
+});
 
-auth.onAuthStateChanged(async(u)=>{
+function showAuthError(m){ authError.textContent = m; authError.style.display = 'block'; }
+
+auth.onAuthStateChanged(async (u) => {
     try {
         if(u){
-            currentUser=u;
-            userKey=u.uid;
+            currentUser = u;
+            userKey = u.uid;
             authModal.classList.remove('show');
-            navAvatar.style.display='block';
-            profileIcon.style.display='none';
+            navAvatar.style.display = 'block';
+            profileIcon.style.display = 'none';
 
             setupOnline();
             await initProfile();
-            await loadGlobalFeed();
+            await loadEncryptedUserPins();
             loadChatList();
         } else {
             authModal.classList.add('show');
-            navAvatar.style.display='none';
-            profileIcon.style.display='block';
+            navAvatar.style.display = 'none';
+            profileIcon.style.display = 'block';
         }
     } catch(err) {
-        console.error("Auth state error:", err);
+        console.error("Auth init err:", err);
     } finally {
         if(loader) loader.classList.add('hide');
     }
 });
 
-// --- TELEGRAM-LIKE SMART PRESENCE (ONLINE/OFFLINE) ---
+// --- SMART ONLINE / OFFLINE PRESENCE ---
 function setupOnline(){
-    if(!currentUser||!userKey)return;
-    const pr=db.ref('presence/'+userKey);
-    const cr=db.ref('.info/connected');
+    if(!currentUser || !userKey) return;
+    const pr = db.ref('presence/' + userKey);
+    const cr = db.ref('.info/connected');
 
-    cr.on('value',s=>{
+    cr.on('value', s => {
         if(s.val()){
-            pr.set({online:true,lastSeen:Date.now()});
-            pr.onDisconnect().set({online:false,lastSeen:Date.now()});
+            pr.set({ online: true, lastSeen: Date.now() });
+            pr.onDisconnect().set({ online: false, lastSeen: Date.now() });
         }
     });
 
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'hidden') {
-            pr.set({online:false, lastSeen:Date.now()});
+            pr.set({ online: false, lastSeen: Date.now() });
         } else {
-            pr.set({online:true, lastSeen:Date.now()});
+            pr.set({ online: true, lastSeen: Date.now() });
         }
     });
 }
 
-function getOnline(uk,cb){
-    const r=db.ref('presence/'+uk);
-    r.on('value',s=>{
-        const v=s.val();
-        if(!v){cb('offline',null);return}
-        cb(v.online?'online':'offline',v.lastSeen);
+function getOnline(uk, cb){
+    const r = db.ref('presence/' + uk);
+    r.on('value', s => {
+        const v = s.val();
+        if(!v){ cb('offline', null); return; }
+        cb(v.online ? 'online' : 'offline', v.lastSeen);
     });
     return r;
 }
 
-function fos(s,ls){
-    if(s==='online') return 'в сети';
-    return 'был(а) '+ft(ls);
+function fos(s, ls){
+    if(s === 'online') return 'в сети';
+    return 'был(а) ' + ft(ls);
 }
 
-// --- PROFILE SYSTEM WITH RTDB SAVING & UNIQUE USERNAME CHECK ---
+// --- PROFILE SYSTEM & UNIQUE USERNAME CHECK ---
 async function initProfile(){
-    if(!currentUser||!userKey)return;
+    if(!currentUser || !userKey) return;
     try {
-        const s=await db.ref('profiles/'+userKey).once('value');
-        currentProfile=s.val()||{};
+        const s = await db.ref('profiles/' + userKey).once('value');
+        currentProfile = s.val() || {};
         if(!currentProfile.username){
-            currentProfile={
-                name:currentUser.displayName||'Имя',
-                username:'user_'+Math.random().toString(36).slice(2,8),
-                bio:'',
-                avatar:'https://api.dicebear.com/7.x/avataaars/svg?seed='+(currentUser.uid),
-                banner:'',
-                views:0
+            currentProfile = {
+                name: currentUser.displayName || 'Имя',
+                username: 'user_' + Math.random().toString(36).slice(2,8),
+                bio: '',
+                avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + userKey,
+                banner: '',
+                views: 0
             };
-            await db.ref('profiles/'+userKey).set(currentProfile);
+            await db.ref('profiles/' + userKey).set(currentProfile);
         }
         displayedProfileKey = userKey;
         renderProfile(currentProfile, true);
-    } catch(e) {
-        console.error("initProfile error:", e);
-    }
+    } catch(e) { console.error("initProfile err:", e); }
 }
 
 function renderProfile(profile, isOwn = false){
-    profileName.textContent=profile.name||'Имя';
-    profileUsername.textContent='@'+(profile.username||'username');
-    profileBio.textContent=profile.bio||'';
-    profileBio.style.display=profile.bio?'block':'none';
-    profileAvatar.src=profile.avatar||('https://api.dicebear.com/7.x/avataaars/svg?seed='+userKey);
+    profileName.textContent = profile.name || 'Имя';
+    profileUsername.textContent = '@' + (profile.username || 'username');
+    profileBio.textContent = profile.bio || '';
+    profileBio.style.display = profile.bio ? 'block' : 'none';
+    profileAvatar.src = profile.avatar || ('https://api.dicebear.com/7.x/avataaars/svg?seed=' + userKey);
 
     if(isOwn){
-        navAvatar.src=profile.avatar||('https://api.dicebear.com/7.x/avataaars/svg?seed='+userKey);
-        editProfileBtn.style.display='block';
-        bannerEditBtn.style.display='flex';
-        avatarEditBtn.style.display='flex';
+        navAvatar.src = profile.avatar || ('https://api.dicebear.com/7.x/avataaars/svg?seed=' + userKey);
+        editProfileBtn.style.display = 'block';
+        bannerEditBtn.style.display = 'flex';
+        avatarEditBtn.style.display = 'flex';
     } else {
-        editProfileBtn.style.display='none';
-        bannerEditBtn.style.display='none';
-        avatarEditBtn.style.display='none';
+        editProfileBtn.style.display = 'none';
+        bannerEditBtn.style.display = 'none';
+        avatarEditBtn.style.display = 'none';
     }
 
-    const bi=profileBanner.querySelector('img'); if(bi)bi.remove();
+    const bi = profileBanner.querySelector('img'); if(bi) bi.remove();
     if(profile.banner){
-        const i=document.createElement('img');i.src=profile.banner;
-        profileBanner.insertBefore(i,profileBanner.firstChild);
+        const i = document.createElement('img'); i.src = profile.banner;
+        profileBanner.insertBefore(i, profileBanner.firstChild);
     }
 
-    statPins.textContent=pins.filter(p=>p.authorKey===(isOwn?userKey:displayedProfileKey)).length;
-    statSaved.textContent=pins.filter(p=>p.liked).length;
-    statViews.textContent=profile.views||0;
+    statPins.textContent = pins.filter(p => p.authorKey === (isOwn ? userKey : displayedProfileKey)).length;
+    statSaved.textContent = pins.filter(p => p.liked).length;
+    statViews.textContent = profile.views || 0;
 
-    renderProfileFeed(isOwn?userKey:displayedProfileKey);
+    renderProfileFeed(isOwn ? userKey : displayedProfileKey);
 }
 
 function renderProfileFeed(targetUserKey){
-    const f=currentPtab==='created'?pins.filter(p=>p.authorKey===targetUserKey):pins.filter(p=>p.liked);
-    if(f.length===0){
-        profileFeed.innerHTML='<div class="empty" style="padding:40px 20px;"><p>Нет пинов</p></div>';
+    const f = currentPtab === 'created' ? pins.filter(p => p.authorKey === targetUserKey) : pins.filter(p => p.liked);
+    if(f.length === 0){
+        profileFeed.innerHTML = '<div class="empty" style="padding:40px 20px;"><p>Нет пинов</p></div>';
         return;
     }
-    profileFeed.innerHTML=f.map(p=>'<div class="pin" onclick="openViewer(\''+p.id+'\')"><img src="'+p.imageBase64+'" loading="lazy"></div>').join('');
+    profileFeed.innerHTML = f.map(p => '<div class="pin" onclick="openViewer(\''+p.id+'\')"><img src="'+p.imageBase64+'" loading="lazy"></div>').join('');
 }
 
-// Opening Other User's Profile
 async function viewUserProfile(targetKey){
     if(!targetKey) return;
     if(targetKey === userKey){
@@ -627,76 +673,62 @@ async function viewUserProfile(targetKey){
         displayedProfileKey = targetKey;
         showScreen('profile');
         renderProfile(prof, false);
-    } catch(e) {
-        showToast('Ошибка загрузки');
-    }
+    } catch(e) { showToast('Ошибка загрузки'); }
 }
 
-// EDIT PROFILE & WORKING COVER BUTTON
+// EDIT PROFILE MODAL
 editProfileBtn.addEventListener('click', openEditModal);
-bannerEditBtn.addEventListener('click', (e)=>{ e.stopPropagation(); editBannerInput.click(); });
-avatarEditBtn.addEventListener('click', (e)=>{ e.stopPropagation(); editAvatarInput.click(); });
+bannerEditBtn.addEventListener('click', (e) => { e.stopPropagation(); editBannerInput.click(); });
+avatarEditBtn.addEventListener('click', (e) => { e.stopPropagation(); editAvatarInput.click(); });
 
 function openEditModal(){
-    editName.value=currentProfile.name||'';
-    editUsername.value=currentProfile.username||'';
-    editBio.value=currentProfile.bio||'';
+    editName.value = currentProfile.name || '';
+    editUsername.value = currentProfile.username || '';
+    editBio.value = currentProfile.bio || '';
 
-    if(currentProfile.banner){
-        editBannerPreview.src=currentProfile.banner;
-        editBannerPreview.style.display='block';
-    } else {
-        editBannerPreview.style.display='none';
-    }
+    if(currentProfile.banner){ editBannerPreview.src = currentProfile.banner; editBannerPreview.style.display = 'block'; }
+    else { editBannerPreview.style.display = 'none'; }
 
-    if(currentProfile.avatar){
-        editAvatarPreview.src=currentProfile.avatar;
-        editAvatarPreview.style.display='block';
-    } else {
-        editAvatarPreview.style.display='none';
-    }
+    if(currentProfile.avatar){ editAvatarPreview.src = currentProfile.avatar; editAvatarPreview.style.display = 'block'; }
+    else { editAvatarPreview.style.display = 'none'; }
 
     editModal.classList.add('show');
 }
 
-editBannerPreview.addEventListener('click',()=>editBannerInput.click());
-editAvatarPreview.addEventListener('click',()=>editAvatarInput.click());
+editBannerPreview.addEventListener('click', () => editBannerInput.click());
+editAvatarPreview.addEventListener('click', () => editAvatarInput.click());
 
-editBannerInput.addEventListener('change',async(e)=>{
-    const f=e.target.files[0]; if(!f)return;
-    const b=await cib(f,900,0.65);
-    editBannerPreview.src=b;
-    editBannerPreview.style.display='block';
+editBannerInput.addEventListener('change', async (e) => {
+    const f = e.target.files[0]; if(!f) return;
+    const b = await cib(f, 900, 0.65);
+    editBannerPreview.src = b; editBannerPreview.style.display = 'block';
 });
 
-editAvatarInput.addEventListener('change',async(e)=>{
-    const f=e.target.files[0]; if(!f)return;
-    const b=await cib(f,300,0.7);
-    editAvatarPreview.src=b;
-    editAvatarPreview.style.display='block';
+editAvatarInput.addEventListener('change', async (e) => {
+    const f = e.target.files[0]; if(!f) return;
+    const b = await cib(f, 300, 0.7);
+    editAvatarPreview.src = b; editAvatarPreview.style.display = 'block';
 });
 
-editCancel.addEventListener('click',()=>editModal.classList.remove('show'));
+editCancel.addEventListener('click', () => editModal.classList.remove('show'));
 
-// SAVE PROFILE WITH UNIQUE USERNAME CHECK IN RTDB
-editSave.addEventListener('click',async()=>{
-    const n=editName.value.trim();
-    const u=editUsername.value.trim().toLowerCase().replace(/[^a-z0-9_]/g,'');
-    const b=editBio.value.trim();
+editSave.addEventListener('click', async () => {
+    const n = editName.value.trim();
+    const u = editUsername.value.trim().toLowerCase().replace(/[^a-z0-9_]/g,'');
+    const b = editBio.value.trim();
 
-    if(!n){showToast('Введите имя');return}
-    if(!u||u.length<3){showToast('Юзернейм от 3 символов');return}
+    if(!n){ showToast('Введите имя'); return; }
+    if(!u || u.length < 3){ showToast('Юзернейм от 3 символов'); return; }
 
-    editSave.textContent='Сохранение...';
+    editSave.textContent = 'Сохранение...';
     try {
-        // UNIQUE USERNAME CHECK IN RTDB
         const us = await db.ref('profiles').once('value');
-        const allProfiles = us.val()||{};
+        const allProfiles = us.val() || {};
 
         for(const key in allProfiles){
             if(key !== userKey && allProfiles[key].username === u){
-                showToast('❌ Юзернейм @'+u+' уже занят!');
-                editSave.textContent='Сохранить';
+                showToast('❌ Юзернейм @' + u + ' уже занят!');
+                editSave.textContent = 'Сохранить';
                 return;
             }
         }
@@ -711,88 +743,104 @@ editSave.addEventListener('click',async()=>{
 
         editModal.classList.remove('show');
         renderProfile(currentProfile, true);
-        showToast('Профиль успешно сохранен!');
-    } catch(e) {
-        showToast('Ошибка при сохранении');
-    } finally {
-        editSave.textContent='Сохранить';
-    }
+        showToast('Профиль сохранен!');
+    } catch(e) { showToast('Ошибка сохранения'); }
+    finally { editSave.textContent = 'Сохранить'; }
 });
 
-// --- GLOBAL PINS & PINTEREST FEED ---
-async function loadGlobalFeed(){
+// --- ENCRYPTED PINS SYSTEM (PBKDF2 Derived from Email + Password) ---
+async function loadEncryptedUserPins(){
+    if(!currentUser) return;
+    if(!userPassword){ renderPins(); return; }
+
     try {
-        const s = await db.ref('publicPins').once('value');
+        const k = await dk(currentUser.email, userPassword);
+        const s = await db.ref('pins/' + userKey).once('value');
         const d = s.val() || {};
+
         pins = [];
         for(const id in d){
-            pins.push({id, ...d[id]});
+            try {
+                const de = await dd(k, d[id].data);
+                pins.push({ id, ...JSON.parse(de) });
+            } catch(e) {
+                console.log("Pin decrypt err:", e);
+            }
         }
-        pins.sort((a,b)=>b.timestamp-a.timestamp);
+
+        // Also fetch public shared pins
+        const pubSnap = await db.ref('publicPins').once('value');
+        const pubData = pubSnap.val() || {};
+        for(const id in pubData){
+            if(!pins.some(p => p.id === id)){
+                pins.push({ id, ...pubData[id] });
+            }
+        }
+
+        pins.sort((a,b) => b.timestamp - a.timestamp);
         renderPins();
+        renderProfile(currentProfile, true);
     } catch(e) {
-        console.error("Feed err:", e);
+        console.error("loadEncryptedUserPins err:", e);
     }
 }
 
 function renderPins(){
-    const f=currentTab==='for-you'?pins:pins.filter(p=>p.liked);
-    if(f.length===0){feed.innerHTML='';empty.style.display='block';return}
-    empty.style.display='none';
+    const f = currentTab === 'for-you' ? pins : pins.filter(p => p.liked);
+    if(f.length === 0){ feed.innerHTML = ''; empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
 
-    feed.innerHTML=f.map(p=>`
+    feed.innerHTML = f.map(p => `
         <div class="pin" onclick="openViewer('${p.id}')">
             <img src="${p.imageBase64}" loading="lazy">
             <div class="pin-info-mini">
-                <div class="pin-title-mini">${esc(p.title || 'Без названия')}</div>
+                <div class="pin-title-mini">${esc(p.title || 'Пин')}</div>
                 <div class="pin-author-mini">
-                    <img src="${p.authorAvatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed='+p.authorKey}">
+                    <img src="${p.authorAvatar || ('https://api.dicebear.com/7.x/avataaars/svg?seed=' + p.authorKey)}">
                     <span>${esc(p.authorName || 'Автор')}</span>
                 </div>
             </div>
             <div class="pin-overlay"></div>
-            <div class="pin-save ${p.liked?'saved':''}" onclick="toggleLike('${p.id}',event)">
+            <div class="pin-save ${p.liked ? 'saved' : ''}" onclick="toggleLike('${p.id}',event)">
                 <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
             </div>
         </div>
     `).join('');
 }
 
-// UPLOAD PIN WITH TITLE & DESCRIPTION
+// UPLOAD PIN WITH AES-GCM CLOUD ENCRYPTION
 addBtn.addEventListener('click', () => {
     if(!currentUser){ showToast('Войдите в аккаунт'); return; }
+    if(!userPassword){ showToast('Введите пароль повторно'); authModal.classList.add('show'); return; }
     uploadModal.classList.add('show');
 });
 
-uploadBtn.addEventListener('click',()=>fileInput.click());
-fileInput.addEventListener('change',async(e)=>{
-    const f=e.target.files[0]; if(!f)return;
-    uploadFile=f;
-    uploadPreview.src=URL.createObjectURL(f);
-    uploadPreview.style.display='block';
-    uploadBtn.style.display='none';
+uploadBtn.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', (e) => {
+    const f = e.target.files[0]; if(!f) return;
+    uploadFile = f;
+    uploadPreview.src = URL.createObjectURL(f);
+    uploadPreview.style.display = 'block';
+    uploadBtn.style.display = 'none';
     uploadDone.classList.add('active');
-    uploadInfo.style.display='block';
-    uploadInfo.textContent=(f.size/1024/1024).toFixed(2)+' MB';
+    uploadInfo.style.display = 'block';
+    uploadInfo.textContent = (f.size/1024/1024).toFixed(2) + ' MB';
 });
 
-uploadCancel.addEventListener('click',resetUpload);
+uploadCancel.addEventListener('click', resetUpload);
 
-uploadDone.addEventListener('click',async()=>{
-    if(!uploadFile||!currentUser)return;
-    uploadDone.textContent='...';
+uploadDone.addEventListener('click', async () => {
+    if(!uploadFile || !currentUser || !userPassword) return;
+    uploadDone.textContent = '...';
     uploadDone.classList.remove('active');
-    uploadProgress.style.display='block';
-    uploadProgressBar.style.width='20%';
+    uploadProgress.style.display = 'block';
+    uploadProgressBar.style.width = '20%';
 
     try {
-        uploadInfo.textContent='Обработка снимка...';
+        uploadInfo.textContent = 'Шифрование...';
         const b64 = await cib(uploadFile, 800, 0.6);
+        const k = await dk(currentUser.email, userPassword);
 
-        uploadProgressBar.style.width='60%';
-        uploadInfo.textContent='Публикация...';
-
-        const pid = Date.now().toString();
         const pinData = {
             imageBase64: b64,
             title: uploadTitle.value.trim() || 'Без названия',
@@ -804,30 +852,40 @@ uploadDone.addEventListener('click',async()=>{
             timestamp: Date.now()
         };
 
-        await db.ref('publicPins/' + pid).set(pinData);
-        uploadProgressBar.style.width='100%';
+        const encData = await ed(k, JSON.stringify(pinData));
+        const pid = Date.now().toString();
 
-        showToast('Пин опубликован!');
+        uploadProgressBar.style.width = '70%';
+        uploadInfo.textContent = 'Сохранение в облако...';
+
+        // Save privately encrypted pin
+        await db.ref('pins/' + userKey + '/' + pid).set({ data: encData });
+
+        // Save public feed pin
+        await db.ref('publicPins/' + pid).set(pinData);
+
+        uploadProgressBar.style.width = '100%';
+        showToast('🔒 Пин зашифрован и опубликован!');
         resetUpload();
-        await loadGlobalFeed();
+        await loadEncryptedUserPins();
     } catch(e) {
         showToast('Ошибка загрузки');
-        uploadDone.textContent='Готово';
+        uploadDone.textContent = 'Готово';
     }
 });
 
 function resetUpload(){
     uploadModal.classList.remove('show');
-    uploadFile=null; fileInput.value='';
-    uploadPreview.style.display='none';
-    uploadBtn.style.display='flex';
-    uploadTitle.value=''; uploadBio.value='';
-    uploadDone.textContent='Готово'; uploadDone.classList.remove('active');
-    uploadProgress.style.display='none'; uploadProgressBar.style.width='0%';
-    uploadInfo.style.display='none';
+    uploadFile = null; fileInput.value = '';
+    uploadPreview.style.display = 'none';
+    uploadBtn.style.display = 'flex';
+    uploadTitle.value = ''; uploadBio.value = '';
+    uploadDone.textContent = 'Готово'; uploadDone.classList.remove('active');
+    uploadProgress.style.display = 'none'; uploadProgressBar.style.width = '0%';
+    uploadInfo.style.display = 'none';
 }
 
-// VIEW PIN (PINTEREST STYLE DETAILED VIEWER)
+// PIN VIEWER
 window.openViewer = (id) => {
     const p = pins.find(x => x.id === id);
     if(!p) return;
@@ -853,7 +911,7 @@ window.openViewer = (id) => {
     viewer.classList.add('show');
 };
 
-viewerBack.addEventListener('click',()=>viewer.classList.remove('show'));
+viewerBack.addEventListener('click', () => viewer.classList.remove('show'));
 viewerDownload.addEventListener('click', () => {
     if(!viewingPin) return;
     const a = document.createElement('a');
@@ -876,64 +934,64 @@ window.toggleLike = async (id, e) => {
     showToast(p.liked ? 'Сохранено в профиль' : 'Удалено из сохраненных');
 };
 
-// --- SCREEN SWITCHING ---
+// NAVIGATION & SCREENS
 function showScreen(sc){
-    currentScreen=sc;
-    if(sc==='home'){
-        homeHeader.style.display='flex';
-        feedWrap.style.display='block';
+    currentScreen = sc;
+    if(sc === 'home'){
+        homeHeader.style.display = 'flex';
+        feedWrap.style.display = 'block';
         messengerWrap.classList.remove('show');
         profileWrap.classList.remove('show');
-    }else if(sc==='messages'){
-        homeHeader.style.display='none';
-        feedWrap.style.display='none';
+    } else if(sc === 'messages'){
+        homeHeader.style.display = 'none';
+        feedWrap.style.display = 'none';
         messengerWrap.classList.add('show');
         profileWrap.classList.remove('show');
         loadChatList();
-    }else if(sc==='profile'){
-        homeHeader.style.display='none';
-        feedWrap.style.display='none';
+    } else if(sc === 'profile'){
+        homeHeader.style.display = 'none';
+        feedWrap.style.display = 'none';
         messengerWrap.classList.remove('show');
         profileWrap.classList.add('show');
     }
 }
 
-document.querySelectorAll('.nav-item[data-nav]').forEach(n=>{
-    n.addEventListener('click',()=>{
-        document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+document.querySelectorAll('.nav-item[data-nav]').forEach(n => {
+    n.addEventListener('click', () => {
+        document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
         n.classList.add('active');
-        const nv=n.dataset.nav;
-        if(nv==='home') showScreen('home');
-        if(nv==='profile') { displayedProfileKey = userKey; renderProfile(currentProfile, true); showScreen('profile'); }
-        if(nv==='search') showToast('Поиск скоро...');
-        if(nv==='messages') showScreen('messages');
+        const nv = n.dataset.nav;
+        if(nv === 'home') showScreen('home');
+        if(nv === 'profile'){ displayedProfileKey = userKey; renderProfile(currentProfile, true); showScreen('profile'); }
+        if(nv === 'search') showToast('Поиск скоро...');
+        if(nv === 'messages') showScreen('messages');
     });
 });
 
-document.querySelectorAll('.tab').forEach(t=>{
-    t.addEventListener('click',()=>{
-        document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
         t.classList.add('active');
-        currentTab=t.dataset.tab;
+        currentTab = t.dataset.tab;
         renderPins();
     });
 });
 
-document.querySelectorAll('.profile-tab').forEach(t=>{
-    t.addEventListener('click',()=>{
-        document.querySelectorAll('.profile-tab').forEach(x=>x.classList.remove('active'));
+document.querySelectorAll('.profile-tab').forEach(t => {
+    t.addEventListener('click', () => {
+        document.querySelectorAll('.profile-tab').forEach(x => x.classList.remove('active'));
         t.classList.add('active');
-        currentPtab=t.dataset.ptab;
+        currentPtab = t.dataset.ptab;
         renderProfileFeed(displayedProfileKey);
     });
 });
 
-// ===== REALTIME MESSENGER (FIXED RECIPIENT MESSAGES, BLURRED PREVIEWS & REALTIME TYPING) =====
-function gck(u1,u2){ return u1 < u2 ? u1+'_'+u2 : u2+'_'+u1; }
+// ===== REALTIME TELEGRAM MESSENGER =====
+function gck(u1, u2){ return u1 < u2 ? u1 + '_' + u2 : u2 + '_' + u1; }
 
 async function loadChatList(){
-    if(!currentUser||!userKey)return;
-    chatListEl.innerHTML='<div class="empty" style="padding:40px 20px;"><p>Загрузка чатов...</p></div>';
+    if(!currentUser || !userKey) return;
+    chatListEl.innerHTML = '<div class="empty" style="padding:40px 20px;"><p>Загрузка диалогов...</p></div>';
 
     try {
         const s = await db.ref('userChats/' + userKey).once('value');
@@ -945,9 +1003,8 @@ async function loadChatList(){
             if(!cd.otherKey) continue;
 
             const ps = await db.ref('profiles/' + cd.otherKey).once('value');
-            const p = ps.val() || {name:'Пользователь', username:'unknown', avatar:''};
+            const p = ps.val() || { name: 'Пользователь', username: 'unknown', avatar: '' };
 
-            // Fetch last message
             const ms = await db.ref('chats/' + ck + '/messages').orderByKey().limitToLast(1).once('value');
             const mv = ms.val();
             let lp = '', lt = '', isPhoto = false, photoData = '';
@@ -960,19 +1017,17 @@ async function loadChatList(){
                     const de = await dd(sharedKey, md.data);
                     const dj = JSON.parse(de);
 
-                    if(dj.type==='text') lp = dj.text;
-                    else if(dj.type==='image'){
+                    if(dj.type === 'text') lp = dj.text;
+                    else if(dj.type === 'image'){
                         lp = 'Фото';
                         isPhoto = true;
                         photoData = dj.data;
                     }
-                    else if(dj.type==='video') lp = '📹 Видео';
-                    else if(dj.type==='audio') lp = '🎵 Аудио';
+                    else if(dj.type === 'video') lp = '📹 Видео';
+                    else if(dj.type === 'audio') lp = '🎵 Аудио';
 
                     lt = ft(dj.timestamp);
-                } catch(e) {
-                    lp = 'Сообщение';
-                }
+                } catch(e) { lp = 'Сообщение'; }
             }
 
             ca.push({
@@ -989,7 +1044,7 @@ async function loadChatList(){
             });
         }
 
-        ca.sort((a,b)=>b.key.localeCompare(a.key));
+        ca.sort((a,b) => b.key.localeCompare(a.key));
 
         if(ca.length === 0){
             chatListEl.innerHTML = '<div class="empty" style="padding:60px 20px;"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><p>Нет диалогов</p><div class="empty-sub">Найдите пользователя по юзернейму</div></div>';
@@ -998,7 +1053,7 @@ async function loadChatList(){
 
         chatListEl.innerHTML = ca.map(c => `
             <div class="chat-item" onclick="openChat('${c.otherKey}','${esc(c.name)}','${c.avatar || ''}','${esc(c.username)}')">
-                <img class="chat-item-avatar" src="${c.avatar || ('https://api.dicebear.com/7.x/avataaars/svg?seed='+c.otherKey)}" onclick="event.stopPropagation(); viewUserProfile('${c.otherKey}')">
+                <img class="chat-item-avatar" src="${c.avatar || ('https://api.dicebear.com/7.x/avataaars/svg?seed=' + c.otherKey)}" onclick="event.stopPropagation(); viewUserProfile('${c.otherKey}')">
                 <div class="chat-item-info">
                     <div class="chat-item-name">${esc(c.name)}</div>
                     <div class="chat-item-preview" id="preview_${c.key}">
@@ -1013,13 +1068,13 @@ async function loadChatList(){
             </div>
         `).join('');
 
-        // Attach Realtime Typing listeners for chat list items
+        // Typing Status Listeners for Dialog List
         ca.forEach(c => {
             db.ref(`typing/${c.key}/${c.otherKey}`).on('value', snap => {
-                const isTyping = snap.val();
+                const val = snap.val();
                 const pEl = document.getElementById(`preview_${c.key}`);
                 if(pEl){
-                    if(isTyping){
+                    if(val && (Date.now() - val < 2500)){
                         pEl.classList.add('typing');
                         pEl.innerHTML = `<span>печатает...</span>`;
                     } else {
@@ -1036,7 +1091,7 @@ async function loadChatList(){
     }
 }
 
-// OPEN CHAT ROOM
+// OPEN CHAT ROOM WITH INSTANT REALTIME MESSAGES
 window.openChat = async (ouk, oname, oavatar, ouname) => {
     if(!currentUser) return;
     chatKey = gck(userKey, ouk);
@@ -1047,66 +1102,53 @@ window.openChat = async (ouk, oname, oavatar, ouname) => {
     chatMessages.innerHTML = '';
     chatRoom.classList.add('show');
 
-    // Avatar / Name click opens Profile
     chatRoomAvatar.onclick = () => viewUserProfile(ouk);
     chatRoomProfileClick.onclick = () => viewUserProfile(ouk);
 
-    // Online presence listener
+    // Online Status
     if(chatOnlineRef) chatOnlineRef.off();
     chatOnlineRef = getOnline(ouk, (s, ls) => {
-        chatRoomStatus.textContent = fos(s, ls);
-        chatRoomStatus.classList.toggle('online', s === 'online');
+        isOtherOnline = (s === 'online');
+        if(!isOtherOnline){
+            chatRoomStatus.classList.remove('typing');
+            chatRoomStatus.textContent = fos(s, ls);
+            chatRoomStatus.classList.remove('online');
+        } else {
+            chatRoomStatus.textContent = 'в сети';
+            chatRoomStatus.classList.add('online');
+        }
     });
 
-    // Typing listener in Header (Telegram style)
+    // Realtime Typing Listener for Header
     if(typingRef) typingRef.off();
     typingRef = db.ref(`typing/${chatKey}/${ouk}`);
     typingRef.on('value', snap => {
-        if(snap.val()){
+        const val = snap.val();
+        if(isOtherOnline && val && (Date.now() - val < 2500)){
             chatRoomStatus.textContent = 'печатает...';
             chatRoomStatus.classList.add('typing');
         } else {
             chatRoomStatus.classList.remove('typing');
-            if(chatOnlineRef) getOnline(ouk, (s, ls) => {
-                chatRoomStatus.textContent = fos(s, ls);
-                chatRoomStatus.classList.toggle('online', s === 'online');
-            });
+            if(isOtherOnline){
+                chatRoomStatus.textContent = 'в сети';
+                chatRoomStatus.classList.add('online');
+            }
         }
     });
 
-    // Reset unread count
-    try { await db.ref(`userChats/${userKey}/${chatKey}`).update({unread:0}); } catch(e){}
+    // Clear Unread Counter
+    try { await db.ref(`userChats/${userKey}/${chatKey}`).update({ unread: 0 }); } catch(e){}
 
-    // Load message history
-    try {
-        const sharedKey = await getChatEncryptionKey(chatKey);
-        const s = await db.ref(`chats/${chatKey}/messages`).orderByKey().once('value');
-        const d = s.val() || {};
-        let ld = '';
-
-        for(const id in d){
-            try {
-                const de = await dd(sharedKey, d[id].data);
-                const mj = JSON.parse(de);
-                const cd = fdd(mj.timestamp);
-                if(cd !== ld){ ld = cd; chatMessages.innerHTML += `<div class="msg-date">${cd}</div>`; }
-                renderMsg(mj, id);
-            } catch(e) { console.error("Decrypt msg err:", e); }
-        }
-        scrollToBottom();
-    } catch(e) {
-        showToast('Ошибка загрузки переписки');
-    }
-
-    // Realtime Incoming Message Listener
+    // INSTANT REALTIME MESSAGE LISTENER (no page refresh needed!)
     if(chatListener) chatListener.off();
-    chatListener = db.ref(`chats/${chatKey}/messages`).orderByKey().limitToLast(1);
+    const sharedKey = await getChatEncryptionKey(chatKey);
+
+    chatListener = db.ref(`chats/${chatKey}/messages`).orderByKey();
     chatListener.on('child_added', async (snap) => {
         const id = snap.key;
         if(document.querySelector(`[data-msgid="${id}"]`)) return;
 
         try {
-            const sharedKey = await getChatEncryptionKey(chatKey);
             const de = await dd(sharedKey, snap.val().data);
             const mj = JSON.parse(de);
 
@@ -1124,9 +1166,11 @@ window.openChat = async (ouk, oname, oavatar, ouname) => {
             scrollToBottom();
 
             if(mj.sender !== userKey){
-                db.ref(`userChats/${userKey}/${chatKey}`).update({unread:0});
+                db.ref(`userChats/${userKey}/${chatKey}`).update({ unread: 0 });
             }
-        } catch(e){}
+        } catch(e){
+            console.error("Msg child_added decrypt err:", e);
+        }
     });
 };
 
@@ -1158,11 +1202,11 @@ chatBack.addEventListener('click', () => {
     loadChatList();
 });
 
-// TELEGRAM-LIKE TYPING TRIGGER
+// TELEGRAM-LIKE TYPING SENDER (Removes immediately on stop)
 chatInput.addEventListener('input', () => {
     if(!chatKey || !userKey) return;
 
-    db.ref(`typing/${chatKey}/${userKey}`).set(true);
+    db.ref(`typing/${chatKey}/${userKey}`).set(Date.now());
 
     if(typingTimer) clearTimeout(typingTimer);
     typingTimer = setTimeout(() => {
@@ -1170,7 +1214,7 @@ chatInput.addEventListener('input', () => {
     }, 1200);
 });
 
-// SEND MESSAGES
+// SEND MESSAGE (Instant Realtime Delivery)
 chatSend.addEventListener('click', sendMsg);
 chatInput.addEventListener('keydown', (e) => {
     if(e.key === 'Enter' && !e.shiftKey){
@@ -1218,7 +1262,7 @@ async function sendMedia(file, type){
     showToast('Обработка...');
     try {
         let data = '';
-        if(type === 'image') data = await cib(file, 700, 0.55);
+        if(type === 'image') data = await cib(file, 800, 0.6);
         else data = await f2b(file);
 
         if(data.length > 9000000){ showToast('Файл слишком большой'); return; }
@@ -1238,7 +1282,7 @@ async function sendMedia(file, type){
     }
 }
 
-// SEARCH USER BY USERNAME
+// SEARCH USER
 chatSearchInput.addEventListener('keydown', async (e) => {
     if(e.key !== 'Enter') return;
     const q = chatSearchInput.value.trim().toLowerCase().replace(/[^a-z0-9_]/g,'');
@@ -1265,9 +1309,7 @@ chatSearchInput.addEventListener('keydown', async (e) => {
         await db.ref(`userChats/${userKey}/${ck}`).set({ otherKey: foundKey, lastMsg: Date.now(), unread: 0 });
         openChat(foundKey, found.name, found.avatar, found.username);
         chatSearchInput.value = '';
-    } catch(e) {
-        showToast('Ошибка поиска');
-    }
+    } catch(e) { showToast('Ошибка поиска'); }
 });
 
 function esc(t){ if(!t) return ''; const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
