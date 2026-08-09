@@ -22,7 +22,7 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:-apple-sys
 .filter-btn{width:38px;height:38px;border-radius:50%;background:var(--s3);display:flex;align-items:center;justify-content:center;cursor:pointer}
 .filter-btn svg{width:18px;height:18px;stroke:var(--t);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 
-/* Clean Pinterest Feed Grid */
+/* Pinterest Feed Grid */
 .feed-wrap{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 6px 20px}
 .feed{column-count:2;column-gap:7px;padding-top:4px}
 .feed-wrap::-webkit-scrollbar{display:none}
@@ -67,7 +67,7 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:-apple-sys
 .modal .switch span{color:var(--t);font-weight:600}
 .modal .error{color:var(--a);font-size:13px;margin-top:10px;text-align:center;display:none;font-weight:500}
 
-/* Upload Pin Modal (Public Pins / Stories) */
+/* Upload Modal (Personal vs Public Stories Toggle) */
 .upload-modal{position:fixed;inset:0;background:var(--bg);z-index:200;display:none;flex-direction:column}
 .upload-modal.show{display:flex}
 .upload-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0}
@@ -76,7 +76,12 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:-apple-sys
 .upload-header .done{color:var(--a);font-size:15px;font-weight:700;cursor:pointer;padding:4px;opacity:.35;pointer-events:none;transition:opacity .2s}
 .upload-header .done.active{opacity:1;pointer-events:auto}
 .upload-area{flex:1;display:flex;flex-direction:column;align-items:center;padding:20px;overflow-y:auto}
-.upload-notice{width:100%;max-width:320px;background:rgba(230,0,35,0.12);border:1px solid rgba(230,0,35,0.3);border-radius:var(--rs);padding:10px 14px;margin-bottom:14px;font-size:12px;color:#ff8899;line-height:1.4;text-align:center}
+
+/* Clean Type Switcher */
+.pin-type-selector{width:100%;max-width:320px;background:var(--s3);border-radius:var(--rs);padding:4px;display:flex;gap:4px;margin-bottom:16px}
+.pin-type-btn{flex:1;padding:10px 0;text-align:center;font-size:13px;font-weight:700;color:var(--t2);border-radius:10px;cursor:pointer;transition:all .2s}
+.pin-type-btn.active{background:var(--s4);color:var(--t);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+
 .upload-btn{width:100%;max-width:320px;height:180px;border-radius:var(--r);background:var(--s2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;cursor:pointer;border:2px dashed rgba(255,255,255,.15);margin-bottom:16px}
 .upload-btn svg{width:42px;height:42px;stroke:var(--t3);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
 .upload-btn span{color:var(--t3);font-size:14px;font-weight:500}
@@ -121,10 +126,13 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:-apple-sys
 .profile-wrap.show{display:block}
 .profile-wrap::-webkit-scrollbar{display:none}
 .profile-header{position:relative}
+
+/* Profile Cover Banner Fixed Layering */
 .profile-banner{width:100%;height:170px;background:linear-gradient(135deg,#0d1b2a,#1b263b,#415a77);position:relative;overflow:hidden;cursor:pointer}
-.profile-banner img{width:100%;height:100%;object-fit:cover}
-.profile-banner-edit{position:absolute;bottom:10px;right:10px;width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5}
+.profile-banner img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;pointer-events:none}
+.profile-banner-edit{position:absolute;bottom:10px;right:10px;width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5}
 .profile-banner-edit svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
 .profile-avatar-wrap{display:flex;justify-content:center;margin-top:-55px;position:relative;z-index:2;padding:0 20px}
 .profile-avatar{width:110px;height:110px;border-radius:50%;border:4px solid var(--bg);object-fit:cover;background:var(--s3);box-shadow:0 4px 20px rgba(0,0,0,.4);cursor:pointer}
 .profile-avatar-edit{position:absolute;bottom:6px;right:calc(50% - 55px + 6px);width:32px;height:32px;border-radius:50%;background:var(--s3);border:3px solid var(--bg);display:flex;align-items:center;justify-content:center;cursor:pointer}
@@ -171,7 +179,7 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:-apple-sys
 .edit-banner-preview{width:100%;height:130px;border-radius:var(--rs);object-fit:cover;margin-bottom:8px;background:var(--s3);cursor:pointer;border:1px dashed rgba(255,255,255,.2)}
 .edit-avatar-preview{width:90px;height:90px;border-radius:50%;object-fit:cover;margin:0 auto 8px;display:block;background:var(--s3);cursor:pointer;border:3px solid var(--s2)}
 
-/* Fast Avatar & Banner Cropper / Editor Modal */
+/* Cropper Modal */
 .cropper-modal{position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:450;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px}
 .cropper-modal.show{display:flex}
 .cropper-container{width:100%;max-width:400px;background:var(--s2);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;align-items:center;border:1px solid rgba(255,255,255,.08)}
@@ -209,7 +217,6 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:-apple-sys
 .chat-item-time{font-size:12px;color:var(--t3);margin-bottom:3px}
 .chat-item-badge{min-width:20px;height:20px;background:var(--a);border-radius:10px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;padding:0 6px}
 
-/* Telegram Realtime Search Results Header */
 .search-results-label{padding:8px 12px;font-size:12px;font-weight:700;color:var(--a);text-transform:uppercase;letter-spacing:1px}
 
 /* Chat Room */
@@ -229,13 +236,13 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:-apple-sys
 .chat-messages::-webkit-scrollbar{display:none}
 .msg-date{text-align:center;color:var(--t3);font-size:12px;font-weight:600;margin:12px 0;padding:4px 12px;background:var(--s2);border-radius:12px;align-self:center}
 
-/* Message Bubbles Styling */
+/* Message Bubbles */
 .msg-bubble{max-width:78%;padding:10px 14px;border-radius:var(--rs);font-size:15px;line-height:1.45;word-break:break-word;position:relative;animation:mi .25s cubic-bezier(.22,1,.36,1)}
 @keyframes mi{from{opacity:0;transform:translateY(10px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
 .msg-bubble.out{align-self:flex-end;background:#343434;color:#fff;border-bottom-right-radius:4px}
 .msg-bubble.in{align-self:flex-start;background:var(--s3);color:var(--t);border-bottom-left-radius:4px}
 
-/* Telegram Style Media & Collages (No borders, time in bottom right corner) */
+/* Telegram Style Media & Collages */
 .msg-media-wrap{position:relative;display:inline-block;border-radius:var(--rx);overflow:hidden;cursor:pointer;margin:-4px -6px}
 .msg-media-wrap img, .msg-media-wrap video{width:100%;display:block;border:none!important;outline:none!important;box-shadow:none!important;background:var(--s3)}
 .msg-media-wrap video{max-height:300px;object-fit:cover}
@@ -252,7 +259,7 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:-apple-sys
 .collage-item{position:relative;background:var(--s3);cursor:pointer;overflow:hidden;min-height:90px}
 .collage-item img, .collage-item video{width:100%;height:100%;object-fit:cover;display:block;border:none!important}
 
-/* Telegram Custom Audio Player */
+/* Audio Player */
 .tg-audio-player{display:flex;align-items:center;gap:12px;background:rgba(0,0,0,0.25);padding:10px 14px;border-radius:14px;margin:-2px 0;width:100%;min-width:220px}
 .tg-audio-btn{width:38px;height:38px;border-radius:50%;background:#fff;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:transform .15s}
 .tg-audio-btn:active{transform:scale(.92)}
@@ -264,7 +271,7 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:-apple-sys
 .tg-audio-progress{height:100%;background:#fff;width:0%;border-radius:2px}
 .tg-audio-duration{font-size:11px;opacity:0.7;display:flex;justify-content:space-between;margin-top:2px}
 
-/* Telegram Custom Video Player Modal */
+/* Video Player Modal */
 .video-player-modal{position:fixed;inset:0;background:#000;z-index:500;display:none;flex-direction:column;align-items:center;justify-content:center}
 .video-player-modal.show{display:flex}
 .video-player-header{position:absolute;top:0;left:0;right:0;padding:16px;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(to bottom,rgba(0,0,0,.8),transparent);z-index:10}
@@ -372,11 +379,17 @@ input[type="file"]{display:none!important}
 </div>
 </div>
 
-<!-- Upload Pin Modal (Public Pins / Stories) -->
+<!-- Upload Pin Modal (Choice between Private Feed Pin vs Public Story) -->
 <div class="upload-modal" id="uploadModal">
-<div class="upload-header"><div class="cancel" id="uploadCancel">Отмена</div><h3>Создать публичный пин (Историю)</h3><div class="done" id="uploadDone">Готово</div></div>
+<div class="upload-header"><div class="cancel" id="uploadCancel">Отмена</div><h3>Создать пин</h3><div class="done" id="uploadDone">Готово</div></div>
 <div class="upload-area">
-<div class="upload-notice">⚡ Этот пин будет <b>публичным</b> (как истории в TG). Его увидят все пользователи в общей ленте и в вашем профиле!</div>
+
+<!-- Professional Sleek Segmented Switcher -->
+<div class="pin-type-selector">
+<div class="pin-type-btn active" id="typePrivateBtn" onclick="selectPinType('private')">🔒 Личный пин (Лента)</div>
+<div class="pin-type-btn" id="typePublicBtn" onclick="selectPinType('public')">🌐 История (Публично)</div>
+</div>
+
 <div class="upload-btn" id="uploadBtn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span>Выбрать фото</span></div>
 <img class="upload-preview" id="uploadPreview">
 <div class="upload-inputs">
@@ -464,7 +477,7 @@ input[type="file"]{display:none!important}
 </div>
 </div>
 
-<!-- Powerful & Fast Cropper Modal for Avatars and Covers -->
+<!-- Powerful Cropper Modal -->
 <div class="cropper-modal" id="cropperModal">
 <div class="cropper-container">
 <h3 id="cropperTitle" style="font-size:18px;font-weight:700">Редактор фото</h3>
@@ -482,7 +495,7 @@ input[type="file"]{display:none!important}
 </div>
 </div>
 
-<!-- Telegram Video Fullscreen Player Modal -->
+<!-- Video Player Modal -->
 <div class="video-player-modal" id="videoPlayerModal">
 <div class="video-player-header">
 <div class="video-player-close" id="videoPlayerClose"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
@@ -499,8 +512,10 @@ firebase.initializeApp(firebaseConfig);
 const auth=firebase.auth(),db=firebase.database();
 
 let currentUser=null,userKey=null,pins=[],currentTab='for-you',currentPtab='created',currentScreen='home',uploadFile=null,isLogin=true,userPassword=localStorage.getItem('meow_pass')||'',currentProfile={},viewingPin=null,currentChat=null,chatKey=null,chatListener=null,typingTimer=null,typingRef=null,chatOnlineRef=null,displayedProfileKey=null,isOtherOnline=false;
+let selectedPinType = 'private'; // 'private' or 'public'
+let pendingBannerBase64 = null, pendingAvatarBase64 = null;
 
-// LOCAL CACHES FOR INSTANT PERFORMANCE
+// LOCAL CACHES
 let profilesCache = JSON.parse(localStorage.getItem('meow_profiles_cache') || '{}');
 let chatsCache = JSON.parse(localStorage.getItem('meow_chats_cache') || '[]');
 
@@ -515,7 +530,7 @@ const editModal=document.getElementById('editModal'),editCancel=document.getElem
 const cropperModal=document.getElementById('cropperModal'),cropperTitle=document.getElementById('cropperTitle'),cropperBox=document.getElementById('cropperBox'),cropperImg=document.getElementById('cropperImg'),cropperZoom=document.getElementById('cropperZoom'),cropperCancel=document.getElementById('cropperCancel'),cropperApply=document.getElementById('cropperApply');
 let cropperMode = 'avatar', cropperCallback = null, cropImgObj = new Image(), cropState = { scale: 1, x: 0, y: 0, startX: 0, startY: 0, dragging: false };
 
-// Video Fullscreen Modal Elements
+// Video Fullscreen Elements
 const videoPlayerModal=document.getElementById('videoPlayerModal'),videoPlayerModalEl=document.getElementById('videoPlayerModalEl'),videoPlayerClose=document.getElementById('videoPlayerClose');
 
 // Loader Hide Safety
@@ -596,7 +611,7 @@ function ft(ts){
 function fmt(ts){ const d = new Date(ts); return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0'); }
 function fdd(ts){ const d = new Date(ts), n = new Date(); if(d.toDateString() === n.toDateString()) return 'Сегодня'; const y = new Date(n); y.setDate(y.getDate()-1); if(d.toDateString() === y.toDateString()) return 'Вчера'; const mo = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря']; return d.getDate() + ' ' + mo[d.getMonth()]; }
 
-// --- CROPPER EDITOR FOR AVATARS AND COVERS ---
+// --- CROPPER EDITOR ---
 function openCropper(file, mode, cb){
     cropperMode = mode;
     cropperCallback = cb;
@@ -677,7 +692,7 @@ cropperApply.addEventListener('click', () => {
     const drawY = (boxH - drawH) / 2 + (cropState.y * (boxH / renderBoxH));
 
     ctx.drawImage(cropImgObj, drawX, drawY, drawW, drawH);
-    const resultB64 = c.toDataURL('image/jpeg', 0.65); // Fast optimized Base64 JPEG for RTDB!
+    const resultB64 = c.toDataURL('image/jpeg', 0.65);
 
     cropperModal.classList.remove('show');
     if(cropperCallback) cropperCallback(resultB64);
@@ -770,7 +785,7 @@ function fos(s, ls){
     return 'был(а) ' + ft(ls);
 }
 
-// --- PROFILE & COVERS (SAVED IN RTDB AS COMPRESSED BASE64) ---
+// --- PROFILE & BANNER COVERS (100% WORKING BASE64 RTDB STORAGE) ---
 async function initProfile(){
     if(!currentUser || !userKey) return;
     try {
@@ -813,6 +828,7 @@ function renderProfile(profile, isOwn = false){
         avatarEditBtn.style.display = 'none';
     }
 
+    // Render Banner cleanly
     const bi = profileBanner.querySelector('img'); if(bi) bi.remove();
     if(profile.banner){
         const i = document.createElement('img'); i.src = profile.banner;
@@ -826,7 +842,7 @@ function renderProfile(profile, isOwn = false){
     renderProfileFeed(isOwn ? userKey : displayedProfileKey);
 }
 
-// RESTRICT SAVED PINS: SAVED PINS ARE STRICTLY PRIVATE AND ONLY VISIBLE TO THE PROFILE OWNER!
+// RESTRICT SAVED PINS: SAVED PINS ARE STRICTLY PRIVATE!
 function renderProfileFeed(targetUserKey){
     const isOwn = (targetUserKey === userKey);
 
@@ -848,8 +864,13 @@ function renderProfileFeed(targetUserKey){
     `).join('');
 }
 
+// SEAMLESSLY VIEW USER PROFILE FROM CHAT OR FEED
 async function viewUserProfile(targetKey){
     if(!targetKey) return;
+
+    // IF OPENED FROM CHAT ROOM -> CLOSE CHAT ROOM SO USER SEES PROFILE SEAMLESSLY!
+    chatRoom.classList.remove('show');
+
     if(targetKey === userKey){
         showScreen('profile');
         displayedProfileKey = userKey;
@@ -875,7 +896,7 @@ async function viewUserProfile(targetKey){
     } catch(e) { showToast('Ошибка загрузки'); }
 }
 
-// PROFILE EDITING & COVER / AVATAR SAVING IN RTDB VIA BASE64
+// WORKING COVER & PROFILE EDITING
 editProfileBtn.addEventListener('click', openEditModal);
 bannerEditBtn.addEventListener('click', (e) => { e.stopPropagation(); editBannerInput.click(); });
 profileBanner.addEventListener('click', () => { if(displayedProfileKey === userKey) editBannerInput.click(); });
@@ -885,6 +906,8 @@ function openEditModal(){
     editName.value = currentProfile.name || '';
     editUsername.value = currentProfile.username || '';
     editBio.value = currentProfile.bio || '';
+    pendingBannerBase64 = null;
+    pendingAvatarBase64 = null;
 
     if(currentProfile.banner){ editBannerPreview.src = currentProfile.banner; editBannerPreview.style.display = 'block'; }
     else { editBannerPreview.style.display = 'none'; }
@@ -901,6 +924,7 @@ editAvatarPreview.addEventListener('click', () => editAvatarInput.click());
 editBannerInput.addEventListener('change', (e) => {
     const f = e.target.files[0]; if(!f) return;
     openCropper(f, 'banner', (resB64) => {
+        pendingBannerBase64 = resB64;
         editBannerPreview.src = resB64;
         editBannerPreview.style.display = 'block';
     });
@@ -909,6 +933,7 @@ editBannerInput.addEventListener('change', (e) => {
 editAvatarInput.addEventListener('change', (e) => {
     const f = e.target.files[0]; if(!f) return;
     openCropper(f, 'avatar', (resB64) => {
+        pendingAvatarBase64 = resB64;
         editAvatarPreview.src = resB64;
         editAvatarPreview.style.display = 'block';
     });
@@ -940,10 +965,10 @@ editSave.addEventListener('click', async () => {
         currentProfile.name = n;
         currentProfile.username = u;
         currentProfile.bio = b;
-        if(editAvatarPreview.src && editAvatarPreview.src.startsWith('data:')) currentProfile.avatar = editAvatarPreview.src;
-        if(editBannerPreview.src && editBannerPreview.src.startsWith('data:')) currentProfile.banner = editBannerPreview.src;
+        if(pendingAvatarBase64) currentProfile.avatar = pendingAvatarBase64;
+        if(pendingBannerBase64) currentProfile.banner = pendingBannerBase64;
 
-        // Save immediately in RTDB via Base64!
+        // Guaranteed RTDB save via Base64!
         await db.ref('profiles/' + userKey).set(currentProfile);
 
         profilesCache[userKey] = currentProfile;
@@ -951,12 +976,24 @@ editSave.addEventListener('click', async () => {
 
         editModal.classList.remove('show');
         renderProfile(currentProfile, true);
-        showToast('✅ Обложка и профиль сохранены!');
+        showToast('✅ Профиль и обложка сохранены!');
     } catch(e) { showToast('Ошибка сохранения'); }
     finally { editSave.textContent = 'Сохранить'; }
 });
 
-// --- PUBLIC PINS & STORIES (EVERYONE CAN SEE STORIES IN FEED & USER PROFILES) ---
+// --- TYPE SWITCHER: PRIVATE PIN (FEED) VS PUBLIC STORY ---
+function selectPinType(type){
+    selectedPinType = type;
+    if(type === 'private'){
+        document.getElementById('typePrivateBtn').classList.add('active');
+        document.getElementById('typePublicBtn').classList.remove('active');
+    } else {
+        document.getElementById('typePublicBtn').classList.add('active');
+        document.getElementById('typePrivateBtn').classList.remove('active');
+    }
+}
+
+// --- PINS LOAD & CREATION ---
 async function loadEncryptedUserPins(){
     if(!currentUser) return;
 
@@ -1038,7 +1075,6 @@ uploadDone.addEventListener('click', async () => {
         const b64 = await cib(uploadFile, 750, 0.6);
         const k = await dk(currentUser.email, userPassword);
 
-        // ALWAYS attach REAL author details
         const pinData = {
             imageBase64: b64,
             title: uploadTitle.value.trim() || '',
@@ -1047,21 +1083,28 @@ uploadDone.addEventListener('click', async () => {
             authorName: currentProfile.name || 'Пользователь',
             authorUser: currentProfile.username || 'username',
             authorAvatar: currentProfile.avatar || ('https://api.dicebear.com/7.x/avataaars/svg?seed=' + userKey),
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            isPublic: (selectedPinType === 'public')
         };
 
         const encData = await ed(k, JSON.stringify(pinData));
         const pid = Date.now().toString();
 
         uploadProgressBar.style.width = '70%';
-        uploadInfo.textContent = 'Публикация в публичные истории...';
+        uploadInfo.textContent = 'Сохранение...';
 
-        // Public pin -> stored in publicPins for ALL USERS to see!
+        // ALWAYS save encrypted in user's personal pins
         await db.ref('pins/' + userKey + '/' + pid).set({ data: encData });
-        await db.ref('publicPins/' + pid).set(pinData);
+
+        // IF PUBLIC (История) -> also publish to publicPins for everyone!
+        if(selectedPinType === 'public'){
+            await db.ref('publicPins/' + pid).set(pinData);
+            showToast('✨ Публичная история опубликована!');
+        } else {
+            showToast('🔒 Личный пин сохранен в вашу ленту!');
+        }
 
         uploadProgressBar.style.width = '100%';
-        showToast('✨ Публичная история опубликована!');
         resetUpload();
         await loadEncryptedUserPins();
     } catch(e) {
@@ -1079,6 +1122,7 @@ function resetUpload(){
     uploadDone.textContent = 'Готово'; uploadDone.classList.remove('active');
     uploadProgress.style.display = 'none'; uploadProgressBar.style.width = '0%';
     uploadInfo.style.display = 'none';
+    selectPinType('private');
 }
 
 async function openViewer(id){
@@ -1207,7 +1251,7 @@ document.querySelectorAll('.profile-tab').forEach(t => {
     });
 });
 
-// ===== INSTANT REALTIME MESSENGER WITH LOCAL STORAGE CACHING =====
+// ===== MESSENGER WITH LOCAL STORAGE CACHING =====
 function gck(u1, u2){ return u1 < u2 ? u1 + '_' + u2 : u2 + '_' + u1; }
 
 function renderChatListFromCache(){
@@ -1234,7 +1278,6 @@ function renderChatListFromCache(){
     `).join('');
 }
 
-// REALTIME LISTENER FOR USER CHATS (NO SLOW LOOP, INSTANT RENDER & BACKGROUND CACHING)
 function setupRealtimeChatsListener(){
     if(!currentUser || !userKey) return;
 
@@ -1249,7 +1292,6 @@ function setupRealtimeChatsListener(){
             return;
         }
 
-        // Fetch all profiles in parallel once
         const allProfilesSnap = await db.ref('profiles').once('value');
         const allProf = allProfilesSnap.val() || {};
 
@@ -1264,7 +1306,6 @@ function setupRealtimeChatsListener(){
 
             let lp = 'Сообщение', lt = '', isPhoto = false, photoData = '';
 
-            // Fetch last message for chat item preview
             const ms = await db.ref('chats/' + ck + '/messages').orderByKey().limitToLast(1).once('value');
             const mv = ms.val();
 
@@ -1313,7 +1354,7 @@ function setupRealtimeChatsListener(){
     });
 }
 
-// TELEGRAM REAL-TIME USERNAME SEARCH
+// REALTIME USERNAME SEARCH
 chatSearchInput.addEventListener('input', async (e) => {
     const q = e.target.value.trim().toLowerCase().replace(/[^a-z0-9_]/g,'');
 
@@ -1432,7 +1473,6 @@ window.openChat = async (ouk, oname, oavatar, ouname) => {
     });
 };
 
-// RENDER MESSAGES WITH TELEGRAM AUDIO, COLLAGES & TIMINGS
 function renderMsg(m, id){
     const el = document.createElement('div');
     el.className = 'msg-bubble ' + (m.sender === userKey ? 'out' : 'in');
@@ -1512,7 +1552,7 @@ videoPlayerClose.addEventListener('click', () => {
     videoPlayerModal.classList.remove('show');
 });
 
-// TELEGRAM CUSTOM MUSIC PLAYER ENGINE
+// TELEGRAM MUSIC PLAYER
 let activeAudioEl = null, activeAudioBtn = null, activeAudioProgress = null;
 
 function toggleAudioPlayer(btn){
@@ -1608,7 +1648,7 @@ async function sendMsg(){
     } catch(e) { showToast('Ошибка отправки'); }
 }
 
-// ATTACHMENTS & COLLAGES (TELEGRAM STYLE)
+// ATTACHMENTS & COLLAGES
 chatAttach.addEventListener('click', (e) => { e.stopPropagation(); attachMenu.classList.toggle('show'); });
 document.addEventListener('click', (e) => { if(!attachMenu.contains(e.target) && e.target !== chatAttach) attachMenu.classList.remove('show'); });
 
@@ -1647,9 +1687,9 @@ async function sendMediaFiles(files, type){
             msg = { sender: userKey, type: 'collage', items: processedItems, timestamp: Date.now() };
         }
 
-        const enc = await ed(sharedKey, JSON.stringify(msg));
+        const enc. = await ed(sharedKey, JSON.stringify(msg));
         const mid = Date.now().toString();
-        await db.ref(`chats/${chatKey}/messages/${mid}`).set({ data: enc });
+        await db.ref(`chats/${chatKey}/messages/${mid}`).set({ data: enc. });
 
         await db.ref(`userChats/${userKey}/${chatKey}`).set({ otherKey: currentChat.otherKey, lastMsg: Date.now(), unread: 0 });
         await db.ref(`userChats/${currentChat.otherKey}/${chatKey}`).set({ otherKey: userKey, lastMsg: Date.now(), unread: firebase.database.ServerValue.increment(1) });
