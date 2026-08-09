@@ -1687,9 +1687,9 @@ async function sendMediaFiles(files, type){
             msg = { sender: userKey, type: 'collage', items: processedItems, timestamp: Date.now() };
         }
 
-        const enc. = await ed(sharedKey, JSON.stringify(msg));
+        const enc = await ed(sharedKey, JSON.stringify(msg));
         const mid = Date.now().toString();
-        await db.ref(`chats/${chatKey}/messages/${mid}`).set({ data: enc. });
+        await db.ref(`chats/${chatKey}/messages/${mid}`).set({ data: enc });
 
         await db.ref(`userChats/${userKey}/${chatKey}`).set({ otherKey: currentChat.otherKey, lastMsg: Date.now(), unread: 0 });
         await db.ref(`userChats/${currentChat.otherKey}/${chatKey}`).set({ otherKey: userKey, lastMsg: Date.now(), unread: firebase.database.ServerValue.increment(1) });
