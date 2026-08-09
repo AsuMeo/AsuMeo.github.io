@@ -300,19 +300,32 @@ input[type="file"]{display:none!important}
 </div>
 </div>
 <div class="toast" id="toast"></div>
-<script>
 
+<script>
+// --- FIREBASE INITIALIZATION ---
 const firebaseConfig={apiKey:"AIzaSyBm0mIvHVznIeF2PoFk6dtdaiT5r877wyA",authDomain:"meow-874ce.firebaseapp.com",databaseURL:"https://meow-874ce-default-rtdb.europe-west1.firebasedatabase.app",projectId:"meow-874ce",storageBucket:"meow-874ce.firebasestorage.app",messagingSenderId:"471541334599",appId:"1:471541334599:web:567af3e7dbe70a37572762"};
 firebase.initializeApp(firebaseConfig);
 const auth=firebase.auth(),db=firebase.database();
+
 let currentUser=null,userKey=null,pins=[],currentTab='for-you',currentPtab='created',currentScreen='home',uploadFile=null,isLogin=true,userPassword=localStorage.getItem('meow_pass')||'',currentProfile={},viewingPin=null,currentChat=null,chatKey=null,chatListener=null,onlineRef=null,lastOnlineRef=null,unreadCount=0,chatOnlineRef=null;
 
+// Elements
 const loader=document.getElementById('loader'),authModal=document.getElementById('authModal'),authTitle=document.getElementById('authTitle'),authEmail=document.getElementById('authEmail'),authPass=document.getElementById('authPass'),authBtn=document.getElementById('authBtn'),authSwitch=document.getElementById('authSwitch'),authError=document.getElementById('authError'),feed=document.getElementById('feed'),feedWrap=document.getElementById('feedWrap'),empty=document.getElementById('empty'),homeHeader=document.getElementById('homeHeader'),messengerWrap=document.getElementById('messengerWrap'),chatListEl=document.getElementById('chatList'),chatSearchInput=document.getElementById('chatSearchInput'),profileWrap=document.getElementById('profileWrap'),uploadModal=document.getElementById('uploadModal'),uploadBtn=document.getElementById('uploadBtn'),fileInput=document.getElementById('fileInput'),uploadPreview=document.getElementById('uploadPreview'),uploadDone=document.getElementById('uploadDone'),uploadCancel=document.getElementById('uploadCancel'),uploadProgress=document.getElementById('uploadProgress'),uploadProgressBar=document.getElementById('uploadProgressBar'),uploadInfo=document.getElementById('uploadInfo'),viewer=document.getElementById('viewer'),viewerImg=document.getElementById('viewerImg'),viewerContent=document.getElementById('viewerContent'),viewerBack=document.getElementById('viewerBack'),viewerDownload=document.getElementById('viewerDownload'),viewerShare=document.getElementById('viewerShare'),toast=document.getElementById('toast'),navAvatar=document.getElementById('navAvatar'),profileIcon=document.getElementById('profileIcon'),msgBadge=document.getElementById('msgBadge');
 const chatRoom=document.getElementById('chatRoom'),chatBack=document.getElementById('chatBack'),chatRoomAvatar=document.getElementById('chatRoomAvatar'),chatRoomName=document.getElementById('chatRoomName'),chatRoomStatus=document.getElementById('chatRoomStatus'),chatMessages=document.getElementById('chatMessages'),chatInput=document.getElementById('chatInput'),chatSend=document.getElementById('chatSend'),chatAttach=document.getElementById('chatAttach'),attachMenu=document.getElementById('attachMenu'),attachPhoto=document.getElementById('attachPhoto'),attachVideo=document.getElementById('attachVideo'),attachAudio=document.getElementById('attachAudio'),attachPhotoInput=document.getElementById('attachPhotoInput'),attachVideoInput=document.getElementById('attachVideoInput'),attachAudioInput=document.getElementById('attachAudioInput');
 const profileBanner=document.getElementById('profileBanner'),profileAvatar=document.getElementById('profileAvatar'),profileName=document.getElementById('profileName'),profileUsername=document.getElementById('profileUsername'),profileBio=document.getElementById('profileBio'),profileStatus=document.getElementById('profileStatus'),statPins=document.getElementById('statPins'),statSaved=document.getElementById('statSaved'),statViews=document.getElementById('statViews'),profileFeed=document.getElementById('profileFeed'),editProfileBtn=document.getElementById('editProfileBtn'),shareProfileBtn=document.getElementById('shareProfileBtn'),bannerEditBtn=document.getElementById('bannerEditBtn'),avatarEditBtn=document.getElementById('avatarEditBtn');
 const editModal=document.getElementById('editModal'),editCancel=document.getElementById('editCancel'),editSave=document.getElementById('editSave'),editBannerPreview=document.getElementById('editBannerPreview'),editAvatarPreview=document.getElementById('editAvatarPreview'),editBannerInput=document.getElementById('editBannerInput'),editAvatarInput=document.getElementById('editAvatarInput'),editName=document.getElementById('editName'),editUsername=document.getElementById('editUsername'),editBio=document.getElementById('editBio');
 
-async function dk(e,p){const en=new TextEncoder(),km=await crypto.subtle.importKey('raw',en.encode(e+p),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt:en.encode('meow-salt-v2-2026'),iterations:100000,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
+// --- SAFETY FALLBACK TIMER FOR LOADER ---
+setTimeout(()=>{
+    if(loader) loader.classList.add('hide');
+}, 3000);
+
+// --- HELPER FUNCTIONS & ENCRYPTION ---
+async function dk(e,p){
+    if(!e || !p) throw new Error("Missing email or password");
+    const en=new TextEncoder(),km=await crypto.subtle.importKey('raw',en.encode(e+p),'PBKDF2',false,['deriveKey']);
+    return crypto.subtle.deriveKey({name:'PBKDF2',salt:en.encode('meow-salt-v2-2026'),iterations:100000,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
 async function ed(k,d){const en=new TextEncoder(),iv=crypto.getRandomValues(new Uint8Array(12)),e=await crypto.subtle.encrypt({name:'AES-GCM',iv},k,en.encode(d)),c=new Uint8Array(iv.length+e.byteLength);c.set(iv);c.set(new Uint8Array(e),iv.length);let b='';for(let i=0;i<c.length;i++)b+=String.fromCharCode(c[i]);return btoa(b)}
 async function dd(k,b){const u=Uint8Array.from(atob(b),c=>c.charCodeAt(0)),iv=u.slice(0,12),d=u.slice(12),de=await crypto.subtle.decrypt({name:'AES-GCM',iv},k,d);return new TextDecoder().decode(de)}
 function cib(f,mw=700,q=0.55){return new Promise((res,rej)=>{const i=new Image();i.onload=()=>{const c=document.createElement('canvas');let w=i.width,h=i.height;if(w>mw){h=Math.round(h*mw/w);w=mw}c.width=w;c.height=h;const x=c.getContext('2d');x.fillStyle='#000';x.fillRect(0,0,w,h);x.drawImage(i,0,0,w,h);res(c.toDataURL('image/jpeg',q))};i.onerror=rej;i.src=URL.createObjectURL(f)})}
@@ -321,22 +334,149 @@ function ft(ts){const d=new Date(ts),n=new Date(),df=Math.floor((n-d)/1000),pd=n
 function fmt(ts){const d=new Date(ts);return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0')}
 function fdd(ts){const d=new Date(ts),n=new Date();if(d.toDateString()===n.toDateString())return'Сегодня';const y=new Date(n);y.setDate(y.getDate()-1);if(d.toDateString()===y.toDateString())return'Вчера';const mo=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];if(n.getFullYear()===d.getFullYear())return d.getDate()+' '+mo[d.getMonth()];return d.getDate()+' '+mo[d.getMonth()]+' '+d.getFullYear()}
 
-authBtn.addEventListener('click',async()=>{const em=authEmail.value.trim(),ps=authPass.value.trim();if(!em||!ps){showAuthError('Введите email и пароль');return}authBtn.disabled=true;authBtn.textContent='...';try{if(isLogin){await auth.signInWithEmailAndPassword(em,ps)}else{await auth.createUserWithEmailAndPassword(em,ps)}userPassword=ps;localStorage.setItem('meow_pass',ps);authModal.classList.remove('show')}catch(e){showAuthError(e.message)}authBtn.disabled=false;authBtn.textContent=isLogin?'Войти':'Зарегистрироваться'});
+// --- AUTH LOGIC ---
+authBtn.addEventListener('click',async()=>{
+    const em=authEmail.value.trim(),ps=authPass.value.trim();
+    if(!em||!ps){showAuthError('Введите email и пароль');return}
+    authBtn.disabled=true;authBtn.textContent='...';
+    try{
+        if(isLogin){await auth.signInWithEmailAndPassword(em,ps)}
+        else{await auth.createUserWithEmailAndPassword(em,ps)}
+        userPassword=ps;
+        localStorage.setItem('meow_pass',ps);
+        authModal.classList.remove('show');
+    }catch(e){showAuthError(e.message)}
+    finally{authBtn.disabled=false;authBtn.textContent=isLogin?'Войти':'Зарегистрироваться';}
+});
+
 authSwitch.addEventListener('click',()=>{isLogin=!isLogin;authTitle.textContent=isLogin?'Вход':'Регистрация';authBtn.textContent=isLogin?'Войти':'Зарегистрироваться';authSwitch.innerHTML=isLogin?'Нет аккаунта? <span>Регистрация</span>':'Есть аккаунт? <span>Вход</span>';authError.style.display='none'});
 function showAuthError(m){authError.textContent=m;authError.style.display='block'}
 
-auth.onAuthStateChanged(async(u)=>{if(u){currentUser=u;userKey=btoa(u.email).replace(/[^a-zA-Z0-9]/g,'');authModal.classList.remove('show');navAvatar.style.display='block';navAvatar.src='https://api.dicebear.com/7.x/avataaars/svg?seed='+u.email;profileIcon.style.display='none';await initProfile();await loadPins();setupOnline();loadChatList()}else{authModal.classList.add('show');navAvatar.style.display='none';profileIcon.style.display='block'}loader.classList.add('hide')});
+// --- AUTH STATE CHANGE HANDLER (FIXED INFINITE LOADING) ---
+auth.onAuthStateChanged(async(u)=>{
+    try {
+        if(u){
+            currentUser=u;
+            userKey=u.uid; // Safe unique key
+            authModal.classList.remove('show');
+            navAvatar.style.display='block';
+            navAvatar.src='https://api.dicebear.com/7.x/avataaars/svg?seed='+(u.email||u.uid);
+            profileIcon.style.display='none';
 
-function setupOnline(){if(!currentUser)return;const pr=db.ref('presence/'+userKey),cr=db.ref('.info/connected');cr.on('value',s=>{if(s.val()){pr.set({online:true,lastSeen:Date.now()});pr.onDisconnect().set({online:false,lastSeen:Date.now()})}})}
-function getOnline(uk,cb){const r=db.ref('presence/'+uk);r.on('value',s=>{const v=s.val();if(!v){cb('offline',null);return}cb(v.online?'online':'offline',v.lastSeen)});return r}
+            await initProfile().catch(e => console.error("Profile load err:", e));
+            await loadPins().catch(e => console.error("Pins load err:", e));
+            setupOnline();
+            loadChatList().catch(e => console.error("Chat load err:", e));
+        } else {
+            authModal.classList.add('show');
+            navAvatar.style.display='none';
+            profileIcon.style.display='block';
+        }
+    } catch(err) {
+        console.error("Auth state change error:", err);
+    } finally {
+        if (loader) loader.classList.add('hide');
+    }
+});
+
+function setupOnline(){
+    if(!currentUser||!userKey)return;
+    const pr=db.ref('presence/'+userKey),cr=db.ref('.info/connected');
+    cr.on('value',s=>{
+        if(s.val()){
+            pr.set({online:true,lastSeen:Date.now()});
+            pr.onDisconnect().set({online:false,lastSeen:Date.now()});
+        }
+    });
+}
+
+function getOnline(uk,cb){
+    const r=db.ref('presence/'+uk);
+    r.on('value',s=>{
+        const v=s.val();
+        if(!v){cb('offline',null);return}
+        cb(v.online?'online':'offline',v.lastSeen);
+    });
+    return r;
+}
+
 function fos(s,ls){if(s==='online')return'в сети';if(!ls)return'был(а) давно';return'был(а) '+ft(ls)}
 
-async function initProfile(){const s=await db.ref('profiles/'+userKey).once('value');currentProfile=s.val()||{};if(!currentProfile.username){currentProfile={name:currentUser.displayName||'Имя',username:'user_'+Math.random().toString(36).slice(2,8),bio:'',avatar:'https://api.dicebear.com/7.x/avataaars/svg?seed='+currentUser.email,banner:'',views:0};await db.ref('profiles/'+userKey).set(currentProfile)}renderProfile()}
-function renderProfile(){profileName.textContent=currentProfile.name||'Имя';profileUsername.textContent='@'+(currentProfile.username||'username');profileBio.textContent=currentProfile.bio||'';profileBio.style.display=currentProfile.bio?'block':'none';profileAvatar.src=currentProfile.avatar||'';navAvatar.src=currentProfile.avatar||'https://api.dicebear.com/7.x/avataaars/svg?seed='+currentUser.email;const bi=profileBanner.querySelector('img');if(bi)bi.remove();if(currentProfile.banner){const i=document.createElement('img');i.src=currentProfile.banner;profileBanner.insertBefore(i,profileBanner.firstChild)}statPins.textContent=pins.length;statSaved.textContent=pins.filter(p=>p.liked).length;statViews.textContent=currentProfile.views||0;renderProfileFeed()}
-function renderProfileFeed(){const f=currentPtab==='created'?pins:pins.filter(p=>p.liked);if(f.length===0){profileFeed.innerHTML='<div class="empty" style="padding:40px 20px;"><p>Нет пинов</p></div>';return}profileFeed.innerHTML=f.map(p=>'<div class="pin" onclick="openViewer(''+p.id+'')"><img src="'+p.imageBase64+'" loading="lazy"></div>').join('')}
+async function initProfile(){
+    if(!currentUser||!userKey)return;
+    try {
+        const s=await db.ref('profiles/'+userKey).once('value');
+        currentProfile=s.val()||{};
+        if(!currentProfile.username){
+            currentProfile={
+                name:currentUser.displayName||'Имя',
+                username:'user_'+Math.random().toString(36).slice(2,8),
+                bio:'',
+                avatar:'https://api.dicebear.com/7.x/avataaars/svg?seed='+(currentUser.email||currentUser.uid),
+                banner:'',
+                views:0
+            };
+            await db.ref('profiles/'+userKey).set(currentProfile);
+        }
+        renderProfile();
+    } catch(e) {
+        console.error("initProfile error:", e);
+    }
+}
 
-async function loadPins(){if(!currentUser||!userPassword)return;try{const k=await dk(currentUser.email,userPassword),s=await db.ref('pins/'+userKey).once('value'),d=s.val()||{};pins=[];for(const id in d){try{const de=await dd(k,d[id].data);pins.push({id,...JSON.parse(de)})}catch(e){}}pins.sort((a,b)=>b.timestamp-a.timestamp);renderPins();renderProfile()}catch(e){showToast('Ошибка загрузки пинов')}}
-function renderPins(){const f=currentTab==='for-you'?pins:pins.filter(p=>p.liked);if(f.length===0){feed.innerHTML='';empty.style.display='block';return}empty.style.display='none';feed.innerHTML=f.map(p=>'<div class="pin" onclick="openViewer(''+p.id+'')"><img src="'+p.imageBase64+'" loading="lazy" onerror="this.style.display='none'"><div class="pin-overlay"></div><div class="pin-save '+(p.liked?'saved':'')+'" onclick="toggleLike(''+p.id+'',event)"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div></div>').join('')}
+function renderProfile(){
+    profileName.textContent=currentProfile.name||'Имя';
+    profileUsername.textContent='@'+(currentProfile.username||'username');
+    profileBio.textContent=currentProfile.bio||'';
+    profileBio.style.display=currentProfile.bio?'block':'none';
+    profileAvatar.src=currentProfile.avatar||('https://api.dicebear.com/7.x/avataaars/svg?seed='+(currentUser?currentUser.uid:'meow'));
+    navAvatar.src=currentProfile.avatar||('https://api.dicebear.com/7.x/avataaars/svg?seed='+(currentUser?currentUser.uid:'meow'));
+    const bi=profileBanner.querySelector('img');if(bi)bi.remove();
+    if(currentProfile.banner){
+        const i=document.createElement('img');i.src=currentProfile.banner;
+        profileBanner.insertBefore(i,profileBanner.firstChild);
+    }
+    statPins.textContent=pins.length;
+    statSaved.textContent=pins.filter(p=>p.liked).length;
+    statViews.textContent=currentProfile.views||0;
+    renderProfileFeed();
+}
+
+function renderProfileFeed(){
+    const f=currentPtab==='created'?pins:pins.filter(p=>p.liked);
+    if(f.length===0){
+        profileFeed.innerHTML='<div class="empty" style="padding:40px 20px;"><p>Нет пинов</p></div>';
+        return;
+    }
+    profileFeed.innerHTML=f.map(p=>'<div class="pin" onclick="openViewer(\''+p.id+'\')"><img src="'+p.imageBase64+'" loading="lazy"></div>').join('');
+}
+
+async function loadPins(){
+    if(!currentUser||!userKey)return;
+    if(!userPassword){ renderPins(); renderProfile(); return; }
+    try{
+        const k=await dk(currentUser.email,userPassword),s=await db.ref('pins/'+userKey).once('value'),d=s.val()||{};
+        pins=[];
+        for(const id in d){
+            try{
+                const de=await dd(k,d[id].data);
+                pins.push({id,...JSON.parse(de)});
+            }catch(e){}
+        }
+        pins.sort((a,b)=>b.timestamp-a.timestamp);
+        renderPins();
+        renderProfile();
+    }catch(e){
+        console.error("loadPins error:", e);
+    }
+}
+
+function renderPins(){
+    const f=currentTab==='for-you'?pins:pins.filter(p=>p.liked);
+    if(f.length===0){feed.innerHTML='';empty.style.display='block';return}
+    empty.style.display='none';
+    feed.innerHTML=f.map(p=>'<div class="pin" onclick="openViewer(\''+p.id+'\')"><img src="'+p.imageBase64+'" loading="lazy" onerror="this.style.display=\'none\'"><div class="pin-overlay"></div><div class="pin-save '+(p.liked?'saved':'')+'" onclick="toggleLike(\''+p.id+'\',event)"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div></div>').join('');
+}
 
 document.querySelectorAll('.tab').forEach(t=>{t.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');currentTab=t.dataset.tab;renderPins()})});
 document.querySelectorAll('.profile-tab').forEach(t=>{t.addEventListener('click',()=>{document.querySelectorAll('.profile-tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');currentPtab=t.dataset.ptab;renderProfileFeed()})});
@@ -374,20 +514,112 @@ function showToast(m){toast.textContent=m;toast.classList.add('show');setTimeout
 // ===== MESSENGER =====
 function gck(u1,u2){return u1<u2?u1+'_'+u2:u2+'_'+u1}
 
-async function loadChatList(){if(!currentUser)return;chatListEl.innerHTML='<div class="empty" style="padding:40px 20px;"><p>Загрузка...</p></div>';try{const s=await db.ref('userChats/'+userKey).once('value'),c=s.val()||{};const ca=[];for(const ck in c){const cd=c[ck];if(!cd.otherKey)continue;const ps=await db.ref('profiles/'+cd.otherKey).once('value'),p=ps.val()||{name:'Пользователь',username:'unknown',avatar:'https://api.dicebear.com/7.x/avataaars/svg?seed='+cd.otherKey};const ms=await db.ref('chats/'+ck+'/messages').orderByKey().limitToLast(1).once('value'),mv=ms.val();let lp='',lt='';if(mv){const mk=Object.keys(mv)[0],md=mv[mk];try{const k=await dk(currentUser.email,userPassword),de=await dd(k,md.data);const dj=JSON.parse(de);lp=dj.type==='text'?dj.text:(dj.type==='image'?'Фото':dj.type==='video'?'Видео':'Музыка');lt=ft(dj.timestamp)}catch(e){lp='Сообщение';lt=''}}ca.push({key:ck,otherKey:cd.otherKey,name:p.name,username:p.username,avatar:p.avatar,lastPreview:lp,lastTime:lt,unread:cd.unread||0})}ca.sort((a,b)=>{if(!a.lastTime&&!b.lastTime)return 0;if(!a.lastTime)return 1;if(!b.lastTime)return -1;return 0});if(ca.length===0){chatListEl.innerHTML='<div class="empty" style="padding:60px 20px;"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><p>Нет чатов</p><div class="empty-sub">Найдите пользователя по юзернейму</div></div>';return}chatListEl.innerHTML=ca.map(c=>'<div class="chat-item" onclick="openChat(''+c.otherKey+'',''+c.name+'',''+c.avatar+'',''+c.username+'')"><img class="chat-item-avatar" src="'+(c.avatar||'')+'" alt=""><div class="chat-item-info"><div class="chat-item-name">'+esc(c.name)+'</div><div class="chat-item-preview">'+esc(c.lastPreview||'Начните общение')+'</div></div><div class="chat-item-meta"><div class="chat-item-time">'+(c.lastTime||'')+'</div>'+(c.unread>0?'<div class="chat-item-badge">'+c.unread+'</div>':'')+'</div></div>').join('')}catch(e){console.error(e);chatListEl.innerHTML='<div class="empty" style="padding:40px 20px;"><p>Ошибка загрузки</p></div>'}}
+async function loadChatList(){
+    if(!currentUser||!userKey)return;
+    chatListEl.innerHTML='<div class="empty" style="padding:40px 20px;"><p>Загрузка...</p></div>';
+    try{
+        const s=await db.ref('userChats/'+userKey).once('value'),c=s.val()||{};
+        const ca=[];
+        for(const ck in c){
+            const cd=c[ck];
+            if(!cd.otherKey)continue;
+            const ps=await db.ref('profiles/'+cd.otherKey).once('value'),p=ps.val()||{name:'Пользователь',username:'unknown',avatar:'https://api.dicebear.com/7.x/avataaars/svg?seed='+cd.otherKey};
+            const ms=await db.ref('chats/'+ck+'/messages').orderByKey().limitToLast(1).once('value'),mv=ms.val();
+            let lp='',lt='';
+            if(mv){
+                const mk=Object.keys(mv)[0],md=mv[mk];
+                try{
+                    if(userPassword){
+                        const k=await dk(currentUser.email,userPassword),de=await dd(k,md.data);
+                        const dj=JSON.parse(de);
+                        lp=dj.type==='text'?dj.text:(dj.type==='image'?'Фото':dj.type==='video'?'Видео':'Музыка');
+                        lt=ft(dj.timestamp);
+                    } else {
+                        lp='Сообщение';
+                    }
+                }catch(e){lp='Сообщение';lt=''}
+            }
+            ca.push({key:ck,otherKey:cd.otherKey,name:p.name,username:p.username,avatar:p.avatar,lastPreview:lp,lastTime:lt,unread:cd.unread||0});
+        }
+        ca.sort((a,b)=>{if(!a.lastTime&&!b.lastTime)return 0;if(!a.lastTime)return 1;if(!b.lastTime)return -1;return 0});
+        if(ca.length===0){
+            chatListEl.innerHTML='<div class="empty" style="padding:60px 20px;"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><p>Нет чатов</p><div class="empty-sub">Найдите пользователя по юзернейму</div></div>';
+            return;
+        }
+        chatListEl.innerHTML=ca.map(c=>'<div class="chat-item" onclick="openChat(\''+c.otherKey+'\',\''+esc(c.name)+'\',\''+(c.avatar||'')+'\',\''+esc(c.username)+'\')"><img class="chat-item-avatar" src="'+(c.avatar||'')+'" alt=""><div class="chat-item-info"><div class="chat-item-name">'+esc(c.name)+'</div><div class="chat-item-preview">'+esc(c.lastPreview||'Начните общение')+'</div></div><div class="chat-item-meta"><div class="chat-item-time">'+(c.lastTime||'')+'</div>'+(c.unread>0?'<div class="chat-item-badge">'+c.unread+'</div>':'')+'</div></div>').join('');
+    }catch(e){
+        console.error(e);
+        chatListEl.innerHTML='<div class="empty" style="padding:40px 20px;"><p>Ошибка загрузки</p></div>';
+    }
+}
 
-window.openChat=async(ouk,oname,oavatar,ouname)=>{if(!currentUser||!userPassword){showToast('Войдите с паролем');return}chatKey=gck(userKey,ouk);currentChat={otherKey:ouk,name:oname,avatar:oavatar,username:ouname};chatRoomName.textContent=oname;chatRoomAvatar.src=oavatar||'';chatMessages.innerHTML='';chatRoom.classList.add('show');if(chatOnlineRef)chatOnlineRef.off();chatOnlineRef=getOnline(ouk,(s,ls)=>{chatRoomStatus.textContent=fos(s,ls);chatRoomStatus.classList.toggle('online',s==='online')});
+window.openChat=async(ouk,oname,oavatar,ouname)=>{
+    if(!currentUser||!userPassword){showToast('Войдите с паролем');return}
+    chatKey=gck(userKey,ouk);
+    currentChat={otherKey:ouk,name:oname,avatar:oavatar,username:ouname};
+    chatRoomName.textContent=oname;
+    chatRoomAvatar.src=oavatar||'';
+    chatMessages.innerHTML='';
+    chatRoom.classList.add('show');
+    if(chatOnlineRef)chatOnlineRef.off();
+    chatOnlineRef=getOnline(ouk,(s,ls)=>{chatRoomStatus.textContent=fos(s,ls);chatRoomStatus.classList.toggle('online',s==='online')});
 
-// Mark unread as read
-try{await db.ref('userChats/'+userKey+'/'+chatKey).update({unread:0})}catch(e){}
+    try{await db.ref('userChats/'+userKey+'/'+chatKey).update({unread:0})}catch(e){}
 
-// Load messages
-try{const k=await dk(currentUser.email,userPassword),s=await db.ref('chats/'+chatKey+'/messages').orderByKey().once('value'),d=s.val()||{};let ld='';for(const id in d){try{const de=await dd(k,d[id].data);const mj=JSON.parse(de);const cd=fdd(mj.timestamp);if(cd!==ld){ld=cd;chatMessages.innerHTML+='<div class="msg-date">'+cd+'</div>'}renderMsg(mj,id)}catch(e){console.log('decrypt fail',e)}}scrollToBottom()}catch(e){console.error(e);showToast('Ошибка загрузки чата')}
+    try{
+        const k=await dk(currentUser.email,userPassword),s=await db.ref('chats/'+chatKey+'/messages').orderByKey().once('value'),d=s.val()||{};
+        let ld='';
+        for(const id in d){
+            try{
+                const de=await dd(k,d[id].data);
+                const mj=JSON.parse(de);
+                const cd=fdd(mj.timestamp);
+                if(cd!==ld){ld=cd;chatMessages.innerHTML+='<div class="msg-date">'+cd+'</div>'}
+                renderMsg(mj,id);
+            }catch(e){console.log('decrypt fail',e)}
+        }
+        scrollToBottom();
+    }catch(e){console.error(e);showToast('Ошибка загрузки чата')}
 
-// Listen for new messages
-if(chatListener)chatListener.off();chatListener=db.ref('chats/'+chatKey+'/messages').orderByKey().limitToLast(1);chatListener.on('child_added',async(snap)=>{const id=snap.key;const existing=document.querySelector('[data-msgid="'+id+'"]');if(existing)return;try{const k=await dk(currentUser.email,userPassword),de=await dd(k,snap.val().data);const mj=JSON.parse(de);const cd=fdd(mj.timestamp);const dates=document.querySelectorAll('.msg-date');let lastDate='';if(dates.length)lastDate=dates[dates.length-1].textContent;if(cd!==lastDate){const ddEl=document.createElement('div');ddEl.className='msg-date';ddEl.textContent=cd;chatMessages.appendChild(ddEl)}renderMsg(mj,id);scrollToBottom();if(mj.sender!==userKey){db.ref('userChats/'+userKey+'/'+chatKey).update({unread:0})}}catch(e){}})};
+    if(chatListener)chatListener.off();
+    chatListener=db.ref('chats/'+chatKey+'/messages').orderByKey().limitToLast(1);
+    chatListener.on('child_added',async(snap)=>{
+        const id=snap.key;
+        const existing=document.querySelector('[data-msgid="'+id+'"]');
+        if(existing)return;
+        try{
+            const k=await dk(currentUser.email,userPassword),de=await dd(k,snap.val().data);
+            const mj=JSON.parse(de);
+            const cd=fdd(mj.timestamp);
+            const dates=document.querySelectorAll('.msg-date');
+            let lastDate='';
+            if(dates.length)lastDate=dates[dates.length-1].textContent;
+            if(cd!==lastDate){
+                const ddEl=document.createElement('div');
+                ddEl.className='msg-date';
+                ddEl.textContent=cd;
+                chatMessages.appendChild(ddEl);
+            }
+            renderMsg(mj,id);
+            scrollToBottom();
+            if(mj.sender!==userKey){db.ref('userChats/'+userKey+'/'+chatKey).update({unread:0})}
+        }catch(e){}
+    });
+};
 
-function renderMsg(m,id){const el=document.createElement('div');el.className='msg-bubble '+(m.sender===userKey?'out':'in');el.setAttribute('data-msgid',id);let content='';if(m.type==='text')content=esc(m.text);else if(m.type==='image')content='<img src="'+m.data+'" onclick="viewMedia(this)" style="cursor:pointer">';else if(m.type==='video')content='<video src="'+m.data+'" controls preload="metadata" poster="'+m.data+'"></video>';else if(m.type==='audio')content='<audio src="'+m.data+'" controls></audio>';el.innerHTML=content+'<div class="msg-time">'+fmt(m.timestamp)+'<span class="msg-status">'+(m.sender===userKey?'<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>':'')+'</span></div>';chatMessages.appendChild(el)}
+function renderMsg(m,id){
+    const el=document.createElement('div');
+    el.className='msg-bubble '+(m.sender===userKey?'out':'in');
+    el.setAttribute('data-msgid',id);
+    let content='';
+    if(m.type==='text')content=esc(m.text);
+    else if(m.type==='image')content='<img src="'+m.data+'" onclick="viewMedia(this)" style="cursor:pointer">';
+    else if(m.type==='video')content='<video src="'+m.data+'" controls preload="metadata" poster="'+m.data+'"></video>';
+    else if(m.type==='audio')content='<audio src="'+m.data+'" controls></audio>';
+    el.innerHTML=content+'<div class="msg-time">'+fmt(m.timestamp)+'<span class="msg-status">'+(m.sender===userKey?'<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>':'')+'</span></div>';
+    chatMessages.appendChild(el);
+}
+
 function scrollToBottom(){chatMessages.scrollTop=chatMessages.scrollHeight}
 function viewMedia(el){viewerContent.innerHTML=el.outerHTML;viewer.classList.add('show')}
 
@@ -403,21 +635,76 @@ attachPhotoInput.addEventListener('change',(e)=>sendMedia(e.target.files[0],'ima
 attachVideoInput.addEventListener('change',(e)=>sendMedia(e.target.files[0],'video'));
 attachAudioInput.addEventListener('change',(e)=>sendMedia(e.target.files[0],'audio'));
 
-async function sendMedia(file,type){if(!file||!currentChat||!userPassword)return;showToast('Обработка...');try{let data='';if(type==='image'){data=await cib(file,700,0.55)}else{data=await f2b(file)}if(data.length>9000000){showToast('Файл слишком большой');return}const k=await dk(currentUser.email,userPassword);const msg={sender:userKey,type:type,data:data,timestamp:Date.now()};const enc=await ed(k,JSON.stringify(msg));const mid=Date.now().toString();await db.ref('chats/'+chatKey+'/messages/'+mid).set({data:enc});await db.ref('userChats/'+userKey+'/'+chatKey).set({otherKey:currentChat.otherKey,lastMsg:Date.now(),unread:0});await db.ref('userChats/'+currentChat.otherKey+'/'+chatKey).set({otherKey:userKey,lastMsg:Date.now(),unread:firebase.database.ServerValue.increment(1)});showToast('Отправлено!')}catch(e){console.error(e);showToast('Ошибка отправки')}};
+async function sendMedia(file,type){
+    if(!file||!currentChat||!userPassword)return;
+    showToast('Обработка...');
+    try{
+        let data='';
+        if(type==='image'){data=await cib(file,700,0.55)}else{data=await f2b(file)}
+        if(data.length>9000000){showToast('Файл слишком большой');return}
+        const k=await dk(currentUser.email,userPassword);
+        const msg={sender:userKey,type:type,data:data,timestamp:Date.now()};
+        const enc=await ed(k,JSON.stringify(msg));
+        const mid=Date.now().toString();
+        await db.ref('chats/'+chatKey+'/messages/'+mid).set({data:enc});
+        await db.ref('userChats/'+userKey+'/'+chatKey).set({otherKey:currentChat.otherKey,lastMsg:Date.now(),unread:0});
+        await db.ref('userChats/'+currentChat.otherKey+'/'+chatKey).set({otherKey:userKey,lastMsg:Date.now(),unread:firebase.database.ServerValue.increment(1)});
+        showToast('Отправлено!');
+    }catch(e){console.error(e);showToast('Ошибка отправки')}
+}
 
 chatSend.addEventListener('click',sendMsg);
 chatInput.addEventListener('keydown',(e)=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg()}});
-async function sendMsg(){const text=chatInput.value.trim();if(!text||!currentChat||!userPassword)return;chatInput.value='';try{const k=await dk(currentUser.email,userPassword);const msg={sender:userKey,type:'text',text:text,timestamp:Date.now()};const enc=await ed(k,JSON.stringify(msg));const mid=Date.now().toString();await db.ref('chats/'+chatKey+'/messages/'+mid).set({data:enc});await db.ref('userChats/'+userKey+'/'+chatKey).set({otherKey:currentChat.otherKey,lastMsg:Date.now(),unread:0});await db.ref('userChats/'+currentChat.otherKey+'/'+chatKey).set({otherKey:userKey,lastMsg:Date.now(),unread:firebase.database.ServerValue.increment(1)})}catch(e){console.error(e);showToast('Ошибка отправки')}}
+async function sendMsg(){
+    const text=chatInput.value.trim();
+    if(!text||!currentChat||!userPassword)return;
+    chatInput.value='';
+    try{
+        const k=await dk(currentUser.email,userPassword);
+        const msg={sender:userKey,type:'text',text:text,timestamp:Date.now()};
+        const enc=await ed(k,JSON.stringify(msg));
+        const mid=Date.now().toString();
+        await db.ref('chats/'+chatKey+'/messages/'+mid).set({data:enc});
+        await db.ref('userChats/'+userKey+'/'+chatKey).set({otherKey:currentChat.otherKey,lastMsg:Date.now(),unread:0});
+        await db.ref('userChats/'+currentChat.otherKey+'/'+chatKey).set({otherKey:userKey,lastMsg:Date.now(),unread:firebase.database.ServerValue.increment(1)});
+    }catch(e){console.error(e);showToast('Ошибка отправки')}
+}
 
 // Search user by username
-chatSearchInput.addEventListener('keydown',async(e)=>{if(e.key!=='Enter')return;const q=chatSearchInput.value.trim().toLowerCase().replace(/[^a-z0-9_]/g,'');if(!q||q.length<3){showToast('Минимум 3 символа');return}showToast('Поиск...');try{const s=await db.ref('profiles').once('value'),d=s.val()||{};let found=null,foundKey=null;for(const k in d){if(d[k].username===q){found=d[k];foundKey=k;break}}if(!found){showToast('Пользователь не найден');return}if(foundKey===userKey){showToast('Это вы :)');return}const ck=gck(userKey,foundKey);await db.ref('userChats/'+userKey+'/'+ck).set({otherKey:foundKey,lastMsg:Date.now(),unread:0});openChat(foundKey,found.name,found.avatar,found.username);chatSearchInput.value=''}catch(e){showToast('Ошибка поиска')}});
+chatSearchInput.addEventListener('keydown',async(e)=>{
+    if(e.key!=='Enter')return;
+    const q=chatSearchInput.value.trim().toLowerCase().replace(/[^a-z0-9_]/g,'');
+    if(!q||q.length<3){showToast('Минимум 3 символа');return}
+    showToast('Поиск...');
+    try{
+        const s=await db.ref('profiles').once('value'),d=s.val()||{};
+        let found=null,foundKey=null;
+        for(const k in d){if(d[k].username===q){found=d[k];foundKey=k;break}}
+        if(!found){showToast('Пользователь не найден');return}
+        if(foundKey===userKey){showToast('Это вы :)');return}
+        const ck=gck(userKey,foundKey);
+        await db.ref('userChats/'+userKey+'/'+ck).set({otherKey:foundKey,lastMsg:Date.now(),unread:0});
+        openChat(foundKey,found.name,found.avatar,found.username);
+        chatSearchInput.value='';
+    }catch(e){showToast('Ошибка поиска')}
+});
 
-function esc(t){const d=document.createElement('div');d.textContent=t;return d.innerHTML}
+function esc(t){if(!t)return'';const d=document.createElement('div');d.textContent=t;return d.innerHTML}
 
 // Check URL for profile param
 const urlParams=new URLSearchParams(window.location.search);
 const profileUser=urlParams.get('u');
-if(profileUser){window.addEventListener('load',async()=>{try{const s=await db.ref('profiles').once('value'),d=s.val()||{};for(const k in d){if(d[k].username===profileUser){showToast('Профиль @'+profileUser);return}}showToast('Профиль не найден')}catch(e){}})}
+if(profileUser){
+    window.addEventListener('load',async()=>{
+        try{
+            const s=await db.ref('profiles').once('value'),d=s.val()||{};
+            for(const k in d){
+                if(d[k].username===profileUser){showToast('Профиль @'+profileUser);return}
+            }
+            showToast('Профиль не найден');
+        }catch(e){}
+    });
+}
 </script>
 </body>
 </html>
