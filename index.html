@@ -2,530 +2,422 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#0a0a0a">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#000">
 <title>Meow</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  :root {
-    --bg:#0a0a0a; --surface:#141414; --surface2:#1e1e1e; --text:#fff; --text2:#888; --accent:#e60023; --radius:16px;
-  }
-  html,body { height:100%; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; overflow:hidden; }
-  #app { height:100%; display:flex; flex-direction:column; }
-  .safe-top { height:env(safe-area-inset-top,0); background:var(--bg); }
-
-  .header {
-    display:flex; align-items:center; justify-content:space-between;
-    padding:8px 16px 4px; background:var(--bg); position:sticky; top:0; z-index:100;
-  }
-  .tabs { display:flex; gap:20px; }
-  .tab { font-size:16px; font-weight:600; color:var(--text2); padding-bottom:6px; position:relative; cursor:pointer; }
-  .tab.active { color:var(--text); }
-  .tab.active::after { content:""; position:absolute; bottom:0; left:0; right:0; height:2.5px; background:var(--text); border-radius:2px; }
-  .filter-btn {
-    width:36px; height:36px; border-radius:50%; background:var(--surface2); display:flex; align-items:center; justify-content:center; cursor:pointer;
-  }
-  .filter-btn svg { width:18px; height:18px; stroke:var(--text); fill:none; stroke-width:2; }
-
-  .feed-wrap { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:0 8px 80px; }
-  .feed { column-count:2; column-gap:8px; }
-  .pin {
-    break-inside:avoid; margin-bottom:8px; border-radius:var(--radius); overflow:hidden; background:var(--surface); position:relative; cursor:pointer; animation:fadeIn .4s ease;
-  }
-  @keyframes fadeIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
-  .pin img { width:100%; display:block; border-radius:var(--radius); }
-  .pin-overlay { position:absolute; inset:0; background:linear-gradient(to top,rgba(0,0,0,.6) 0%,transparent 50%); opacity:0; transition:opacity .2s; border-radius:var(--radius); }
-  .pin:hover .pin-overlay, .pin:active .pin-overlay { opacity:1; }
-  .pin-actions { position:absolute; bottom:8px; left:8px; right:8px; display:flex; justify-content:space-between; align-items:center; opacity:0; transition:opacity .2s; }
-  .pin:hover .pin-actions, .pin:active .pin-actions { opacity:1; }
-  .pin-like { color:var(--text); font-size:13px; display:flex; align-items:center; gap:4px; }
-  .pin-like.liked { color:var(--accent); }
-  .pin-more { color:var(--text); padding:4px; }
-  .pin-title { padding:8px 10px 10px; font-size:13px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-
-  .bottom-nav {
-    position:fixed; bottom:0; left:0; right:0; height:56px; background:var(--bg); border-top:1px solid var(--surface2);
-    display:flex; justify-content:space-around; align-items:center; padding-bottom:env(safe-area-inset-bottom,0); z-index:100;
-  }
-  .nav-item { width:48px; height:48px; display:flex; align-items:center; justify-content:center; cursor:pointer; border-radius:50%; transition:background .2s; }
-  .nav-item:active { background:var(--surface2); }
-  .nav-item svg { width:24px; height:24px; stroke:var(--text2); fill:none; stroke-width:2; }
-  .nav-item.active svg { stroke:var(--text); }
-  .nav-item.add { background:var(--text); }
-  .nav-item.add svg { stroke:var(--bg); }
-  .nav-avatar { width:28px; height:28px; border-radius:50%; object-fit:cover; border:2px solid var(--text2); }
-  .nav-item.active .nav-avatar { border-color:var(--text); }
-
-  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:200; display:none; align-items:center; justify-content:center; padding:20px; }
-  .modal-overlay.show { display:flex; }
-  .modal { background:var(--surface); border-radius:var(--radius); padding:28px 24px; width:100%; max-width:340px; }
-  .modal h2 { font-size:20px; margin-bottom:20px; text-align:center; }
-  .modal input { width:100%; padding:14px 16px; border-radius:12px; border:none; background:var(--surface2); color:var(--text); font-size:15px; margin-bottom:12px; outline:none; }
-  .modal input::placeholder { color:var(--text2); }
-  .modal button { width:100%; padding:14px; border-radius:12px; border:none; background:var(--accent); color:#fff; font-size:16px; font-weight:600; cursor:pointer; margin-top:8px; }
-  .modal .switch { text-align:center; margin-top:16px; color:var(--text2); font-size:14px; cursor:pointer; }
-  .modal .switch span { color:var(--text); text-decoration:underline; }
-  .modal .error { color:#ff4444; font-size:13px; margin-top:8px; text-align:center; display:none; }
-
-  .upload-modal { position:fixed; inset:0; background:var(--bg); z-index:200; display:none; flex-direction:column; }
-  .upload-modal.show { display:flex; }
-  .upload-header { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--surface2); }
-  .upload-header h3 { font-size:16px; }
-  .upload-header .cancel { color:var(--text2); font-size:14px; cursor:pointer; }
-  .upload-header .done { color:var(--accent); font-size:14px; font-weight:600; cursor:pointer; }
-  .upload-area { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; }
-  .upload-btn {
-    width:160px; height:160px; border-radius:var(--radius); background:var(--surface2); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; cursor:pointer; border:2px dashed var(--text2);
-  }
-  .upload-btn svg { width:40px; height:40px; stroke:var(--text2); fill:none; stroke-width:1.5; }
-  .upload-btn span { color:var(--text2); font-size:14px; }
-  .upload-preview { width:100%; max-height:50vh; object-fit:contain; border-radius:var(--radius); display:none; }
-  .upload-title-input { width:100%; max-width:400px; padding:14px 16px; border-radius:12px; border:none; background:var(--surface2); color:var(--text); font-size:15px; margin-top:16px; outline:none; display:none; }
-  .upload-title-input::placeholder { color:var(--text2); }
-  .upload-progress { width:100%; max-width:400px; height:4px; background:var(--surface2); border-radius:2px; margin-top:12px; display:none; overflow:hidden; }
-  .upload-progress-bar { height:100%; width:0%; background:var(--accent); border-radius:2px; transition:width .3s; }
-  .upload-info { color:var(--text2); font-size:12px; margin-top:8px; display:none; }
-
-  .loader { position:fixed; inset:0; background:var(--bg); z-index:300; display:flex; align-items:center; justify-content:center; }
-  .loader.hide { display:none; }
-  .spinner { width:40px; height:40px; border:3px solid var(--surface2); border-top-color:var(--accent); border-radius:50%; animation:spin 1s linear infinite; }
-  @keyframes spin { to { transform:rotate(360deg); } }
-
-  .empty { text-align:center; padding:60px 20px; color:var(--text2); }
-  .empty svg { width:64px; height:64px; stroke:var(--text2); fill:none; stroke-width:1.5; margin-bottom:16px; }
-  .empty p { font-size:15px; }
-
-  .toast { position:fixed; bottom:72px; left:50%; transform:translateX(-50%) translateY(100px); background:var(--surface2); color:var(--text); padding:10px 20px; border-radius:20px; font-size:14px; z-index:250; opacity:0; transition:all .3s; max-width:90%; word-break:break-word; }
-  .toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
-
-  .feed-wrap::-webkit-scrollbar { display:none; }
-  .feed-wrap { -ms-overflow-style:none; scrollbar-width:none; }
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#000;--s1:#0a0a0a;--s2:#141414;--s3:#1e1e1e;--s4:#2a2a2a;--t:#fff;--t2:#a0a0a0;--t3:#666;--a:#e60023;--a2:#ff3355;--g:#00c853;--r:18px;--rs:14px;--rx:10px}
+html,body{height:100%;background:var(--bg);color:var(--t);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;overflow:hidden}
+#app{height:100%;display:flex;flex-direction:column}
+.safe-top{height:env(safe-area-inset-top,0);background:var(--bg);flex-shrink:0}
+.header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px 6px;background:var(--bg);position:sticky;top:0;z-index:100;flex-shrink:0}
+.tabs{display:flex;gap:24px}
+.tab{font-size:17px;font-weight:700;color:var(--t2);padding-bottom:7px;position:relative;cursor:pointer}
+.tab.active{color:var(--t)}
+.tab.active::after{content:"";position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--t);border-radius:3px}
+.filter-btn{width:38px;height:38px;border-radius:50%;background:var(--s3);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.filter-btn svg{width:18px;height:18px;stroke:var(--t);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.feed-wrap{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 6px 20px}
+.feed{column-count:2;column-gap:7px;padding-top:4px}
+.feed-wrap::-webkit-scrollbar{display:none}
+.pin{break-inside:avoid;margin-bottom:7px;border-radius:var(--r);overflow:hidden;background:var(--s2);position:relative;cursor:pointer;animation:pi .4s cubic-bezier(.22,1,.36,1)}
+@keyframes pi{from{opacity:0;transform:scale(.92) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.pin img{width:100%;display:block;border-radius:var(--r);min-height:80px;background:var(--s3)}
+.pin-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.55) 0%,transparent 55%);opacity:0;transition:opacity .2s;border-radius:var(--r);pointer-events:none}
+.pin:active .pin-overlay{opacity:1}
+.pin-save{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s,transform .15s;cursor:pointer;z-index:5}
+.pin:hover .pin-save,.pin:active .pin-save{opacity:1}
+.pin-save:active{transform:scale(.9)}
+.pin-save svg{width:16px;height:16px;stroke:var(--t);fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.pin-save.saved svg{fill:var(--a);stroke:var(--a)}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:rgba(0,0,0,.92);backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-around;align-items:center;padding-bottom:env(safe-area-inset-bottom,0);z-index:100}
+.nav-item{width:52px;height:48px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:14px;transition:background .15s;position:relative}
+.nav-item:active{background:rgba(255,255,255,.06)}
+.nav-item svg{width:26px;height:26px;stroke:var(--t3);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:stroke .2s}
+.nav-item.active svg{stroke:var(--t)}
+.nav-item.add{background:var(--t);width:44px;height:44px;border-radius:50%;margin-top:-2px}
+.nav-item.add svg{stroke:var(--bg);width:22px;height:22px;stroke-width:2.5}
+.nav-avatar{width:28px;height:28px;border-radius:50%;object-fit:cover;border:2px solid var(--t3);transition:border-color .2s}
+.nav-item.active .nav-avatar{border-color:var(--t)}
+.nav-badge{position:absolute;top:6px;right:6px;width:8px;height:8px;background:var(--a);border-radius:50%;border:2px solid var(--bg);display:none}
+.nav-badge.show{display:block}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);backdrop-filter:blur(10px);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--s2);border-radius:var(--r);padding:32px 24px;width:100%;max-width:360px;border:1px solid rgba(255,255,255,.06)}
+.modal-logo{text-align:center;margin-bottom:28px}
+.modal-logo svg{width:48px;height:48px;stroke:var(--a);fill:none;stroke-width:2}
+.modal h2{font-size:24px;margin-bottom:24px;text-align:center;font-weight:800}
+.modal input{width:100%;padding:15px 16px;border-radius:var(--rs);border:1px solid rgba(255,255,255,.1);background:var(--s3);color:var(--t);font-size:16px;margin-bottom:12px;outline:none}
+.modal input:focus{border-color:var(--a)}
+.modal input::placeholder{color:var(--t3)}
+.modal button{width:100%;padding:15px;border-radius:var(--rs);border:none;background:var(--a);color:#fff;font-size:17px;font-weight:700;cursor:pointer;margin-top:8px}
+.modal button:active{transform:scale(.98);background:var(--a2)}
+.modal button:disabled{opacity:.5}
+.modal .switch{text-align:center;margin-top:20px;color:var(--t2);font-size:14px;cursor:pointer}
+.modal .switch span{color:var(--t);font-weight:600}
+.modal .error{color:var(--a);font-size:13px;margin-top:10px;text-align:center;display:none;font-weight:500}
+.upload-modal{position:fixed;inset:0;background:var(--bg);z-index:200;display:none;flex-direction:column}
+.upload-modal.show{display:flex}
+.upload-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0}
+.upload-header h3{font-size:17px;font-weight:700}
+.upload-header .cancel{color:var(--t2);font-size:15px;cursor:pointer;padding:4px}
+.upload-header .done{color:var(--a);font-size:15px;font-weight:700;cursor:pointer;padding:4px;opacity:.35;pointer-events:none;transition:opacity .2s}
+.upload-header .done.active{opacity:1;pointer-events:auto}
+.upload-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;overflow-y:auto}
+.upload-btn{width:170px;height:170px;border-radius:var(--r);background:var(--s2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;cursor:pointer;border:2px dashed rgba(255,255,255,.15)}
+.upload-btn svg{width:42px;height:42px;stroke:var(--t3);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.upload-btn span{color:var(--t3);font-size:14px;font-weight:500}
+.upload-preview{width:100%;max-height:45vh;object-fit:contain;border-radius:var(--rs);display:none;margin-bottom:16px}
+.upload-progress{width:100%;max-width:320px;height:4px;background:var(--s3);border-radius:2px;margin-top:16px;display:none;overflow:hidden}
+.upload-progress-bar{height:100%;width:0%;background:var(--a);border-radius:2px;transition:width .3s cubic-bezier(.22,1,.36,1)}
+.upload-info{color:var(--t2);font-size:12px;margin-top:10px;font-weight:500;display:none}
+.viewer{position:fixed;inset:0;background:var(--bg);z-index:300;display:none;flex-direction:column}
+.viewer.show{display:flex}
+.viewer-header{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;flex-shrink:0}
+.viewer-header .back{width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:50%}
+.viewer-header .back:active{background:rgba(255,255,255,.08)}
+.viewer-header .back svg{width:24px;height:24px;stroke:var(--t);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.viewer-actions{display:flex;gap:4px;align-items:center}
+.viewer-actions .icon-btn{width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:50%}
+.viewer-actions .icon-btn:active{background:rgba(255,255,255,.08)}
+.viewer-actions .icon-btn svg{width:22px;height:22px;stroke:var(--t);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.viewer-actions .download-btn{background:var(--a);color:#fff;padding:9px 20px;border-radius:24px;font-size:14px;font-weight:700;cursor:pointer;border:none}
+.viewer-actions .download-btn:active{transform:scale(.96);background:var(--a2)}
+.viewer-img-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:8px;overflow:hidden}
+.viewer-img-wrap img{max-width:100%;max-height:100%;object-fit:contain;border-radius:var(--rs)}
+.viewer-img-wrap video{max-width:100%;max-height:100%;border-radius:var(--rs)}
+.viewer-img-wrap audio{width:100%;max-width:400px}
+.profile-wrap{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:20px;display:none}
+.profile-wrap.show{display:block}
+.profile-wrap::-webkit-scrollbar{display:none}
+.profile-header{position:relative}
+.profile-banner{width:100%;height:170px;background:linear-gradient(135deg,#0d1b2a,#1b263b,#415a77);position:relative;overflow:hidden}
+.profile-banner img{width:100%;height:100%;object-fit:cover}
+.profile-banner-edit{position:absolute;bottom:10px;right:10px;width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.profile-banner-edit svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.profile-avatar-wrap{display:flex;justify-content:center;margin-top:-55px;position:relative;z-index:2;padding:0 20px}
+.profile-avatar{width:110px;height:110px;border-radius:50%;border:4px solid var(--bg);object-fit:cover;background:var(--s3);box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.profile-avatar-edit{position:absolute;bottom:6px;right:calc(50% - 55px + 6px);width:32px;height:32px;border-radius:50%;background:var(--s3);border:3px solid var(--bg);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.profile-avatar-edit svg{width:14px;height:14px;stroke:var(--t);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.profile-info{text-align:center;padding:14px 20px 20px}
+.profile-name{font-size:24px;font-weight:800;margin-bottom:5px}
+.profile-username{font-size:15px;color:var(--t2);margin-bottom:10px;font-weight:500}
+.profile-status{display:inline-flex;align-items:center;gap:6px;color:var(--g);font-size:13px;font-weight:500;margin-bottom:14px}
+.profile-status-dot{width:8px;height:8px;background:var(--g);border-radius:50%;animation:pu 2s infinite}
+@keyframes pu{0%,100%{opacity:1}50%{opacity:.4}}
+.profile-bio{font-size:14px;color:var(--t2);line-height:1.6;margin-bottom:18px;word-break:break-word;max-width:320px;margin-left:auto;margin-right:auto}
+.profile-stats{display:flex;justify-content:center;gap:28px;margin-bottom:20px}
+.profile-stat{text-align:center}
+.profile-stat-num{font-size:20px;font-weight:800}
+.profile-stat-label{font-size:12px;color:var(--t2);margin-top:2px;font-weight:500}
+.profile-buttons{display:flex;gap:10px;justify-content:center;padding:0 20px;margin-bottom:20px}
+.profile-btn{flex:1;max-width:150px;padding:11px 0;border-radius:var(--rs);border:none;font-size:14px;font-weight:700;cursor:pointer;transition:transform .1s}
+.profile-btn:active{transform:scale(.97)}
+.profile-btn.primary{background:var(--a);color:#fff}
+.profile-btn.secondary{background:var(--s3);color:var(--t)}
+.profile-tabs{display:flex;justify-content:center;gap:36px;border-bottom:1px solid rgba(255,255,255,.06);padding:0 20px}
+.profile-tab{font-size:15px;font-weight:700;color:var(--t3);padding-bottom:12px;position:relative;cursor:pointer;transition:color .2s}
+.profile-tab.active{color:var(--t)}
+.profile-tab.active::after{content:"";position:absolute;bottom:0;left:-10px;right:-10px;height:3px;background:var(--t);border-radius:3px}
+.profile-feed{padding:10px 6px;column-count:3;column-gap:5px}
+.profile-feed .pin{margin-bottom:5px;border-radius:var(--rx)}
+.profile-feed .pin img{border-radius:var(--rx)}
+.edit-modal{position:fixed;inset:0;background:var(--bg);z-index:250;display:none;flex-direction:column}
+.edit-modal.show{display:flex}
+.edit-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0}
+.edit-header h3{font-size:17px;font-weight:700}
+.edit-header .cancel{color:var(--t2);font-size:15px;cursor:pointer;padding:4px}
+.edit-header .save{color:var(--a);font-size:15px;font-weight:700;cursor:pointer;padding:4px}
+.edit-body{padding:20px;overflow-y:auto;flex:1}
+.edit-body::-webkit-scrollbar{display:none}
+.edit-field{margin-bottom:22px}
+.edit-field label{display:block;font-size:11px;color:var(--t2);margin-bottom:7px;text-transform:uppercase;letter-spacing:1px;font-weight:700}
+.edit-field input,.edit-field textarea{width:100%;padding:14px 16px;border-radius:var(--rs);border:1px solid rgba(255,255,255,.1);background:var(--s3);color:var(--t);font-size:15px;outline:none}
+.edit-field input:focus,.edit-field textarea:focus{border-color:var(--a)}
+.edit-field textarea{min-height:90px;resize:none;line-height:1.5}
+.edit-field .hint{font-size:12px;color:var(--t3);margin-top:6px}
+.edit-banner-preview{width:100%;height:130px;border-radius:var(--rs);object-fit:cover;margin-bottom:8px;background:var(--s3);cursor:pointer}
+.edit-avatar-preview{width:90px;height:90px;border-radius:50%;object-fit:cover;margin:0 auto 8px;display:block;background:var(--s3);cursor:pointer;border:3px solid var(--s2)}
+.messenger-wrap{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:none;flex-direction:column}
+.messenger-wrap.show{display:flex}
+.messenger-wrap::-webkit-scrollbar{display:none}
+.chat-list-header{padding:16px 16px 8px}
+.chat-list-header h2{font-size:28px;font-weight:800;margin-bottom:12px}
+.chat-search{position:relative;margin-bottom:8px}
+.chat-search input{width:100%;padding:12px 16px 12px 42px;border-radius:var(--rs);border:none;background:var(--s3);color:var(--t);font-size:15px;outline:none}
+.chat-search input::placeholder{color:var(--t3)}
+.chat-search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;stroke:var(--t3);fill:none;stroke-width:2}
+.chat-list{flex:1;overflow-y:auto;padding:0 8px}
+.chat-list::-webkit-scrollbar{display:none}
+.chat-item{display:flex;align-items:center;gap:14px;padding:12px 10px;border-radius:var(--rs);cursor:pointer;transition:background .15s;margin-bottom:2px}
+.chat-item:active{background:var(--s3)}
+.chat-item-avatar{width:52px;height:52px;border-radius:50%;object-fit:cover;background:var(--s3);flex-shrink:0}
+.chat-item-info{flex:1;min-width:0}
+.chat-item-name{font-size:15px;font-weight:700;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-item-preview{font-size:13px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-item-meta{text-align:right;flex-shrink:0}
+.chat-item-time{font-size:12px;color:var(--t3);margin-bottom:3px}
+.chat-item-badge{min-width:20px;height:20px;background:var(--a);border-radius:10px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;padding:0 6px}
+.chat-room{position:fixed;inset:0;background:var(--bg);z-index:220;display:none;flex-direction:column}
+.chat-room.show{display:flex}
+.chat-room-header{display:flex;align-items:center;gap:12px;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0;background:rgba(0,0,0,.8);backdrop-filter:blur(20px)}
+.chat-room-header .back{width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:50%}
+.chat-room-header .back:active{background:rgba(255,255,255,.08)}
+.chat-room-header .back svg{width:22px;height:22px;stroke:var(--t);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.chat-room-header .chat-avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;background:var(--s3)}
+.chat-room-header .chat-info{flex:1;min-width:0}
+.chat-room-header .chat-name{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-room-header .chat-status{font-size:12px;color:var(--t2);font-weight:500}
+.chat-room-header .chat-status.online{color:var(--g)}
+.chat-messages{flex:1;overflow-y:auto;padding:16px 12px;display:flex;flex-direction:column;gap:4px}
+.chat-messages::-webkit-scrollbar{display:none}
+.msg-date{text-align:center;color:var(--t3);font-size:12px;font-weight:600;margin:12px 0;padding:4px 12px;background:var(--s2);border-radius:12px;align-self:center}
+.msg-bubble{max-width:78%;padding:10px 14px;border-radius:var(--rs);font-size:15px;line-height:1.45;word-break:break-word;position:relative;animation:mi .25s cubic-bezier(.22,1,.36,1)}
+@keyframes mi{from{opacity:0;transform:translateY(10px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+.msg-bubble.out{align-self:flex-end;background:var(--a);color:#fff;border-bottom-right-radius:4px}
+.msg-bubble.in{align-self:flex-start;background:var(--s3);color:var(--t);border-bottom-left-radius:4px}
+.msg-bubble img{max-width:100%;border-radius:var(--rx);margin:-4px -6px;display:block}
+.msg-bubble video{max-width:100%;border-radius:var(--rx);margin:-4px -6px;display:block;max-height:280px}
+.msg-bubble audio{width:100%;min-width:200px;margin:-2px 0}
+.msg-time{font-size:10px;opacity:.65;margin-top:4px;text-align:right;font-weight:500}
+.msg-status{display:inline-flex;margin-left:4px}
+.msg-status svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.chat-input-wrap{padding:10px 12px 14px;border-top:1px solid rgba(255,255,255,.06);background:rgba(0,0,0,.8);backdrop-filter:blur(20px);flex-shrink:0;position:relative}
+.chat-input-row{display:flex;align-items:flex-end;gap:8px}
+.chat-attach{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:background .15s}
+.chat-attach:active{background:rgba(255,255,255,.08)}
+.chat-attach svg{width:22px;height:22px;stroke:var(--t2);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.chat-input{flex:1;background:var(--s3);border-radius:20px;padding:10px 16px;border:none;color:var(--t);font-size:15px;outline:none;max-height:120px;resize:none;line-height:1.4;font-family:inherit}
+.chat-input::placeholder{color:var(--t3)}
+.chat-send{width:38px;height:38px;border-radius:50%;background:var(--a);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:transform .1s,background .2s;border:none}
+.chat-send:active{transform:scale(.92);background:var(--a2)}
+.chat-send svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.attach-menu{position:absolute;bottom:70px;left:12px;background:var(--s2);border-radius:var(--rs);padding:8px;border:1px solid rgba(255,255,255,.08);display:none;flex-direction:column;gap:2px;z-index:30;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+.attach-menu.show{display:flex}
+.attach-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:var(--rx);cursor:pointer;transition:background .15s;font-size:15px;font-weight:500}
+.attach-item:active{background:var(--s3)}
+.attach-item svg{width:22px;height:22px;stroke:var(--t);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.empty{text-align:center;padding:60px 20px;color:var(--t2)}
+.empty svg{width:56px;height:56px;stroke:var(--t3);fill:none;stroke-width:1.5;margin-bottom:14px}
+.empty p{font-size:15px;font-weight:500}
+.empty-sub{font-size:13px;color:var(--t3);margin-top:6px}
+.toast{position:fixed;bottom:72px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--s2);color:var(--t);padding:12px 22px;border-radius:24px;font-size:14px;font-weight:500;z-index:350;opacity:0;transition:all .35s cubic-bezier(.22,1,.36,1);border:1px solid rgba(255,255,255,.08);box-shadow:0 8px 32px rgba(0,0,0,.4);max-width:90%;text-align:center;word-break:break-word}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.loader{position:fixed;inset:0;background:var(--bg);z-index:400;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px}
+.loader.hide{display:none}
+.spinner{width:36px;height:36px;border:3px solid var(--s3);border-top-color:var(--a);border-radius:50%;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.loader-text{color:var(--t2);font-size:14px;font-weight:500}
+input[type="file"]{display:none!important}
+::-webkit-scrollbar{display:none}
 </style>
 </head>
 <body>
-<div class="loader" id="loader"><div class="spinner"></div></div>
-
+<div class="loader" id="loader"><div class="spinner"></div><div class="loader-text">Meow</div></div>
 <div id="app">
-  <div class="safe-top"></div>
-  <div class="header">
-    <div class="tabs">
-      <div class="tab active" data-tab="for-you">Для вас</div>
-      <div class="tab" data-tab="saved">Сохраненное</div>
-    </div>
-    <div class="filter-btn" id="filterBtn">
-      <svg viewBox="0 0 24 24"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
-    </div>
-  </div>
-
-  <div class="feed-wrap" id="feedWrap">
-    <div class="feed" id="feed"></div>
-    <div class="empty" id="empty" style="display:none;">
-      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
-      <p>Нет сохраненных пинов</p>
-    </div>
-  </div>
-
-  <div class="bottom-nav">
-    <div class="nav-item active" data-nav="home">
-      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-    </div>
-    <div class="nav-item" data-nav="search">
-      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-    </div>
-    <div class="nav-item add" id="addBtn">
-      <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-    </div>
-    <div class="nav-item" data-nav="messages">
-      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-    </div>
-    <div class="nav-item" data-nav="profile" id="profileNav">
-      <svg viewBox="0 0 24 24" id="profileIcon"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      <img src="" class="nav-avatar" id="navAvatar" style="display:none;">
-    </div>
-  </div>
+<div class="safe-top"></div>
+<div class="header" id="homeHeader">
+<div class="tabs"><div class="tab active" data-tab="for-you">Для вас</div><div class="tab" data-tab="saved">Сохраненное</div></div>
+<div class="filter-btn" id="filterBtn"><svg viewBox="0 0 24 24"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg></div>
 </div>
-
+<div class="feed-wrap" id="feedWrap"><div class="feed" id="feed"></div><div class="empty" id="empty" style="display:none;"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg><p>Нет сохраненных пинов</p></div></div>
+<div class="messenger-wrap" id="messengerWrap">
+<div class="chat-list-header"><h2>Сообщения</h2><div class="chat-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" id="chatSearchInput" placeholder="Поиск по юзернейму"></div></div>
+<div class="chat-list" id="chatList"></div>
+</div>
+<div class="profile-wrap" id="profileWrap">
+<div class="profile-header">
+<div class="profile-banner" id="profileBanner"><div class="profile-banner-edit" id="bannerEditBtn"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div></div>
+<div class="profile-avatar-wrap"><img class="profile-avatar" id="profileAvatar" src="" alt=""><div class="profile-avatar-edit" id="avatarEditBtn"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div></div>
+<div class="profile-info">
+<div class="profile-name" id="profileName">Имя</div>
+<div class="profile-username" id="profileUsername">@username</div>
+<div class="profile-status" id="profileStatus" style="display:none;"><div class="profile-status-dot"></div><span>в сети</span></div>
+<div class="profile-bio" id="profileBio">Описание профиля</div>
+<div class="profile-stats"><div class="profile-stat"><div class="profile-stat-num" id="statPins">0</div><div class="profile-stat-label">пинов</div></div><div class="profile-stat"><div class="profile-stat-num" id="statSaved">0</div><div class="profile-stat-label">сохранено</div></div><div class="profile-stat"><div class="profile-stat-num" id="statViews">0</div><div class="profile-stat-label">просмотров</div></div></div>
+<div class="profile-buttons"><button class="profile-btn primary" id="editProfileBtn">Изменить</button><button class="profile-btn secondary" id="shareProfileBtn">Поделиться</button></div>
+</div>
+<div class="profile-tabs"><div class="profile-tab active" data-ptab="created">Созданные</div><div class="profile-tab" data-ptab="saved">Сохранено</div></div>
+<div class="profile-feed" id="profileFeed"></div>
+</div>
+</div>
+<div class="bottom-nav">
+<div class="nav-item active" data-nav="home" id="navHome"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+<div class="nav-item" data-nav="search" id="navSearch"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div>
+<div class="nav-item add" id="addBtn"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>
+<div class="nav-item" data-nav="messages" id="navMessages"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><div class="nav-badge" id="msgBadge"></div></div>
+<div class="nav-item" data-nav="profile" id="navProfile"><svg viewBox="0 0 24 24" id="profileIcon"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><img src="" class="nav-avatar" id="navAvatar" style="display:none;"></div>
+</div>
+</div>
 <div class="modal-overlay" id="authModal">
-  <div class="modal">
-    <h2 id="authTitle">Вход</h2>
-    <input type="email" id="authEmail" placeholder="Email">
-    <input type="password" id="authPass" placeholder="Пароль">
-    <div class="error" id="authError"></div>
-    <button id="authBtn">Войти</button>
-    <div class="switch" id="authSwitch">Нет аккаунта? <span>Регистрация</span></div>
-  </div>
+<div class="modal">
+<div class="modal-logo"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
+<h2 id="authTitle">Вход</h2>
+<input type="email" id="authEmail" placeholder="Email">
+<input type="password" id="authPass" placeholder="Пароль">
+<div class="error" id="authError"></div>
+<button id="authBtn">Войти</button>
+<div class="switch" id="authSwitch">Нет аккаунта? <span>Регистрация</span></div>
 </div>
-
+</div>
 <div class="upload-modal" id="uploadModal">
-  <div class="upload-header">
-    <div class="cancel" id="uploadCancel">Отмена</div>
-    <h3>Создать пин</h3>
-    <div class="done" id="uploadDone" style="opacity:.3;pointer-events:none;">Готово</div>
-  </div>
-  <div class="upload-area">
-    <div class="upload-btn" id="uploadBtn">
-      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-      <span>Выбрать из галереи</span>
-    </div>
-    <img class="upload-preview" id="uploadPreview">
-    <input type="text" class="upload-title-input" id="uploadTitle" placeholder="Добавьте название">
-    <div class="upload-progress" id="uploadProgress"><div class="upload-progress-bar" id="uploadProgressBar"></div></div>
-    <div class="upload-info" id="uploadInfo"></div>
-    <input type="file" id="fileInput" accept="image/*" style="display:none;">
-  </div>
+<div class="upload-header"><div class="cancel" id="uploadCancel">Отмена</div><h3>Создать пин</h3><div class="done" id="uploadDone">Готово</div></div>
+<div class="upload-area">
+<div class="upload-btn" id="uploadBtn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span>Выбрать из галереи</span></div>
+<img class="upload-preview" id="uploadPreview">
+<div class="upload-progress" id="uploadProgress"><div class="upload-progress-bar" id="uploadProgressBar"></div></div>
+<div class="upload-info" id="uploadInfo"></div>
+<input type="file" id="fileInput" accept="image/*">
 </div>
-
+</div>
+<div class="viewer" id="viewer">
+<div class="viewer-header"><div class="back" id="viewerBack"><svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></div><div class="viewer-actions"><div class="icon-btn" id="viewerShare"><svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></div><div class="icon-btn" id="viewerMore"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></div><button class="download-btn" id="viewerDownload">Скачать</button></div></div>
+<div class="viewer-img-wrap" id="viewerContent"><img src="" id="viewerImg" alt=""></div>
+</div>
+<div class="chat-room" id="chatRoom">
+<div class="chat-room-header"><div class="back" id="chatBack"><svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></div><img class="chat-avatar" id="chatRoomAvatar" src="" alt=""><div class="chat-info"><div class="chat-name" id="chatRoomName">Имя</div><div class="chat-status" id="chatRoomStatus">был(а) недавно</div></div></div>
+<div class="chat-messages" id="chatMessages"></div>
+<div class="chat-input-wrap">
+<div class="chat-input-row"><div class="chat-attach" id="chatAttach"><svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></div><textarea class="chat-input" id="chatInput" placeholder="Сообщение" rows="1"></textarea><button class="chat-send" id="chatSend"><svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></button></div>
+<div class="attach-menu" id="attachMenu"><div class="attach-item" id="attachPhoto"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><span>Фото</span></div><div class="attach-item" id="attachVideo"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2.18"/><path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 17h5M17 7h5"/></svg><span>Видео</span></div><div class="attach-item" id="attachAudio"><svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><span>Музыка</span></div></div>
+<input type="file" id="attachPhotoInput" accept="image/*"><input type="file" id="attachVideoInput" accept="video/*"><input type="file" id="attachAudioInput" accept="audio/*">
+</div>
+</div>
+<div class="edit-modal" id="editModal">
+<div class="edit-header"><div class="cancel" id="editCancel">Отмена</div><h3>Изменить профиль</h3><div class="save" id="editSave">Сохранить</div></div>
+<div class="edit-body">
+<img class="edit-banner-preview" id="editBannerPreview" style="display:none;">
+<div class="edit-field"><label>Шапка профиля</label><input type="file" id="editBannerInput" accept="image/*"><div class="hint">Нажмите на изображение выше</div></div>
+<img class="edit-avatar-preview" id="editAvatarPreview" style="display:none;">
+<div class="edit-field"><label>Аватар</label><input type="file" id="editAvatarInput" accept="image/*"><div class="hint">Нажмите на изображение выше</div></div>
+<div class="edit-field"><label>Имя</label><input type="text" id="editName" placeholder="Ваше имя" maxlength="30"></div>
+<div class="edit-field"><label>Юзернейм</label><input type="text" id="editUsername" placeholder="username" maxlength="20"><div class="hint">Только a-z, 0-9, _</div></div>
+<div class="edit-field"><label>Описание</label><textarea id="editBio" placeholder="Расскажите о себе" maxlength="160"></textarea></div>
+</div>
+</div>
 <div class="toast" id="toast"></div>
-
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyBm0mIvHVznIeF2PoFk6dtdaiT5r877wyA",
-  authDomain: "meow-874ce.firebaseapp.com",
-  databaseURL: "https://meow-874ce-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "meow-874ce",
-  storageBucket: "meow-874ce.firebasestorage.app",
-  messagingSenderId: "471541334599",
-  appId: "1:471541334599:web:567af3e7dbe70a37572762"
-};
 
+const firebaseConfig={apiKey:"AIzaSyBm0mIvHVznIeF2PoFk6dtdaiT5r877wyA",authDomain:"meow-874ce.firebaseapp.com",databaseURL:"https://meow-874ce-default-rtdb.europe-west1.firebasedatabase.app",projectId:"meow-874ce",storageBucket:"meow-874ce.firebasestorage.app",messagingSenderId:"471541334599",appId:"1:471541334599:web:567af3e7dbe70a37572762"};
 firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.database();
+const auth=firebase.auth(),db=firebase.database();
+let currentUser=null,userKey=null,pins=[],currentTab='for-you',currentPtab='created',currentScreen='home',uploadFile=null,isLogin=true,userPassword=localStorage.getItem('meow_pass')||'',currentProfile={},viewingPin=null,currentChat=null,chatKey=null,chatListener=null,onlineRef=null,lastOnlineRef=null,unreadCount=0,chatOnlineRef=null;
 
-let currentUser = null;
-let userKey = null;
-let pins = [];
-let currentTab = 'for-you';
-let uploadFile = null;
-let isLogin = true;
-let userPassword = localStorage.getItem('meow_pass') || '';
+const loader=document.getElementById('loader'),authModal=document.getElementById('authModal'),authTitle=document.getElementById('authTitle'),authEmail=document.getElementById('authEmail'),authPass=document.getElementById('authPass'),authBtn=document.getElementById('authBtn'),authSwitch=document.getElementById('authSwitch'),authError=document.getElementById('authError'),feed=document.getElementById('feed'),feedWrap=document.getElementById('feedWrap'),empty=document.getElementById('empty'),homeHeader=document.getElementById('homeHeader'),messengerWrap=document.getElementById('messengerWrap'),chatListEl=document.getElementById('chatList'),chatSearchInput=document.getElementById('chatSearchInput'),profileWrap=document.getElementById('profileWrap'),uploadModal=document.getElementById('uploadModal'),uploadBtn=document.getElementById('uploadBtn'),fileInput=document.getElementById('fileInput'),uploadPreview=document.getElementById('uploadPreview'),uploadDone=document.getElementById('uploadDone'),uploadCancel=document.getElementById('uploadCancel'),uploadProgress=document.getElementById('uploadProgress'),uploadProgressBar=document.getElementById('uploadProgressBar'),uploadInfo=document.getElementById('uploadInfo'),viewer=document.getElementById('viewer'),viewerImg=document.getElementById('viewerImg'),viewerContent=document.getElementById('viewerContent'),viewerBack=document.getElementById('viewerBack'),viewerDownload=document.getElementById('viewerDownload'),viewerShare=document.getElementById('viewerShare'),toast=document.getElementById('toast'),navAvatar=document.getElementById('navAvatar'),profileIcon=document.getElementById('profileIcon'),msgBadge=document.getElementById('msgBadge');
+const chatRoom=document.getElementById('chatRoom'),chatBack=document.getElementById('chatBack'),chatRoomAvatar=document.getElementById('chatRoomAvatar'),chatRoomName=document.getElementById('chatRoomName'),chatRoomStatus=document.getElementById('chatRoomStatus'),chatMessages=document.getElementById('chatMessages'),chatInput=document.getElementById('chatInput'),chatSend=document.getElementById('chatSend'),chatAttach=document.getElementById('chatAttach'),attachMenu=document.getElementById('attachMenu'),attachPhoto=document.getElementById('attachPhoto'),attachVideo=document.getElementById('attachVideo'),attachAudio=document.getElementById('attachAudio'),attachPhotoInput=document.getElementById('attachPhotoInput'),attachVideoInput=document.getElementById('attachVideoInput'),attachAudioInput=document.getElementById('attachAudioInput');
+const profileBanner=document.getElementById('profileBanner'),profileAvatar=document.getElementById('profileAvatar'),profileName=document.getElementById('profileName'),profileUsername=document.getElementById('profileUsername'),profileBio=document.getElementById('profileBio'),profileStatus=document.getElementById('profileStatus'),statPins=document.getElementById('statPins'),statSaved=document.getElementById('statSaved'),statViews=document.getElementById('statViews'),profileFeed=document.getElementById('profileFeed'),editProfileBtn=document.getElementById('editProfileBtn'),shareProfileBtn=document.getElementById('shareProfileBtn'),bannerEditBtn=document.getElementById('bannerEditBtn'),avatarEditBtn=document.getElementById('avatarEditBtn');
+const editModal=document.getElementById('editModal'),editCancel=document.getElementById('editCancel'),editSave=document.getElementById('editSave'),editBannerPreview=document.getElementById('editBannerPreview'),editAvatarPreview=document.getElementById('editAvatarPreview'),editBannerInput=document.getElementById('editBannerInput'),editAvatarInput=document.getElementById('editAvatarInput'),editName=document.getElementById('editName'),editUsername=document.getElementById('editUsername'),editBio=document.getElementById('editBio');
 
-const loader = document.getElementById('loader');
-const authModal = document.getElementById('authModal');
-const authTitle = document.getElementById('authTitle');
-const authEmail = document.getElementById('authEmail');
-const authPass = document.getElementById('authPass');
-const authBtn = document.getElementById('authBtn');
-const authSwitch = document.getElementById('authSwitch');
-const authError = document.getElementById('authError');
-const feed = document.getElementById('feed');
-const feedWrap = document.getElementById('feedWrap');
-const empty = document.getElementById('empty');
-const uploadModal = document.getElementById('uploadModal');
-const uploadBtn = document.getElementById('uploadBtn');
-const fileInput = document.getElementById('fileInput');
-const uploadPreview = document.getElementById('uploadPreview');
-const uploadTitle = document.getElementById('uploadTitle');
-const uploadDone = document.getElementById('uploadDone');
-const uploadCancel = document.getElementById('uploadCancel');
-const uploadProgress = document.getElementById('uploadProgress');
-const uploadProgressBar = document.getElementById('uploadProgressBar');
-const uploadInfo = document.getElementById('uploadInfo');
-const toast = document.getElementById('toast');
-const navAvatar = document.getElementById('navAvatar');
-const profileIcon = document.getElementById('profileIcon');
+async function dk(e,p){const en=new TextEncoder(),km=await crypto.subtle.importKey('raw',en.encode(e+p),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt:en.encode('meow-salt-v2-2026'),iterations:100000,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
+async function ed(k,d){const en=new TextEncoder(),iv=crypto.getRandomValues(new Uint8Array(12)),e=await crypto.subtle.encrypt({name:'AES-GCM',iv},k,en.encode(d)),c=new Uint8Array(iv.length+e.byteLength);c.set(iv);c.set(new Uint8Array(e),iv.length);let b='';for(let i=0;i<c.length;i++)b+=String.fromCharCode(c[i]);return btoa(b)}
+async function dd(k,b){const u=Uint8Array.from(atob(b),c=>c.charCodeAt(0)),iv=u.slice(0,12),d=u.slice(12),de=await crypto.subtle.decrypt({name:'AES-GCM',iv},k,d);return new TextDecoder().decode(de)}
+function cib(f,mw=700,q=0.55){return new Promise((res,rej)=>{const i=new Image();i.onload=()=>{const c=document.createElement('canvas');let w=i.width,h=i.height;if(w>mw){h=Math.round(h*mw/w);w=mw}c.width=w;c.height=h;const x=c.getContext('2d');x.fillStyle='#000';x.fillRect(0,0,w,h);x.drawImage(i,0,0,w,h);res(c.toDataURL('image/jpeg',q))};i.onerror=rej;i.src=URL.createObjectURL(f)})}
+function f2b(f){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(f)})}
+function ft(ts){const d=new Date(ts),n=new Date(),df=Math.floor((n-d)/1000),pd=n=>n.toString().padStart(2,'0');if(df<60)return'только что';if(df<3600)return Math.floor(df/60)+' мин назад';if(df<7200)return'час назад';if(df<86400)return Math.floor(df/3600)+' ч назад';if(d.toDateString()===n.toDateString())return'сегодня в '+pd(d.getHours())+':'+pd(d.getMinutes());const y=new Date(n);y.setDate(y.getDate()-1);if(d.toDateString()===y.toDateString())return'вчера в '+pd(d.getHours())+':'+pd(d.getMinutes());const mo=['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];if(n.getFullYear()===d.getFullYear())return d.getDate()+' '+mo[d.getMonth()]+' в '+pd(d.getHours())+':'+pd(d.getMinutes());return d.getDate()+' '+mo[d.getMonth()]+' '+d.getFullYear()}
+function fmt(ts){const d=new Date(ts);return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0')}
+function fdd(ts){const d=new Date(ts),n=new Date();if(d.toDateString()===n.toDateString())return'Сегодня';const y=new Date(n);y.setDate(y.getDate()-1);if(d.toDateString()===y.toDateString())return'Вчера';const mo=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];if(n.getFullYear()===d.getFullYear())return d.getDate()+' '+mo[d.getMonth()];return d.getDate()+' '+mo[d.getMonth()]+' '+d.getFullYear()}
 
-async function deriveKey(email, password) {
-  const enc = new TextEncoder();
-  const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(email + password), 'PBKDF2', false, ['deriveKey']);
-  return crypto.subtle.deriveKey(
-    { name: 'PBKDF2', salt: enc.encode('meow-salt-fixed'), iterations: 100000, hash: 'SHA-256' },
-    keyMaterial, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
-  );
-}
+authBtn.addEventListener('click',async()=>{const em=authEmail.value.trim(),ps=authPass.value.trim();if(!em||!ps){showAuthError('Введите email и пароль');return}authBtn.disabled=true;authBtn.textContent='...';try{if(isLogin){await auth.signInWithEmailAndPassword(em,ps)}else{await auth.createUserWithEmailAndPassword(em,ps)}userPassword=ps;localStorage.setItem('meow_pass',ps);authModal.classList.remove('show')}catch(e){showAuthError(e.message)}authBtn.disabled=false;authBtn.textContent=isLogin?'Войти':'Зарегистрироваться'});
+authSwitch.addEventListener('click',()=>{isLogin=!isLogin;authTitle.textContent=isLogin?'Вход':'Регистрация';authBtn.textContent=isLogin?'Войти':'Зарегистрироваться';authSwitch.innerHTML=isLogin?'Нет аккаунта? <span>Регистрация</span>':'Есть аккаунт? <span>Вход</span>';authError.style.display='none'});
+function showAuthError(m){authError.textContent=m;authError.style.display='block'}
 
-async function encryptData(key, data) {
-  const enc = new TextEncoder();
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(data));
-  const combined = new Uint8Array(iv.length + encrypted.byteLength);
-  combined.set(iv); combined.set(new Uint8Array(encrypted), iv.length);
-  let binary = ''; for (let i = 0; i < combined.length; i++) binary += String.fromCharCode(combined[i]);
-  return btoa(binary);
-}
+auth.onAuthStateChanged(async(u)=>{if(u){currentUser=u;userKey=btoa(u.email).replace(/[^a-zA-Z0-9]/g,'');authModal.classList.remove('show');navAvatar.style.display='block';navAvatar.src='https://api.dicebear.com/7.x/avataaars/svg?seed='+u.email;profileIcon.style.display='none';await initProfile();await loadPins();setupOnline();loadChatList()}else{authModal.classList.add('show');navAvatar.style.display='none';profileIcon.style.display='block'}loader.classList.add('hide')});
 
-async function decryptData(key, base64) {
-  const bytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
-  const iv = bytes.slice(0, 12);
-  const data = bytes.slice(12);
-  const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, data);
-  return new TextDecoder().decode(decrypted);
-}
+function setupOnline(){if(!currentUser)return;const pr=db.ref('presence/'+userKey),cr=db.ref('.info/connected');cr.on('value',s=>{if(s.val()){pr.set({online:true,lastSeen:Date.now()});pr.onDisconnect().set({online:false,lastSeen:Date.now()})}})}
+function getOnline(uk,cb){const r=db.ref('presence/'+uk);r.on('value',s=>{const v=s.val();if(!v){cb('offline',null);return}cb(v.online?'online':'offline',v.lastSeen)});return r}
+function fos(s,ls){if(s==='online')return'в сети';if(!ls)return'был(а) давно';return'был(а) '+ft(ls)}
 
-function compressImageToBase64(file, maxWidth = 700, quality = 0.55) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      let w = img.width, h = img.height;
-      if (w > maxWidth) { h = Math.round(h * maxWidth / w); w = maxWidth; }
-      canvas.width = w; canvas.height = h;
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, w, h);
-      ctx.drawImage(img, 0, 0, w, h);
-      const base64 = canvas.toDataURL('image/jpeg', quality);
-      resolve(base64);
-    };
-    img.onerror = reject;
-    img.src = URL.createObjectURL(file);
-  });
-}
+async function initProfile(){const s=await db.ref('profiles/'+userKey).once('value');currentProfile=s.val()||{};if(!currentProfile.username){currentProfile={name:currentUser.displayName||'Имя',username:'user_'+Math.random().toString(36).slice(2,8),bio:'',avatar:'https://api.dicebear.com/7.x/avataaars/svg?seed='+currentUser.email,banner:'',views:0};await db.ref('profiles/'+userKey).set(currentProfile)}renderProfile()}
+function renderProfile(){profileName.textContent=currentProfile.name||'Имя';profileUsername.textContent='@'+(currentProfile.username||'username');profileBio.textContent=currentProfile.bio||'';profileBio.style.display=currentProfile.bio?'block':'none';profileAvatar.src=currentProfile.avatar||'';navAvatar.src=currentProfile.avatar||'https://api.dicebear.com/7.x/avataaars/svg?seed='+currentUser.email;const bi=profileBanner.querySelector('img');if(bi)bi.remove();if(currentProfile.banner){const i=document.createElement('img');i.src=currentProfile.banner;profileBanner.insertBefore(i,profileBanner.firstChild)}statPins.textContent=pins.length;statSaved.textContent=pins.filter(p=>p.liked).length;statViews.textContent=currentProfile.views||0;renderProfileFeed()}
+function renderProfileFeed(){const f=currentPtab==='created'?pins:pins.filter(p=>p.liked);if(f.length===0){profileFeed.innerHTML='<div class="empty" style="padding:40px 20px;"><p>Нет пинов</p></div>';return}profileFeed.innerHTML=f.map(p=>'<div class="pin" onclick="openViewer(''+p.id+'')"><img src="'+p.imageBase64+'" loading="lazy"></div>').join('')}
 
-authBtn.addEventListener('click', async () => {
-  const email = authEmail.value.trim();
-  const pass = authPass.value.trim();
-  if (!email || !pass) { showAuthError('Введите email и пароль'); return; }
-  authBtn.disabled = true; authBtn.textContent = '...';
-  try {
-    if (isLogin) {
-      await auth.signInWithEmailAndPassword(email, pass);
-    } else {
-      await auth.createUserWithEmailAndPassword(email, pass);
-    }
-    userPassword = pass;
-    localStorage.setItem('meow_pass', pass);
-    authModal.classList.remove('show');
-  } catch (e) {
-    showAuthError(e.message);
-  }
-  authBtn.disabled = false; authBtn.textContent = isLogin ? 'Войти' : 'Зарегистрироваться';
-});
+async function loadPins(){if(!currentUser||!userPassword)return;try{const k=await dk(currentUser.email,userPassword),s=await db.ref('pins/'+userKey).once('value'),d=s.val()||{};pins=[];for(const id in d){try{const de=await dd(k,d[id].data);pins.push({id,...JSON.parse(de)})}catch(e){}}pins.sort((a,b)=>b.timestamp-a.timestamp);renderPins();renderProfile()}catch(e){showToast('Ошибка загрузки пинов')}}
+function renderPins(){const f=currentTab==='for-you'?pins:pins.filter(p=>p.liked);if(f.length===0){feed.innerHTML='';empty.style.display='block';return}empty.style.display='none';feed.innerHTML=f.map(p=>'<div class="pin" onclick="openViewer(''+p.id+'')"><img src="'+p.imageBase64+'" loading="lazy" onerror="this.style.display='none'"><div class="pin-overlay"></div><div class="pin-save '+(p.liked?'saved':'')+'" onclick="toggleLike(''+p.id+'',event)"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div></div>').join('')}
 
-authSwitch.addEventListener('click', () => {
-  isLogin = !isLogin;
-  authTitle.textContent = isLogin ? 'Вход' : 'Регистрация';
-  authBtn.textContent = isLogin ? 'Войти' : 'Зарегистрироваться';
-  authSwitch.innerHTML = isLogin ? 'Нет аккаунта? <span>Регистрация</span>' : 'Есть аккаунт? <span>Вход</span>';
-  authError.style.display = 'none';
-});
+document.querySelectorAll('.tab').forEach(t=>{t.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');currentTab=t.dataset.tab;renderPins()})});
+document.querySelectorAll('.profile-tab').forEach(t=>{t.addEventListener('click',()=>{document.querySelectorAll('.profile-tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');currentPtab=t.dataset.ptab;renderProfileFeed()})});
 
-function showAuthError(msg) { authError.textContent = msg; authError.style.display = 'block'; }
+function showScreen(sc){currentScreen=sc;if(sc==='home'){homeHeader.style.display='flex';feedWrap.style.display='block';messengerWrap.classList.remove('show');profileWrap.classList.remove('show')}else if(sc==='messages'){homeHeader.style.display='none';feedWrap.style.display='none';messengerWrap.classList.add('show');profileWrap.classList.remove('show');loadChatList()}else if(sc==='profile'){homeHeader.style.display='none';feedWrap.style.display='none';messengerWrap.classList.remove('show');profileWrap.classList.add('show');renderProfile()}}
+document.querySelectorAll('.nav-item[data-nav]').forEach(n=>{n.addEventListener('click',()=>{document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));n.classList.add('active');const nv=n.dataset.nav;if(nv==='home')showScreen('home');if(nv==='profile')showScreen('profile');if(nv==='search')showToast('Поиск скоро...');if(nv==='messages')showScreen('messages')})});
 
-auth.onAuthStateChanged(async (user) => {
-  if (user) {
-    currentUser = user;
-    userKey = btoa(user.email).replace(/[^a-zA-Z0-9]/g, '');
-    authModal.classList.remove('show');
-    navAvatar.style.display = 'block';
-    navAvatar.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}`;
-    profileIcon.style.display = 'none';
-    await loadPins();
-  } else {
-    authModal.classList.add('show');
-    navAvatar.style.display = 'none';
-    profileIcon.style.display = 'block';
-  }
-  loader.classList.add('hide');
-});
+addBtn.addEventListener('click',()=>{if(!currentUser){showToast('Войдите в аккаунт');return}if(!userPassword){showToast('Введите пароль повторно');authModal.classList.add('show');return}uploadModal.classList.add('show')});
+uploadBtn.addEventListener('click',()=>fileInput.click());
+fileInput.addEventListener('change',async(e)=>{const f=e.target.files[0];if(!f)return;uploadFile=f;uploadPreview.src=URL.createObjectURL(f);uploadPreview.style.display='block';uploadBtn.style.display='none';uploadDone.classList.add('active');uploadInfo.style.display='block';uploadInfo.textContent=(f.size/1024/1024).toFixed(2)+' MB'});
+uploadCancel.addEventListener('click',resetUpload);
+uploadDone.addEventListener('click',async()=>{if(!uploadFile||!currentUser||!userPassword)return;uploadDone.textContent='...';uploadDone.classList.remove('active');uploadProgress.style.display='block';uploadProgressBar.style.width='5%';try{uploadInfo.textContent='Сжатие...';const b64=await cib(uploadFile,700,0.55);if(b64.length>7000000){showToast('Фото слишком большое');resetUpload();return}uploadProgressBar.style.width='40%';uploadInfo.textContent='Шифрование...';const k=await dk(currentUser.email,userPassword),pd={imageBase64:b64,title:'',timestamp:Date.now(),liked:false,likes:0};uploadProgressBar.style.width='65%';const enc=await ed(k,JSON.stringify(pd));uploadProgressBar.style.width='80%';uploadInfo.textContent='Сохранение...';const pid=Date.now().toString();await db.ref('pins/'+userKey+'/'+pid).set({data:enc});uploadProgressBar.style.width='100%';showToast('Пин сохранен!');resetUpload();await loadPins()}catch(e){console.error(e);showToast('Ошибка: '+(e.message||'Неизвестная'));uploadDone.textContent='Готово'}uploadProgress.style.display='none'});
+function resetUpload(){uploadModal.classList.remove('show');uploadFile=null;fileInput.value='';uploadPreview.style.display='none';uploadBtn.style.display='flex';uploadDone.textContent='Готово';uploadDone.classList.remove('active');uploadProgress.style.display='none';uploadProgressBar.style.width='0%';uploadInfo.style.display='none'}
 
-async function loadPins() {
-  if (!currentUser) return;
-  if (!userPassword) {
-    showToast('Введите пароль повторно');
-    authModal.classList.add('show');
-    return;
-  }
-  try {
-    const key = await deriveKey(currentUser.email, userPassword);
-    const snap = await db.ref(`pins/${userKey}`).once('value');
-    const data = snap.val() || {};
-    pins = [];
-    for (const id in data) {
-      try {
-        const decrypted = await decryptData(key, data[id].data);
-        pins.push({ id, ...JSON.parse(decrypted) });
-      } catch (e) { console.log('Decrypt fail', id); }
-    }
-    pins.sort((a, b) => b.timestamp - a.timestamp);
-    renderPins();
-  } catch (e) {
-    showToast('Ошибка загрузки: ' + e.message);
-  }
-}
+window.openViewer=(id)=>{const p=pins.find(x=>x.id===id);if(!p)return;viewingPin=p;viewerContent.innerHTML='<img src="'+p.imageBase64+'" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:14px;">';viewer.classList.add('show')};
+viewerBack.addEventListener('click',()=>viewer.classList.remove('show'));
+viewerDownload.addEventListener('click',()=>{if(!viewingPin)return;const a=document.createElement('a');a.href=viewingPin.imageBase64;a.download='meow_'+Date.now()+'.jpg';a.click();showToast('Скачано!')});
+viewerShare.addEventListener('click',async()=>{if(!viewingPin)return;try{const b=await(await fetch(viewingPin.imageBase64)).blob(),f=new File([b],'pin.jpg',{type:'image/jpeg'});await navigator.share({files:[f],title:'Meow Pin'})}catch(e){showToast('Не удалось поделиться')}});
 
-function renderPins() {
-  const filtered = currentTab === 'for-you' ? pins : pins.filter(p => p.liked);
-  if (filtered.length === 0) { feed.innerHTML = ''; empty.style.display = 'block'; return; }
-  empty.style.display = 'none';
-  feed.innerHTML = filtered.map(p => `
-    <div class="pin" data-id="${p.id}">
-      <img src="${p.imageBase64}" alt="${p.title || ''}" loading="lazy" onerror="this.style.display='none'">
-      <div class="pin-overlay"></div>
-      <div class="pin-actions">
-        <div class="pin-like ${p.liked ? 'liked' : ''}" onclick="toggleLike('${p.id}', event)">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="${p.liked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-          ${p.likes || 0}
-        </div>
-        <div class="pin-more" onclick="deletePin('${p.id}', event)">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-        </div>
-      </div>
-      ${p.title ? `<div class="pin-title">${escapeHtml(p.title)}</div>` : ''}
-    </div>
-  `).join('');
-}
+window.toggleLike=async(id,e)=>{e.stopPropagation();const p=pins.find(x=>x.id===id);if(!p||!currentUser||!userPassword)return;p.liked=!p.liked;p.likes=(p.likes||0)+(p.liked?1:-1);try{const k=await dk(currentUser.email,userPassword),en=await ed(k,JSON.stringify(p));await db.ref('pins/'+userKey+'/'+id).update({data:en});renderPins()}catch(e){}};
 
-function escapeHtml(t) {
-  const d = document.createElement('div'); d.textContent = t; return d.innerHTML;
-}
+editProfileBtn.addEventListener('click',()=>{editName.value=currentProfile.name||'';editUsername.value=currentProfile.username||'';editBio.value=currentProfile.bio||'';editAvatarPreview.src=currentProfile.avatar||'';editAvatarPreview.style.display=currentProfile.avatar?'block':'none';editBannerPreview.src=currentProfile.banner||'';editBannerPreview.style.display=currentProfile.banner?'block':'none';editModal.classList.add('show')});
+editCancel.addEventListener('click',()=>editModal.classList.remove('show'));
+editBannerPreview.addEventListener('click',()=>editBannerInput.click());
+editAvatarPreview.addEventListener('click',()=>editAvatarInput.click());
+editBannerInput.addEventListener('change',async(e)=>{const f=e.target.files[0];if(!f)return;const b=await cib(f,800,0.6);editBannerPreview.src=b;editBannerPreview.style.display='block'});
+editAvatarInput.addEventListener('change',async(e)=>{const f=e.target.files[0];if(!f)return;const b=await cib(f,300,0.7);editAvatarPreview.src=b;editAvatarPreview.style.display='block'});
+editSave.addEventListener('click',async()=>{const n=editName.value.trim(),u=editUsername.value.trim().toLowerCase().replace(/[^a-z0-9_]/g,''),b=editBio.value.trim();if(!n){showToast('Введите имя');return}if(!u||u.length<3){showToast('Юзернейм минимум 3 символа');return}editSave.textContent='...';try{const us=await db.ref('profiles').once('value'),uv=us.val()||{};for(const k in uv){if(k!==userKey&&uv[k].username===u){showToast('Юзернейм уже занят');editSave.textContent='Сохранить';return}}currentProfile.name=n;currentProfile.username=u;currentProfile.bio=b;if(editAvatarPreview.src&&editAvatarPreview.src.startsWith('data:'))currentProfile.avatar=editAvatarPreview.src;if(editBannerPreview.src&&editBannerPreview.src.startsWith('data:'))currentProfile.banner=editBannerPreview.src;await db.ref('profiles/'+userKey).set(currentProfile);editModal.classList.remove('show');renderProfile();showToast('Профиль обновлен!')}catch(e){showToast('Ошибка сохранения')}editSave.textContent='Сохранить'});
+shareProfileBtn.addEventListener('click',()=>{const url=window.location.origin+window.location.pathname+'?u='+currentProfile.username;navigator.clipboard.writeText(url).then(()=>showToast('Ссылка скопирована!'))});
+bannerEditBtn.addEventListener('click',()=>editProfileBtn.click());
+avatarEditBtn.addEventListener('click',()=>editProfileBtn.click());
+document.getElementById('filterBtn').addEventListener('click',()=>showToast('Фильтры скоро...'));
+function showToast(m){toast.textContent=m;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2500)}
 
-document.querySelectorAll('.tab').forEach(t => {
-  t.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
-    t.classList.add('active');
-    currentTab = t.dataset.tab;
-    renderPins();
-  });
-});
+// ===== MESSENGER =====
+function gck(u1,u2){return u1<u2?u1+'_'+u2:u2+'_'+u1}
 
-addBtn.addEventListener('click', () => {
-  if (!currentUser) { showToast('Войдите в аккаунт'); return; }
-  if (!userPassword) { showToast('Введите пароль повторно'); authModal.classList.add('show'); return; }
-  uploadModal.classList.add('show');
-});
+async function loadChatList(){if(!currentUser)return;chatListEl.innerHTML='<div class="empty" style="padding:40px 20px;"><p>Загрузка...</p></div>';try{const s=await db.ref('userChats/'+userKey).once('value'),c=s.val()||{};const ca=[];for(const ck in c){const cd=c[ck];if(!cd.otherKey)continue;const ps=await db.ref('profiles/'+cd.otherKey).once('value'),p=ps.val()||{name:'Пользователь',username:'unknown',avatar:'https://api.dicebear.com/7.x/avataaars/svg?seed='+cd.otherKey};const ms=await db.ref('chats/'+ck+'/messages').orderByKey().limitToLast(1).once('value'),mv=ms.val();let lp='',lt='';if(mv){const mk=Object.keys(mv)[0],md=mv[mk];try{const k=await dk(currentUser.email,userPassword),de=await dd(k,md.data);const dj=JSON.parse(de);lp=dj.type==='text'?dj.text:(dj.type==='image'?'Фото':dj.type==='video'?'Видео':'Музыка');lt=ft(dj.timestamp)}catch(e){lp='Сообщение';lt=''}}ca.push({key:ck,otherKey:cd.otherKey,name:p.name,username:p.username,avatar:p.avatar,lastPreview:lp,lastTime:lt,unread:cd.unread||0})}ca.sort((a,b)=>{if(!a.lastTime&&!b.lastTime)return 0;if(!a.lastTime)return 1;if(!b.lastTime)return -1;return 0});if(ca.length===0){chatListEl.innerHTML='<div class="empty" style="padding:60px 20px;"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><p>Нет чатов</p><div class="empty-sub">Найдите пользователя по юзернейму</div></div>';return}chatListEl.innerHTML=ca.map(c=>'<div class="chat-item" onclick="openChat(''+c.otherKey+'',''+c.name+'',''+c.avatar+'',''+c.username+'')"><img class="chat-item-avatar" src="'+(c.avatar||'')+'" alt=""><div class="chat-item-info"><div class="chat-item-name">'+esc(c.name)+'</div><div class="chat-item-preview">'+esc(c.lastPreview||'Начните общение')+'</div></div><div class="chat-item-meta"><div class="chat-item-time">'+(c.lastTime||'')+'</div>'+(c.unread>0?'<div class="chat-item-badge">'+c.unread+'</div>':'')+'</div></div>').join('')}catch(e){console.error(e);chatListEl.innerHTML='<div class="empty" style="padding:40px 20px;"><p>Ошибка загрузки</p></div>'}}
 
-uploadBtn.addEventListener('click', () => fileInput.click());
+window.openChat=async(ouk,oname,oavatar,ouname)=>{if(!currentUser||!userPassword){showToast('Войдите с паролем');return}chatKey=gck(userKey,ouk);currentChat={otherKey:ouk,name:oname,avatar:oavatar,username:ouname};chatRoomName.textContent=oname;chatRoomAvatar.src=oavatar||'';chatMessages.innerHTML='';chatRoom.classList.add('show');if(chatOnlineRef)chatOnlineRef.off();chatOnlineRef=getOnline(ouk,(s,ls)=>{chatRoomStatus.textContent=fos(s,ls);chatRoomStatus.classList.toggle('online',s==='online')});
 
-fileInput.addEventListener('change', async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  uploadFile = file;
-  const url = URL.createObjectURL(file);
-  uploadPreview.src = url;
-  uploadPreview.style.display = 'block';
-  uploadBtn.style.display = 'none';
-  uploadTitle.style.display = 'block';
-  uploadDone.style.opacity = '1';
-  uploadDone.style.pointerEvents = 'auto';
-  uploadInfo.style.display = 'block';
-  uploadInfo.textContent = `Размер: ${(file.size/1024/1024).toFixed(2)} MB`;
-});
+// Mark unread as read
+try{await db.ref('userChats/'+userKey+'/'+chatKey).update({unread:0})}catch(e){}
 
-uploadCancel.addEventListener('click', resetUpload);
+// Load messages
+try{const k=await dk(currentUser.email,userPassword),s=await db.ref('chats/'+chatKey+'/messages').orderByKey().once('value'),d=s.val()||{};let ld='';for(const id in d){try{const de=await dd(k,d[id].data);const mj=JSON.parse(de);const cd=fdd(mj.timestamp);if(cd!==ld){ld=cd;chatMessages.innerHTML+='<div class="msg-date">'+cd+'</div>'}renderMsg(mj,id)}catch(e){console.log('decrypt fail',e)}}scrollToBottom()}catch(e){console.error(e);showToast('Ошибка загрузки чата')}
 
-uploadDone.addEventListener('click', async () => {
-  if (!uploadFile || !currentUser) return;
-  if (!userPassword) { showToast('Пароль не найден. Перезайдите.'); return; }
+// Listen for new messages
+if(chatListener)chatListener.off();chatListener=db.ref('chats/'+chatKey+'/messages').orderByKey().limitToLast(1);chatListener.on('child_added',async(snap)=>{const id=snap.key;const existing=document.querySelector('[data-msgid="'+id+'"]');if(existing)return;try{const k=await dk(currentUser.email,userPassword),de=await dd(k,snap.val().data);const mj=JSON.parse(de);const cd=fdd(mj.timestamp);const dates=document.querySelectorAll('.msg-date');let lastDate='';if(dates.length)lastDate=dates[dates.length-1].textContent;if(cd!==lastDate){const ddEl=document.createElement('div');ddEl.className='msg-date';ddEl.textContent=cd;chatMessages.appendChild(ddEl)}renderMsg(mj,id);scrollToBottom();if(mj.sender!==userKey){db.ref('userChats/'+userKey+'/'+chatKey).update({unread:0})}}catch(e){}})};
 
-  uploadDone.textContent = '...'; uploadDone.style.pointerEvents = 'none';
-  uploadProgress.style.display = 'block';
-  uploadProgressBar.style.width = '5%';
+function renderMsg(m,id){const el=document.createElement('div');el.className='msg-bubble '+(m.sender===userKey?'out':'in');el.setAttribute('data-msgid',id);let content='';if(m.type==='text')content=esc(m.text);else if(m.type==='image')content='<img src="'+m.data+'" onclick="viewMedia(this)" style="cursor:pointer">';else if(m.type==='video')content='<video src="'+m.data+'" controls preload="metadata" poster="'+m.data+'"></video>';else if(m.type==='audio')content='<audio src="'+m.data+'" controls></audio>';el.innerHTML=content+'<div class="msg-time">'+fmt(m.timestamp)+'<span class="msg-status">'+(m.sender===userKey?'<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>':'')+'</span></div>';chatMessages.appendChild(el)}
+function scrollToBottom(){chatMessages.scrollTop=chatMessages.scrollHeight}
+function viewMedia(el){viewerContent.innerHTML=el.outerHTML;viewer.classList.add('show')}
 
-  try {
-    uploadProgressBar.style.width = '15%';
-    uploadInfo.textContent = 'Сжатие...';
+chatBack.addEventListener('click',()=>{chatRoom.classList.remove('show');if(chatListener)chatListener.off();if(chatOnlineRef)chatOnlineRef.off();currentChat=null;chatKey=null;loadChatList()});
 
-    const base64 = await compressImageToBase64(uploadFile, 700, 0.55);
-    const sizeMB = (base64.length * 0.75 / 1024 / 1024).toFixed(2);
-    uploadInfo.textContent = `Base64: ${sizeMB} MB`;
-    uploadProgressBar.style.width = '40%';
+chatAttach.addEventListener('click',(e)=>{e.stopPropagation();attachMenu.classList.toggle('show')});
+document.addEventListener('click',(e)=>{if(!attachMenu.contains(e.target)&&e.target!==chatAttach)attachMenu.classList.remove('show')});
+attachPhoto.addEventListener('click',()=>{attachMenu.classList.remove('show');attachPhotoInput.click()});
+attachVideo.addEventListener('click',()=>{attachMenu.classList.remove('show');attachVideoInput.click()});
+attachAudio.addEventListener('click',()=>{attachMenu.classList.remove('show');attachAudioInput.click()});
 
-    if (base64.length > 7000000) {
-      showToast('Фото слишком большое даже после сжатия');
-      resetUpload();
-      return;
-    }
+attachPhotoInput.addEventListener('change',(e)=>sendMedia(e.target.files[0],'image'));
+attachVideoInput.addEventListener('change',(e)=>sendMedia(e.target.files[0],'video'));
+attachAudioInput.addEventListener('change',(e)=>sendMedia(e.target.files[0],'audio'));
 
-    uploadProgressBar.style.width = '50%';
-    uploadInfo.textContent = 'Шифрование...';
+async function sendMedia(file,type){if(!file||!currentChat||!userPassword)return;showToast('Обработка...');try{let data='';if(type==='image'){data=await cib(file,700,0.55)}else{data=await f2b(file)}if(data.length>9000000){showToast('Файл слишком большой');return}const k=await dk(currentUser.email,userPassword);const msg={sender:userKey,type:type,data:data,timestamp:Date.now()};const enc=await ed(k,JSON.stringify(msg));const mid=Date.now().toString();await db.ref('chats/'+chatKey+'/messages/'+mid).set({data:enc});await db.ref('userChats/'+userKey+'/'+chatKey).set({otherKey:currentChat.otherKey,lastMsg:Date.now(),unread:0});await db.ref('userChats/'+currentChat.otherKey+'/'+chatKey).set({otherKey:userKey,lastMsg:Date.now(),unread:firebase.database.ServerValue.increment(1)});showToast('Отправлено!')}catch(e){console.error(e);showToast('Ошибка отправки')}};
 
-    const key = await deriveKey(currentUser.email, userPassword);
-    const pinData = {
-      imageBase64: base64,
-      title: uploadTitle.value.trim() || '',
-      timestamp: Date.now(),
-      liked: false,
-      likes: 0
-    };
+chatSend.addEventListener('click',sendMsg);
+chatInput.addEventListener('keydown',(e)=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg()}});
+async function sendMsg(){const text=chatInput.value.trim();if(!text||!currentChat||!userPassword)return;chatInput.value='';try{const k=await dk(currentUser.email,userPassword);const msg={sender:userKey,type:'text',text:text,timestamp:Date.now()};const enc=await ed(k,JSON.stringify(msg));const mid=Date.now().toString();await db.ref('chats/'+chatKey+'/messages/'+mid).set({data:enc});await db.ref('userChats/'+userKey+'/'+chatKey).set({otherKey:currentChat.otherKey,lastMsg:Date.now(),unread:0});await db.ref('userChats/'+currentChat.otherKey+'/'+chatKey).set({otherKey:userKey,lastMsg:Date.now(),unread:firebase.database.ServerValue.increment(1)})}catch(e){console.error(e);showToast('Ошибка отправки')}}
 
-    uploadProgressBar.style.width = '65%';
-    const encrypted = await encryptData(key, JSON.stringify(pinData));
-    uploadProgressBar.style.width = '80%';
-    uploadInfo.textContent = 'Сохранение...';
+// Search user by username
+chatSearchInput.addEventListener('keydown',async(e)=>{if(e.key!=='Enter')return;const q=chatSearchInput.value.trim().toLowerCase().replace(/[^a-z0-9_]/g,'');if(!q||q.length<3){showToast('Минимум 3 символа');return}showToast('Поиск...');try{const s=await db.ref('profiles').once('value'),d=s.val()||{};let found=null,foundKey=null;for(const k in d){if(d[k].username===q){found=d[k];foundKey=k;break}}if(!found){showToast('Пользователь не найден');return}if(foundKey===userKey){showToast('Это вы :)');return}const ck=gck(userKey,foundKey);await db.ref('userChats/'+userKey+'/'+ck).set({otherKey:foundKey,lastMsg:Date.now(),unread:0});openChat(foundKey,found.name,found.avatar,found.username);chatSearchInput.value=''}catch(e){showToast('Ошибка поиска')}});
 
-    const pinId = Date.now().toString();
-    await db.ref(`pins/${userKey}/${pinId}`).set({ data: encrypted });
-    uploadProgressBar.style.width = '100%';
+function esc(t){const d=document.createElement('div');d.textContent=t;return d.innerHTML}
 
-    showToast('Пин сохранен!');
-    resetUpload();
-    await loadPins();
-  } catch (e) {
-    console.error(e);
-    showToast('Ошибка: ' + (e.message || 'Неизвестная ошибка'));
-    uploadDone.textContent = 'Готово';
-    uploadDone.style.pointerEvents = 'auto';
-  }
-  uploadProgress.style.display = 'none';
-  uploadProgressBar.style.width = '0%';
-});
-
-function resetUpload() {
-  uploadModal.classList.remove('show');
-  uploadFile = null; fileInput.value = '';
-  uploadPreview.style.display = 'none';
-  uploadBtn.style.display = 'flex';
-  uploadTitle.style.display = 'none'; uploadTitle.value = '';
-  uploadDone.textContent = 'Готово';
-  uploadDone.style.opacity = '.3';
-  uploadDone.style.pointerEvents = 'none';
-  uploadProgress.style.display = 'none';
-  uploadProgressBar.style.width = '0%';
-  uploadInfo.style.display = 'none';
-}
-
-window.toggleLike = async (id, e) => {
-  e.stopPropagation();
-  const pin = pins.find(p => p.id === id);
-  if (!pin || !currentUser || !userPassword) return;
-  pin.liked = !pin.liked;
-  pin.likes = (pin.likes || 0) + (pin.liked ? 1 : -1);
-  try {
-    const key = await deriveKey(currentUser.email, userPassword);
-    const encrypted = await encryptData(key, JSON.stringify(pin));
-    await db.ref(`pins/${userKey}/${id}`).update({ data: encrypted });
-    renderPins();
-  } catch (e) { showToast('Ошибка лайка'); }
-};
-
-window.deletePin = async (id, e) => {
-  e.stopPropagation();
-  if (!confirm('Удалить пин?')) return;
-  try {
-    await db.ref(`pins/${userKey}/${id}`).remove();
-    pins = pins.filter(p => p.id !== id);
-    renderPins();
-    showToast('Пин удален');
-  } catch (e) { showToast('Ошибка удаления'); }
-};
-
-function showToast(msg) {
-  toast.textContent = msg;
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 3000);
-}
-
-document.querySelectorAll('.nav-item[data-nav]').forEach(n => {
-  n.addEventListener('click', () => {
-    document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
-    n.classList.add('active');
-    const nav = n.dataset.nav;
-    if (nav === 'home') { currentTab = 'for-you'; renderPins(); }
-    if (nav === 'search') showToast('Поиск скоро...');
-    if (nav === 'messages') showToast('Сообщения скоро...');
-    if (nav === 'profile') { currentTab = 'saved'; renderPins(); }
-    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === currentTab));
-  });
-});
-
-document.getElementById('filterBtn').addEventListener('click', () => {
-  showToast('Фильтры скоро...');
-});
+// Check URL for profile param
+const urlParams=new URLSearchParams(window.location.search);
+const profileUser=urlParams.get('u');
+if(profileUser){window.addEventListener('load',async()=>{try{const s=await db.ref('profiles').once('value'),d=s.val()||{};for(const k in d){if(d[k].username===profileUser){showToast('Профиль @'+profileUser);return}}showToast('Профиль не найден')}catch(e){}})}
 </script>
 </body>
 </html>
